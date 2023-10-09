@@ -31,7 +31,7 @@ void DebugPrint(const char *fmt, ...)
     vsprintf(tmpBuffer, fmt, args);
     va_end(args, fmt);
 
-    printf("DEBUG2: %s¥n", tmpBuffer);
+    printf("DEBUG2: %s\n", tmpBuffer);
 #endif
 }
 
@@ -44,6 +44,6 @@ void DebugPrint2(const char *fmt, ...)
     vsprintf(tmpBuffer, fmt, args);
     va_end(args, fmt);
 
-    printf("DEBUG2: %s¥n", tmpBuffer);
+    printf("DEBUG2: %s\n", tmpBuffer);
 #endif
 }
