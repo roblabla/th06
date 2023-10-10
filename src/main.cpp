@@ -17,7 +17,7 @@
 
 i32 AddInputChain(void)
 {
-    return 0;
+    return 1;
 }
 
 i32 InitD3dDevice(void)
