@@ -28,7 +28,7 @@ PBG3_CFLAGS=/nologo /MT /EHsc /G5 /GS /O2 /DNDEBUG /DDIFFBUILD /Zi /I $(SRC_DIR)
 TH06E_OBJS=	$(OBJ_DIR)\main.obj \
 			$(OBJ_DIR)\Chain.obj \
 			$(OBJ_DIR)\FileSystem.obj \
-			$(OBJ_DIR)\GameContext.obj \
+			$(OBJ_DIR)\Supervisor.obj \
 			$(OBJ_DIR)\GameErrorContext.obj \
 			$(OBJ_DIR)\GameWindow.obj \
 			$(OBJ_DIR)\MidiOutput.obj \
@@ -44,7 +44,7 @@ PBG3_CFLAGS=/nologo /MT /EHsc /G5 /GS /O2 /DNDEBUG /Zi /I $(SRC_DIR) /I $(PBG3_S
 TH06E_OBJS=	$(OBJ_DIR)\main.obj \
 			$(OBJ_DIR)\Chain.obj \
 			$(OBJ_DIR)\FileSystem.obj \
-			$(OBJ_DIR)\GameContext.obj \
+			$(OBJ_DIR)\Supervisor.obj \
 			$(OBJ_DIR)\GameErrorContext.obj \
 			$(OBJ_DIR)\GameWindow.obj \
 			$(OBJ_DIR)\MidiOutput.obj \
