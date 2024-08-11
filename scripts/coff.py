@@ -187,7 +187,10 @@ class ObjectModule:
             sym = SymbolRecord("tmp")
             offset = sym.unpack(buffer, offset)
             self.symbols.append(sym)
-            # COFF format is _slightly_ insane
+            # COFF format is _slightly_ insane. The `number_of_symbols` field
+            # counts both the symbols themselves, but also their aux_records.
+            # Meaning, a symbol containing 2 aux records counts as _three_
+            # items in the number_of_symbols.
             i += 1 + len(sym.aux_records)
 
         # The rest is the string table.
@@ -421,6 +424,7 @@ class StringTable:
     """
 
     def __init__(self):
+        self._size = 4
         self._strings = []
 
     @staticmethod
@@ -445,8 +449,15 @@ class StringTable:
         return iter(self._strings)
 
     def append(self, item):
+        """
+        Adds a new item to the string table, and returns its offset. This offset
+        may be used when referencing this string in the symbol name field.
+        """
         self._check(item)
         self._strings.append(item)
+        cur_offset = self._size
+        self._size += len(item) + 1
+        return cur_offset
 
     def get_string_at_offset(self, offset):
         offset -= 4
@@ -458,9 +469,7 @@ class StringTable:
 
     def pack(self):
         sizeof_strtab_size = 4
-        total_size_in_bytes = sizeof_strtab_size + sum(
-            len(s) + 1 for s in self._strings
-        )
+        total_size_in_bytes = self._size
         buffer = bytearray()
         buffer += total_size_in_bytes.to_bytes(
             sizeof_strtab_size, "little", signed=False
@@ -472,6 +481,7 @@ class StringTable:
     def unpack(self, buffer, offset):
         (size,) = struct.unpack("I", buffer[offset : offset + 4])
         self._strings = buffer[offset + 4 : offset + size - 4].split(b"\0")
+        self._size = size
 
 
 class SpecialSectionNumber(enum.IntEnum):
