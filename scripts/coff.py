@@ -400,8 +400,8 @@ class Section:
             self.pointer_to_raw_data : self.pointer_to_raw_data + self.size_of_raw_data
         ]
         self.relocations = []
+        reloc_offset = self.pointer_to_relocations
         for i in range(self.number_of_relocations):
-            reloc_offset = self.pointer_to_relocations
             reloc = Relocation()
             reloc_offset = reloc.unpack(buffer, reloc_offset)
             self.relocations.append(reloc)
