@@ -32,10 +32,10 @@ def rename_symbols(filename):
                 continue
             if class_name == func_name[1:]:
                 func_name = (b"~" if func_name[0] == b"1" else b"") + func_name[1:]
-            elif namespace != class_name:
+            elif namespace != class_name.encode("utf8"):
                 continue
 
-            offset = obj.strings.append(func_name)
+            offset = obj.string_table.append(func_name)
             sym_obj.name = b"\0\0\0\0" + struct.pack("I", offset)
 
     if not out_folder.exists():
