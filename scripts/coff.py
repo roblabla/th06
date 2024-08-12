@@ -468,19 +468,18 @@ class StringTable:
         return None
 
     def pack(self):
-        sizeof_strtab_size = 4
-        total_size_in_bytes = self._size
         buffer = bytearray()
-        buffer += total_size_in_bytes.to_bytes(
-            sizeof_strtab_size, "little", signed=False
-        )
+        buffer += self._size.to_bytes(4, "little", signed=False)
         for s in self._strings:
             buffer += s + b"\0"
         return bytes(buffer)
 
     def unpack(self, buffer, offset):
         (size,) = struct.unpack("I", buffer[offset : offset + 4])
-        self._strings = buffer[offset + 4 : offset + size - 4].split(b"\0")
+        self._strings = buffer[offset + 4 : offset + size].split(b"\0")
+        if buffer[offset + size - 1] == 0 and len(self._strings[-1]) == 0:
+            # Remove extra empty string at the end.
+            self._strings.pop()
         self._size = size
 
 
