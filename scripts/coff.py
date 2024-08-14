@@ -227,9 +227,53 @@ class ObjectModule:
                 sec.pointer_to_relocations = data_buf_offset + len(data_buf)
                 for reloc in sec.relocations:
                     data_buf += reloc.pack()
+            if sec.line_numbers:
+                sec.pointer_to_linenumbers = data_buf_offset + len(data_buf)
+                for line in sec.line_numbers:
+                    data_buf += line.pack()
             hdrs_buf += sec.get_header()
 
         return bytes(hdrs_buf + data_buf)
+
+
+class LineNumber:
+    """
+    Offset	Size	Field
+    =====================================
+      0	      4	    Type(*)
+      4	      2	    Linenumber
+
+
+    Type:
+        Union of two fields: Symbol Table Index and RVA. Whether Symbol Table Index or RVA is used depends on the
+        value of Linenumber.
+
+        SymbolTableIndex:
+            Used when Linenumber is 0: index to symbol table entry for a function. This format is used to indicate the
+            function that a group of line-number records refer to.
+        VirtualAddress:
+            Used when Linenumber is non-zero: relative virtual address of the executable code that corresponds to the
+            source line indicated. In an object file, this contains the virtual address within the section.
+    Linenumber:
+        When nonzero, this field specifies a one-based line number. When zero, the Type field is interpreted as a
+        Symbol Table Index for a function.
+
+
+
+    """
+
+    struct = struct.Struct("<LH")
+
+    def __init__(self):
+        self.address = 0
+        self.line_number = 0
+
+    def pack(self):
+        return self.struct.pack(self.address, self.line_number)
+
+    def unpack(self, buffer, offset):
+        self.address, self.line_number = self.struct.unpack_from(buffer, offset)
+        return offset + self.struct.size
 
 
 class Relocation:
@@ -408,13 +452,16 @@ class Section:
 
         self.relocations = []
         reloc_offset = self.pointer_to_relocations
+        line_offset = self.pointer_to_linenumbers
         for i in range(self.number_of_relocations):
             reloc = Relocation()
             reloc_offset = reloc.unpack(buffer, reloc_offset)
             self.relocations.append(reloc)
 
-        # TODO: We don't support linenumbers yet, set that to 0
-        self.number_of_linenumbers = 0
+        for i in range(self.number_of_linenumbers):
+            line = LineNumber()
+            line_offset = line.unpack(buffer, line_offset)
+            self.line_numbers.append(line)
 
         return offset + self.header_struct.size
 
