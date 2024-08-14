@@ -404,6 +404,7 @@ class Section:
         self.flags = flags or 0
         self.data = data
         self.relocations = []
+        self.line_numbers = []
         self.virtual_size = 0
         self.virtual_address = 0
         self.size_of_raw_data = len(data) if data else 0
@@ -451,6 +452,7 @@ class Section:
             ]
 
         self.relocations = []
+        self.line_numbers = []
         reloc_offset = self.pointer_to_relocations
         line_offset = self.pointer_to_linenumbers
         for i in range(self.number_of_relocations):
