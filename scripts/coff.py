@@ -396,9 +396,16 @@ class Section:
             self.number_of_linenumbers,
             self.flags,
         ) = self.header_struct.unpack_from(buffer, offset)
-        self.data = buffer[
-            self.pointer_to_raw_data : self.pointer_to_raw_data + self.size_of_raw_data
-        ]
+
+        if (
+            not self.flags & SectionFlags.CNT_UNINITIALIZED_DATA
+            and self.pointer_to_raw_data != 0
+        ):
+            self.data = buffer[
+                self.pointer_to_raw_data : self.pointer_to_raw_data
+                + self.size_of_raw_data
+            ]
+
         self.relocations = []
         reloc_offset = self.pointer_to_relocations
         for i in range(self.number_of_relocations):
