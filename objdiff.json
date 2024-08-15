@@ -75,14 +75,6 @@
             "reverse_fn_order": false
         },
         {
-            "name": "Enemy",
-
-            "target_path": "build/objdiff/asm/Enemy.obj",
-            "base_path": "build/objdiff/src/Enemy.obj",
-
-            "reverse_fn_order": false
-        },
-        {
             "name": "EnemyManager",
 
             "target_path": "build/objdiff/asm/EnemyManager.obj",
