@@ -22,7 +22,7 @@ def build(build_type, verbose=False, jobs=1, object_name=None):
     elif build_type == BuildType.DLLBUILD:
         ninja_args += ["build/th06e.dll"]
     elif build_type == BuildType.OBJDIFFBUILD and object_name is not None:
-        ninja_args += [f"build/objdiff/src/{object_name}.obj"]
+        ninja_args += [f"build/objdiff/src/{object_name}"]
     elif build_type == BuildType.OBJDIFFBUILD:
         ninja_args += ["objdiff"]
     else:
