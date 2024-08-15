@@ -12,8 +12,10 @@ def findAnalyzeHeadless():
     # environment variable, which points to the ghidra installation folder.
     if os.getenv("GHIDRA_HOME") is not None:
         ghidra_home = Path(os.getenv("GHIDRA_HOME"))
-        # What about windows?
-        analyze_headless = ghidra_home / "support" / "analyzeHeadless"
+        if os.name == "nt":
+            analyze_headless = ghidra_home / "support" / "analyzeHeadless.bat"
+        else:
+            analyze_headless = ghidra_home / "support" / "analyzeHeadless"
         if analyze_headless.exists():
             return analyze_headless
 
