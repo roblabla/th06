@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 
@@ -45,7 +46,7 @@ def runAnalyze(
 ):
     commonAnalyzeHeadlessArgs = [findAnalyzeHeadless(), ghidra_repo_name]
 
-    if not ghidra_repo_name.startswith("ghidra://"):
+    if not re.match("^ghidra://", ghidra_repo_name):
         # Set a project name
         commonAnalyzeHeadlessArgs += [project_name]
 
