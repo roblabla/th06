@@ -23,7 +23,7 @@ def main():
     project_name = args.local_project_name
     program = args.program
 
-    os.makedirs(str(SCRIPT_PATH.parent / "build" / "objdiff" / "asm", exist_ok=True))
+    os.makedirs(str(SCRIPT_PATH.parent / "build" / "objdiff" / "asm"), exist_ok=True)
 
     ghidra_helpers.runAnalyze(
         repo,
