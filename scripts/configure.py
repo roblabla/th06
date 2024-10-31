@@ -120,6 +120,7 @@ def configure(build_type):
             "Gui",
             "GuiImpl",
             "Rng",
+            "ReplayManager",
             "utils",
             "ZunTimer",
             "zwave",

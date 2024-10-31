@@ -219,6 +219,14 @@
             "reverse_fn_order": false
         },
         {
+            "name": "ReplayManager",
+
+            "target_path": "build/objdiff/orig/ReplayManager.obj",
+            "base_path": "build/objdiff/reimpl/ReplayManager.obj",
+
+            "reverse_fn_order": false
+        },
+        {
             "name": "Rng",
 
             "target_path": "build/objdiff/orig/Rng.obj",
