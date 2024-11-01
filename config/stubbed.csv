@@ -24,7 +24,6 @@ th06::ResultScreen::ReleaseScoreDat
 th06::ScreenEffect::RegisterChain
 th06::MainMenu::SelectRelated
 th06::ItemManager::RemoveAllItems
-th06::ReplayManager::StopRecording
 th06::ReplayManager::SaveReplay
 th06::ScreenEffect::DrawSquare
 th06::Controller::GetControllerState
