@@ -25,7 +25,6 @@ th06::ScreenEffect::RegisterChain
 th06::MainMenu::SelectRelated
 th06::ItemManager::RemoveAllItems
 th06::ReplayManager::OnUpdateDemoHighPrio
-th06::ReplayManager::OnUpdateDemoLowPrio
 th06::ReplayManager::StopRecording
 th06::ReplayManager::SaveReplay
 th06::ReplayManager::ValidateReplayData
