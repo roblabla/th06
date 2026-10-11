@@ -28,7 +28,9 @@ u8 g_RandomItems[] = {
 };
 // clang-format on
 
+#if !DISABLE_BSS_HACK
 BSS_SORT(E1) i32 g_EnemyManagerPad;
+#endif
 BSS_SORT(E4) ChainElem g_EnemyManagerCalcChain;
 BSS_SORT(E2) ChainElem g_EnemyManagerDrawChain;
 BSS_SORT(E3) EnemyManager g_EnemyManager;

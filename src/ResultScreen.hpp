@@ -20,7 +20,9 @@ namespace th06
 #define PSCR_NUM_STAGES 6
 #define PSCR_NUM_DIFFICULTIES 4
 
-#define CATK_NUM_CAPTURES 64
+#define CLRD_NUM_DIFFICULTIES 5
+
+#define CATK_COUNT 64
 
 #define TH6K_VERSION 16
 
@@ -31,6 +33,8 @@ namespace th06
 #define RESULT_KEYBOARD_END 95
 
 #define SCORE_DAT_FILE_BUFFER_SIZE 0xa0000
+
+#define ALL_CLEARED 99
 
 struct Th6k
 {
@@ -60,8 +64,8 @@ ZUN_ASSERT_TYPE(Catk, 0x40, 4);
 struct Clrd
 {
     Th6k base;
-    u8 difficultyClearedWithRetries[5];
-    u8 difficultyClearedWithoutRetries[5];
+    u8 stagesClearedWithoutContinues[CLRD_NUM_DIFFICULTIES];
+    u8 stagesCleared[CLRD_NUM_DIFFICULTIES];
     u8 characterShotType;
     alignment_padding(0x1);
 };
@@ -78,6 +82,8 @@ struct Pscr
 };
 ZUN_ASSERT_TYPE(Pscr, 0x14, 4);
 
+#define MAX_NAME_LENGTH 8
+
 struct Hscr
 {
     Th6k base;
@@ -85,7 +91,7 @@ struct Hscr
     u8 character;
     u8 difficulty;
     u8 stage;
-    char name[9];
+    char name[MAX_NAME_LENGTH + 1];
 };
 ZUN_ASSERT_TYPE(Hscr, 0x1c, 4);
 

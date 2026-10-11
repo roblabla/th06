@@ -510,8 +510,8 @@ ChainCallbackResult MainMenu_OnUpdate(MainMenu *menu)
                 vmList = &menu->vm[MENU_VMS_DIFFICULTY_SELECT + EXTRA];
                 vmList->pendingInterrupt = 8;
                 g_GameManager.difficulty = EXTRA;
-                if (g_GameManager.HasReachedMaxClears(g_GameManager.character, SHOT_TYPE_A) ||
-                    g_GameManager.HasReachedMaxClears(g_GameManager.character, SHOT_TYPE_B))
+                if (g_GameManager.HasExtraUnlocked(g_GameManager.character, SHOT_TYPE_A) ||
+                    g_GameManager.HasExtraUnlocked(g_GameManager.character, SHOT_TYPE_B))
                 {
                     menu->cursor = g_GameManager.character;
                 }
@@ -543,8 +543,8 @@ ChainCallbackResult MainMenu_OnUpdate(MainMenu *menu)
             {
                 menu->cursor -= CHARACTER_COUNT;
             }
-            if (g_GameManager.difficulty == EXTRA && !g_GameManager.HasReachedMaxClears(menu->cursor, SHOT_TYPE_A) &&
-                !g_GameManager.HasReachedMaxClears(menu->cursor, SHOT_TYPE_B))
+            if (g_GameManager.difficulty == EXTRA && !g_GameManager.HasExtraUnlocked(menu->cursor, SHOT_TYPE_A) &&
+                !g_GameManager.HasExtraUnlocked(menu->cursor, SHOT_TYPE_B))
             {
                 menu->cursor--;
                 if (menu->cursor < 0)
@@ -578,8 +578,8 @@ ChainCallbackResult MainMenu_OnUpdate(MainMenu *menu)
             {
                 menu->cursor += CHARACTER_COUNT;
             }
-            if (g_GameManager.difficulty == EXTRA && !g_GameManager.HasReachedMaxClears(menu->cursor, SHOT_TYPE_A) &&
-                !g_GameManager.HasReachedMaxClears(menu->cursor, SHOT_TYPE_B))
+            if (g_GameManager.difficulty == EXTRA && !g_GameManager.HasExtraUnlocked(menu->cursor, SHOT_TYPE_A) &&
+                !g_GameManager.HasExtraUnlocked(menu->cursor, SHOT_TYPE_B))
             {
                 menu->cursor++;
                 if (menu->cursor >= CHARACTER_COUNT)
@@ -665,7 +665,7 @@ ChainCallbackResult MainMenu_OnUpdate(MainMenu *menu)
             }
             else
             {
-                if (g_GameManager.HasReachedMaxClears(g_GameManager.character, g_GameManager.shotType))
+                if (g_GameManager.HasExtraUnlocked(g_GameManager.character, g_GameManager.shotType))
                 {
                     menu->cursor = g_GameManager.shotType;
                 }
@@ -679,8 +679,7 @@ ChainCallbackResult MainMenu_OnUpdate(MainMenu *menu)
         break;
     case STATE_SHOT_SELECT:
         MoveCursor(menu, SHOTTYPES_PER_CHARACTER);
-        if (g_GameManager.difficulty == EXTRA &&
-            !g_GameManager.HasReachedMaxClears(g_GameManager.character, menu->cursor))
+        if (g_GameManager.difficulty == EXTRA && !g_GameManager.HasExtraUnlocked(g_GameManager.character, menu->cursor))
         {
             menu->cursor = 1 - menu->cursor;
         }
@@ -757,7 +756,7 @@ ChainCallbackResult MainMenu_OnUpdate(MainMenu *menu)
             break;
         }
         else if (WAS_PRESSED(TH_BUTTON_SELECTMENU))
-#pragma var_order(refreshRate, local_48, local_4c)
+#pragma var_order(refreshRate, local_48, stagesCleared)
         {
             float refreshRate, local_48;
 
@@ -850,27 +849,22 @@ ChainCallbackResult MainMenu_OnUpdate(MainMenu *menu)
                 }
             }
             menu->cursor = g_GameManager.menuCursorBackup;
-            i32 local_4c = g_GameManager.clrd[GameManager_CharacterShotType()]
-                                       .difficultyClearedWithoutRetries[g_GameManager.difficulty] > 6
-                               ? 6
-                               : g_GameManager.clrd[GameManager_CharacterShotType()]
-                                     .difficultyClearedWithoutRetries[g_GameManager.difficulty];
-            if (g_GameManager.difficulty == EASY && local_4c == 6)
+
+            i32 stagesCleared =
+                min(6, g_GameManager.clrd[GameManager_CharacterShotType()].stagesCleared[g_GameManager.difficulty]);
+            if (g_GameManager.difficulty == EASY && stagesCleared == 6)
             {
-                local_4c = 5;
+                stagesCleared = 5;
             }
-            if (menu->cursor >= local_4c)
+            if (menu->cursor >= stagesCleared)
             {
                 menu->cursor = 0;
             }
         }
         break;
     case STATE_PRACTICE_LVL_SELECT: {
-        u32 chosenStage = g_GameManager.clrd[GameManager_CharacterShotType()]
-                                      .difficultyClearedWithoutRetries[g_GameManager.difficulty] > 6
-                              ? 6
-                              : g_GameManager.clrd[GameManager_CharacterShotType()]
-                                    .difficultyClearedWithoutRetries[g_GameManager.difficulty];
+        u32 chosenStage =
+            min(6, g_GameManager.clrd[GameManager_CharacterShotType()].stagesCleared[g_GameManager.difficulty]);
         if (g_GameManager.difficulty == EASY && chosenStage == 6)
         {
             chosenStage = 5;
@@ -1076,7 +1070,7 @@ ZunResult MainMenu::BeginStartup()
     {
         time = timeGetTime();
         while (time - g_Supervisor.startupTimeBeforeMenuMusic >= 0 &&
-               (3000 > time - g_Supervisor.startupTimeBeforeMenuMusic))
+               time - g_Supervisor.startupTimeBeforeMenuMusic < 3000)
         {
             time = timeGetTime();
         }
@@ -1103,8 +1097,6 @@ ZunResult MainMenu::BeginStartup()
 
 ZunBool MainMenu::WeirdSecondInputCheck()
 {
-    i32 vm;
-
     if (this->stateTimer < 30)
     {
         return true;
@@ -1117,9 +1109,9 @@ ZunBool MainMenu::WeirdSecondInputCheck()
 
     this->stateTimer = 0;
     this->gameState = STATE_MAIN_MENU;
-    for (vm = 0; vm < ARRAY_SIZE_SIGNED(this->vm); vm++)
+    for (i32 i = 0; i < ARRAY_SIZE_SIGNED(this->vm); i++)
     {
-        this->vm[vm].pendingInterrupt = 2;
+        this->vm[i].pendingInterrupt = 2;
     }
     if (!g_Supervisor.IsHardwareBlendingDisabled())
     {
@@ -1143,20 +1135,20 @@ ZunResult MainMenu::DrawStartMenu(void)
 {
     i32 i = MoveCursor(this, 8);
 #if !TRIALBUILD
-    if (this->cursor == 1 && !g_GameManager.HasReachedMaxClears(CHARA_REIMU, SHOT_TYPE_A) &&
-        !g_GameManager.HasReachedMaxClears(CHARA_REIMU, SHOT_TYPE_B) &&
-        !g_GameManager.HasReachedMaxClears(CHARA_MARISA, SHOT_TYPE_A) &&
-        !g_GameManager.HasReachedMaxClears(CHARA_MARISA, SHOT_TYPE_B))
+    if (this->cursor == 1 && !g_GameManager.HasExtraUnlocked(CHARA_REIMU, SHOT_TYPE_A) &&
+        !g_GameManager.HasExtraUnlocked(CHARA_REIMU, SHOT_TYPE_B) &&
+        !g_GameManager.HasExtraUnlocked(CHARA_MARISA, SHOT_TYPE_A) &&
+        !g_GameManager.HasExtraUnlocked(CHARA_MARISA, SHOT_TYPE_B))
     {
         this->cursor += i;
     }
 #else
     for (;;)
     {
-        if (this->cursor == 1 && !g_GameManager.HasReachedMaxClears(CHARA_REIMU, SHOT_TYPE_A) &&
-            !g_GameManager.HasReachedMaxClears(CHARA_REIMU, SHOT_TYPE_B) &&
-            !g_GameManager.HasReachedMaxClears(CHARA_MARISA, SHOT_TYPE_A) &&
-            !g_GameManager.HasReachedMaxClears(CHARA_MARISA, SHOT_TYPE_B))
+        if (this->cursor == 1 && !g_GameManager.HasExtraUnlocked(CHARA_REIMU, SHOT_TYPE_A) &&
+            !g_GameManager.HasExtraUnlocked(CHARA_REIMU, SHOT_TYPE_B) &&
+            !g_GameManager.HasExtraUnlocked(CHARA_MARISA, SHOT_TYPE_A) &&
+            !g_GameManager.HasExtraUnlocked(CHARA_MARISA, SHOT_TYPE_B))
         {
             this->cursor += i;
         }
@@ -1168,10 +1160,10 @@ ZunResult MainMenu::DrawStartMenu(void)
         this->cursor += i;
     }
 #endif
-    AnmVm *drawVm = this->vm;
-    for (i = 0; i < 8; i++, drawVm++)
+    AnmVm *vm = this->vm;
+    for (i = 0; i < 8; i++, vm++)
     {
-        DrawMenuItem(drawVm, i, this->cursor, COLOR_RED, COLOR_START_MENU_ITEM_INACTIVE, ARRAY_SIZE_SIGNED(this->vm));
+        DrawMenuItem(vm, i, this->cursor, COLOR_RED, COLOR_START_MENU_ITEM_INACTIVE, ARRAY_SIZE_SIGNED(this->vm));
     }
     if (this->stateTimer >= 20)
     {
@@ -1203,10 +1195,10 @@ ZunResult MainMenu::DrawStartMenu(void)
                 break;
 #if !TRIALBUILD
             case 1:
-                if (!(!g_GameManager.HasReachedMaxClears(CHARA_REIMU, SHOT_TYPE_A) &&
-                      !g_GameManager.HasReachedMaxClears(CHARA_REIMU, SHOT_TYPE_B) &&
-                      !g_GameManager.HasReachedMaxClears(CHARA_MARISA, SHOT_TYPE_A) &&
-                      !g_GameManager.HasReachedMaxClears(CHARA_MARISA, SHOT_TYPE_B)))
+                if (g_GameManager.HasExtraUnlocked(CHARA_REIMU, SHOT_TYPE_A) ||
+                    g_GameManager.HasExtraUnlocked(CHARA_REIMU, SHOT_TYPE_B) ||
+                    g_GameManager.HasExtraUnlocked(CHARA_MARISA, SHOT_TYPE_A) ||
+                    g_GameManager.HasExtraUnlocked(CHARA_MARISA, SHOT_TYPE_B))
                 {
                     for (i = 0; i < ARRAY_SIZE_SIGNED(this->vm); i++)
                     {
@@ -1978,37 +1970,34 @@ u32 MainMenu::OnUpdateOptionsMenu()
     return 0;
 }
 
-#pragma var_order(stageNum, color, charShotType, selectedStage, textPos)
+#pragma var_order(i, alpha, shottype, reachedStage, textPos)
 ZunResult MainMenu::ChoosePracticeLevel()
 {
     if (this->gameState == STATE_PRACTICE_LVL_SELECT)
     {
         D3DXVECTOR3 textPos(320.0f, 200.0f, 0.0f);
-        u32 color = (this->stateTimer < 30) ? this->stateTimer * 255 / 30 : 255;
-        i32 charShotType = g_GameManager.character * SHOTTYPES_PER_CHARACTER + g_GameManager.shotType;
-        i32 selectedStage =
-            (g_GameManager.clrd[charShotType].difficultyClearedWithoutRetries[g_GameManager.difficulty] > 6)
-                ? 6
-                : g_GameManager.clrd[charShotType].difficultyClearedWithoutRetries[g_GameManager.difficulty];
+        u32 alpha = (this->stateTimer < 30) ? this->stateTimer * 255 / 30 : 255;
+        i32 shottype = g_GameManager.character * SHOTTYPES_PER_CHARACTER + g_GameManager.shotType;
 
-        if (g_GameManager.difficulty == EASY && selectedStage == 6)
+        i32 reachedStage = min(6, g_GameManager.clrd[shottype].stagesCleared[g_GameManager.difficulty]);
+        if (g_GameManager.difficulty == EASY && reachedStage == 6)
         {
-            selectedStage = 5;
+            reachedStage = 5;
         }
 
-        i32 stageNum;
-        for (stageNum = 0; stageNum < selectedStage; stageNum++)
+        i32 i;
+        for (i = 0; i < reachedStage; i++)
         {
-            if (stageNum == this->cursor)
+            if (i == this->cursor)
             {
-                g_AsciiManager.SetColor(color << 24 | 0x00C0F0F0);
+                g_AsciiManager.SetColor(alpha << 24 | 0x00C0F0F0);
             }
             else
             {
-                g_AsciiManager.SetColor((color >> 1) << 24 | 0x0080C0C0);
+                g_AsciiManager.SetColor((alpha >> 1) << 24 | 0x0080C0C0);
             }
-            g_AsciiManager.AddFormatText(&textPos, "STAGE %d  %.9d", stageNum + 1,
-                                         g_GameManager.pscr[charShotType][stageNum][g_GameManager.difficulty].score);
+            g_AsciiManager.AddFormatText(&textPos, "STAGE %d  %.9d", i + 1,
+                                         g_GameManager.pscr[shottype][i][g_GameManager.difficulty].score);
             textPos.y += 24.0f;
         }
         g_AsciiManager.SetColor(COLOR_WHITE);

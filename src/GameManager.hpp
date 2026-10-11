@@ -46,8 +46,6 @@ enum StageNumber
 #define GAME_REGION_RIGHT (GAME_REGION_LEFT + GAME_REGION_WIDTH)
 #define GAME_REGION_BOTTOM (GAME_REGION_TOP + GAME_REGION_HEIGHT)
 
-#define MAX_CLEARS 99
-
 #define MAX_POWER 128
 
 struct GameManager;
@@ -57,13 +55,14 @@ struct GameManager
 {
     GameManager();
 
-    ZunBool HasReachedMaxClears(i32 character, i32 shottype)
+    ZunBool HasExtraUnlocked(i32 character, i32 shottype)
     {
-        return this->clrd[shottype + character * SHOTTYPES_PER_CHARACTER].difficultyClearedWithRetries[1] ==
-                   MAX_CLEARS ||
-               this->clrd[shottype + character * SHOTTYPES_PER_CHARACTER].difficultyClearedWithRetries[2] ==
-                   MAX_CLEARS ||
-               this->clrd[shottype + character * SHOTTYPES_PER_CHARACTER].difficultyClearedWithRetries[3] == MAX_CLEARS;
+        return this->clrd[shottype + character * SHOTTYPES_PER_CHARACTER].stagesClearedWithoutContinues[NORMAL] ==
+                   ALL_CLEARED ||
+               this->clrd[shottype + character * SHOTTYPES_PER_CHARACTER].stagesClearedWithoutContinues[HARD] ==
+                   ALL_CLEARED ||
+               this->clrd[shottype + character * SHOTTYPES_PER_CHARACTER].stagesClearedWithoutContinues[LUNATIC] ==
+                   ALL_CLEARED;
     }
     void IncreaseSubrank(i32 amount);
     void DecreaseSubrank(i32 amount);
@@ -96,7 +95,7 @@ struct GameManager
     i32 bombsUsed;
     i32 spellcardsCaptured;
     i8 isTimeStopped;
-    Catk catk[CATK_NUM_CAPTURES];
+    Catk catk[CATK_COUNT];
     Clrd clrd[SHOTTYPE_COUNT];
     Pscr pscr[SHOTTYPE_COUNT][PSCR_NUM_STAGES][PSCR_NUM_DIFFICULTIES];
     u16 currentPower;

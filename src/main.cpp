@@ -38,7 +38,6 @@ struct GameWindow
 
 ZUN_ASSERT_TYPE(GameWindow, 0x20, 4);
 
-extern GameWindow g_GameWindow;
 static LRESULT CALLBACK GameWindow_WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 static void GameWindow_InitD3dDevice();
 static i32 GameWindow_InitD3dRendering();
@@ -47,9 +46,6 @@ static i32 GameWindow_InitD3dInterface();
 static void GameWindow_Present();
 
 BSS_SORT(L1) GameWindow g_GameWindow;
-BSS_SORT(L2) static i32 g_TickCountToEffectiveFramerate;
-BSS_SORT(L3) f64 g_LastFrameTime;
-BSS_SORT(L4) HANDLE g_ExclusiveMutex;
 } // namespace th06
 
 DWORD GetDXVersion();
@@ -222,6 +218,19 @@ static void GameWindow_Present()
 
 RenderResult GameWindow::Render()
 {
+    // NOTE: The difference in sorting between trial/release
+    // is actually caused by being static locals. The only
+    // reason this needs an #if is because of how the linker
+    // handles alignment of merged sections and a file-scope
+    // BSS hack causes extra padding at the front.
+#if !TRIALBUILD
+    BSS_SORT(L2) static i32 g_TickCountToEffectiveFramerate;
+    BSS_SORT(L3) static f64 g_LastFrameTime;
+#else
+    BSS_SORT(L3) static i32 g_TickCountToEffectiveFramerate;
+    BSS_SORT(L4) static f64 g_LastFrameTime;
+#endif
+
     i32 res;
 
     if (!this->isAppActive)
@@ -310,6 +319,7 @@ RenderResult GameWindow::Render()
         }
 
     I_HAVE_NO_CLUE_WHY_BUT_I_MUST_JUMP_HERE:
+
         GameWindow_Present();
         if (g_Supervisor.framerateMultiplier == 0.0f)
         {
@@ -760,7 +770,7 @@ static void GameWindow_InitD3dDevice(void)
     fogDensity = 1.0f;
     g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGDENSITY, *(DWORD *)&fogDensity);
     g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGTABLEMODE, D3DFOG_LINEAR);
-    g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGCOLOR, 0xffa0a0a0);
+    g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGCOLOR, COLOR_MEDIUM_GREY);
     fogVal = 1000.0f;
     g_Supervisor.d3dDevice->SetRenderState(D3DRS_FOGSTART, *(DWORD *)&fogVal);
     fogVal = 5000.0f;
@@ -820,6 +830,16 @@ namespace utils
 {
 ZunResult CheckForRunningGameInstance(void)
 {
+    // NOTE: The difference in sorting between trial/release
+    // is actually caused by being static locals. The only
+    // reason this needs an #if is because of how the linker
+    // handles alignment of merged sections and a file-scope
+    // BSS hack causes extra padding at the front.
+#if !TRIALBUILD
+    BSS_SORT(L4) static HANDLE g_ExclusiveMutex;
+#else
+    BSS_SORT(L2) static HANDLE g_ExclusiveMutex;
+#endif
     g_ExclusiveMutex = CreateMutex(NULL, TRUE, TEXT("Touhou Koumakyou App"));
 
     if (g_ExclusiveMutex == NULL)

@@ -428,7 +428,7 @@ th06::SwapMapping,0x423850,function
 th06::MainMenu::ChoosePracticeLevel,0x4238DF,function
 th06::ReleaseTitleAnm,0x4239F0,function
 th06::AnmManager::ShouldDraw,0x423A08,function
-th06::GameManager::HasReachedMaxClears,0x423A31,function
+th06::GameManager::HasExtraUnlocked,0x423A31,function
 th06::DrawMenuItem,0x423A67,function
 th06::MainMenu::WeirdSecondInputCheck,0x423AFF,function
 th06::MainMenu::DrawStartMenu,0x423BEA,function

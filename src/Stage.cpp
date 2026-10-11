@@ -14,7 +14,9 @@
 
 namespace th06
 {
+#if !DISABLE_BSS_HACK
 BSS_SORT(B1) i32 g_StagePad;
+#endif
 BSS_SORT(B3) Stage g_Stage;
 BSS_SORT(B5) ChainElem g_StageCalcChain;
 BSS_SORT(B2) ChainElem g_StageOnDrawHighPrioChain;

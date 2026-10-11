@@ -261,9 +261,9 @@ th06::g_ItemManagerDrawChain,0x6898A0,global,32
 th06::g_ItemManager,0x6898C0,global,166220
 th06::g_ItemManagerCalcChain,0x6B220C,global,32
 th06::g_GameWindow,0x6B222C,global,32
+g_ExclusiveMutex,0x6B224C,global,4
 g_TickCountToEffectiveFramerate,0x6B2250,global,4
-th06::g_LastFrameTime,0x6B2258,global,8
-th06::g_ExclusiveMutex,0x6B224C,global,4
+g_LastFrameTime,0x6B2258,global,8
 g_FpsCounterBuffer,0x6B2260,global,256
 g_NumFramesSinceLastTime,0x6B2360,global,4
 g_LastTime,0x6B2364,global,4

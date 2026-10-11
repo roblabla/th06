@@ -291,8 +291,8 @@ ZunResult Ending::ParseEndFile()
                 {
                     for (i32 difficulty = 0; difficulty < EXTRA; difficulty++)
                     {
-                        if (g_GameManager.clrd[shottype].difficultyClearedWithRetries[difficulty] == 99 ||
-                            g_GameManager.clrd[shottype].difficultyClearedWithoutRetries[difficulty] == 99)
+                        if (g_GameManager.clrd[shottype].stagesClearedWithoutContinues[difficulty] == ALL_CLEARED ||
+                            g_GameManager.clrd[shottype].stagesCleared[difficulty] == ALL_CLEARED)
                         {
                             this->hasSeenEnding = true;
                             break;
@@ -564,21 +564,23 @@ static ZunResult Ending_AddedCallback(Ending *ending)
     ending->hasSeenEnding = false;
     if (g_GameManager.numRetries == 0)
     {
-        if (g_GameManager.clrd[shotTypeAndCharacter].difficultyClearedWithRetries[g_GameManager.difficulty] == 99)
+        if (g_GameManager.clrd[shotTypeAndCharacter].stagesClearedWithoutContinues[g_GameManager.difficulty] ==
+            ALL_CLEARED)
         {
             ending->hasSeenEnding = true;
         }
 
-        g_GameManager.clrd[shotTypeAndCharacter].difficultyClearedWithRetries[g_GameManager.difficulty] = 99;
+        g_GameManager.clrd[shotTypeAndCharacter].stagesClearedWithoutContinues[g_GameManager.difficulty] = ALL_CLEARED;
     }
     else
     {
-        if (g_GameManager.clrd[shotTypeAndCharacter].difficultyClearedWithoutRetries[g_GameManager.difficulty] == 99)
+        if (g_GameManager.clrd[shotTypeAndCharacter].stagesCleared[g_GameManager.difficulty] == ALL_CLEARED)
         {
             ending->hasSeenEnding = true;
         }
     }
-    g_GameManager.clrd[shotTypeAndCharacter].difficultyClearedWithoutRetries[g_GameManager.difficulty] = 99;
+    g_GameManager.clrd[shotTypeAndCharacter].stagesCleared[g_GameManager.difficulty] = ALL_CLEARED;
+
     if (g_GameManager.difficulty == EASY || g_GameManager.numRetries != 0)
     {
         switch (g_GameManager.character)

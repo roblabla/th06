@@ -148,12 +148,12 @@ th06::g_ItemManager,0x69e268,global,166220
 th06::g_ItemManagerCalcChain,0x6C6BB4,global,32
 th06::g_GameWindow,0x6c6bd4,global,32
 g_TickCountToEffectiveFramerate,0x6c6bf4,global,4
-th06::g_LastFrameTime,0x6c6bf8,global,8
-th06::g_ExclusiveMutex,0x6c6c00,global,4
+g_LastFrameTime,0x6c6bf8,global,8
+g_ExclusiveMutex,0x6c6c00,global,4
 g_FpsCounterBuffer,0x6c6c08,global,256
 g_NumFramesSinceLastTime,0x6c6d08,global,4
 g_LastTime,0x6c6d0c,global,4
-$S3,0x6c6d10,global,4
+g_LastTimeStaticGuard,0x6c6d10,global,4
 th06::g_Supervisor,0x6c6d18,global,1240
 g_MusicRoom,0x6c71f0,global,13364
 $S1,0x6ca624,global,4

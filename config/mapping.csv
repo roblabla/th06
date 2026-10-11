@@ -439,7 +439,7 @@ th06::MainMenu_RegisterChain,0x43a338,0x12c,default,,ZunResult,u32
 th06::MainMenu_AddedCallback,0x43a464,0x1f5,default,,ZunResult,MainMenu*
 th06::MainMenu_DeletedCallback,0x43a659,0xb1,default,,ZunResult,MainMenu*
 th06::ReleaseTitleAnm,0x43a70a,0x2c,default,,void
-th06::GameManager::HasReachedMaxClears,0x43a736,0x70,__thiscall,,i32,GameManager*,i32,i32
+th06::GameManager::HasExtraUnlocked,0x43a736,0x70,__thiscall,,i32,GameManager*,i32,i32
 th06::CSoundManager::CSoundManager,0x43a7b0,0x17,__thiscall,,u32*,CSoundManager*
 th06::CSoundManager::~CSoundManager,0x43a7d0,0x2c,__thiscall,,void,CSoundManager*
 th06::CSoundManager::Initialize,0x43a800,0x8e,__thiscall,,i32,CSoundManager*,HWND__*,unsigned long,u32,i32,u32

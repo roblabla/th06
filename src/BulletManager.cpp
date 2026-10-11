@@ -67,7 +67,9 @@ SpawnEffectColors g_BulletSpawnEffects8Colors[] = {
     SPAWN_EFFECT_WHITE,  // BULLET_WHITE8
 };
 
+#if !DISABLE_BSS_HACK
 BSS_SORT(F1) i32 g_BulletManagerPad;
+#endif
 BSS_SORT(F4) ChainElem g_BulletManagerCalcChain;
 BSS_SORT(F2) ChainElem g_BulletManagerDrawChain;
 BSS_SORT(F3) BulletManager g_BulletManager;

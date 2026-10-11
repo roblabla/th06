@@ -441,7 +441,7 @@ th06::MainMenu_RegisterChain,0x43a338,function
 th06::MainMenu_AddedCallback,0x43a464,function
 th06::MainMenu_DeletedCallback,0x43a659,function
 th06::ReleaseTitleAnm,0x43a70a,function
-th06::GameManager::HasReachedMaxClears,0x43a736,function
+th06::GameManager::HasExtraUnlocked,0x43a736,function
 th06::CSoundManager::CSoundManager,0x43a7b0,function
 th06::CSoundManager::~CSoundManager,0x43a7d0,function
 th06::CSoundManager::Initialize,0x43a800,function

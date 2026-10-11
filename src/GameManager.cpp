@@ -280,7 +280,7 @@ static ZunResult GameManager_AddedCallback(GameManager *mgr)
         mgr->rank = 8;
         mgr->grazeInTotal = 0;
         mgr->pointItemsCollected = 0;
-        for (catk = mgr->catk, i = 0; i < CATK_NUM_CAPTURES; i++, catk++)
+        for (catk = mgr->catk, i = 0; i < CATK_COUNT; i++, catk++)
         {
             // Randomize catk content.
             for (catkCursor = 0; catkCursor < sizeof(Catk) / sizeof(u16); catkCursor++)
@@ -328,22 +328,22 @@ static ZunResult GameManager_AddedCallback(GameManager *mgr)
     {
         clrdIdx = GameManager_CharacterShotType();
         if (mgr->numRetries == 0 &&
-            mgr->clrd[clrdIdx].difficultyClearedWithRetries[g_GameManager.difficulty] < mgr->currentStage - 1)
+            mgr->clrd[clrdIdx].stagesClearedWithoutContinues[g_GameManager.difficulty] < mgr->currentStage - 1)
         {
-            mgr->clrd[clrdIdx].difficultyClearedWithRetries[g_GameManager.difficulty] = mgr->currentStage - 1;
+            mgr->clrd[clrdIdx].stagesClearedWithoutContinues[g_GameManager.difficulty] = mgr->currentStage - 1;
         }
-        if (mgr->clrd[clrdIdx].difficultyClearedWithoutRetries[g_GameManager.difficulty] < mgr->currentStage - 1)
+        if (mgr->clrd[clrdIdx].stagesCleared[g_GameManager.difficulty] < mgr->currentStage - 1)
         {
-            mgr->clrd[clrdIdx].difficultyClearedWithoutRetries[g_GameManager.difficulty] = mgr->currentStage - 1;
+            mgr->clrd[clrdIdx].stagesCleared[g_GameManager.difficulty] = mgr->currentStage - 1;
         }
     }
     if (mgr->isInPracticeMode)
     {
         switch (mgr->currentStage)
         {
-        case STAGE2:
+        case 1:
             break;
-        case STAGE3:
+        case 2:
             mgr->currentPower = MAX_POWER / 2;
             break;
         default:

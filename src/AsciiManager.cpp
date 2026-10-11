@@ -21,7 +21,9 @@ struct AsciiManager;
 
 namespace th06
 {
+#if !DISABLE_BSS_HACK
 BSS_SORT(A1) i32 g_AsciiManagerPad[4];
+#endif
 BSS_SORT(A3) AsciiManager g_AsciiManager;
 BSS_SORT(A4) ChainElem g_AsciiManagerCalcChain;
 BSS_SORT(A2) ChainElem g_AsciiManagerOnDrawMenusChain;

@@ -180,7 +180,7 @@ th06::GameManager::AddedCallback
 th06::GameManager::DeletedCallback
 th06::GameManager::RegisterChain
 th06::GameManager::CutChain
-th06::GameManager::HasReachedMaxClears
+th06::GameManager::HasExtraUnlocked
 th06::GameManager::IncreaseSubrank
 th06::GameManager::DecreaseSubrank
 th06::GameManager::IsInBounds

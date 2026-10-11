@@ -242,7 +242,7 @@ restart_sub_changed:
         case ECL_OPCODE_CMP_FLOAT: {
             float lhs = *EclGetVarFloat(enemy, &curInstr->args.cmp.lhs.f32, NULL);
             float rhs = *EclGetVarFloat(enemy, &curInstr->args.cmp.rhs.f32, NULL);
-            enemy->currentContext.compareRegister = lhs == rhs ? 0 : (lhs < rhs ? -1 : 1);
+            enemy->currentContext.compareRegister = lhs == rhs ? 0 : lhs < rhs ? -1 : 1;
             break;
         }
         case ECL_OPCODE_JUMP_LSS:
