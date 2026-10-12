@@ -539,10 +539,10 @@ static ChainCallbackResult Ending_OnDraw(Ending *ending)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-#pragma var_order(unusedshotTypeAndCharacter, shotTypeAndCharacter)
+#pragma var_order(unusedShottype, shottype)
 static ZunResult Ending_AddedCallback(Ending *ending)
 {
-    i32 unusedshotTypeAndCharacter = CURRENT_SHOTTYPE();
+    i32 unusedShottype = CURRENT_SHOTTYPE();
 
     g_GameManager.isGameCompleted = true;
     g_Supervisor.isInEnding = true;
@@ -556,26 +556,26 @@ static ZunResult Ending_AddedCallback(Ending *ending)
     g_AnmManager->SetCurrentBlendMode(AnmBlendMode_NotSet);
     g_AnmManager->SetCurrentVertexShader(AnmVertexShader_NotSet);
 
-    i32 shotTypeAndCharacter = CURRENT_SHOTTYPE();
+    i32 shottype = CURRENT_SHOTTYPE();
     ending->hasSeenEnding = false;
     if (g_GameManager.continuesUsed == 0)
     {
-        if (g_GameManager.clrd[shotTypeAndCharacter].stagesClearedWithoutContinues[g_GameManager.difficulty] ==
+        if (g_GameManager.clrd[shottype].stagesClearedWithoutContinues[g_GameManager.difficulty] ==
             ALL_CLEARED)
         {
             ending->hasSeenEnding = true;
         }
 
-        g_GameManager.clrd[shotTypeAndCharacter].stagesClearedWithoutContinues[g_GameManager.difficulty] = ALL_CLEARED;
+        g_GameManager.clrd[shottype].stagesClearedWithoutContinues[g_GameManager.difficulty] = ALL_CLEARED;
     }
     else
     {
-        if (g_GameManager.clrd[shotTypeAndCharacter].stagesCleared[g_GameManager.difficulty] == ALL_CLEARED)
+        if (g_GameManager.clrd[shottype].stagesCleared[g_GameManager.difficulty] == ALL_CLEARED)
         {
             ending->hasSeenEnding = true;
         }
     }
-    g_GameManager.clrd[shotTypeAndCharacter].stagesCleared[g_GameManager.difficulty] = ALL_CLEARED;
+    g_GameManager.clrd[shottype].stagesCleared[g_GameManager.difficulty] = ALL_CLEARED;
 
     if (g_GameManager.difficulty == EASY || g_GameManager.continuesUsed != 0)
     {
