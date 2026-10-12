@@ -86,7 +86,7 @@ th06::g_CharacterPowerBulletDataMarisaBRank7,0x4781f8,global,180
 th06::g_CharacterPowerBulletDataMarisaBRank8,0x4782b0,global,180
 th06::g_CharacterPowerBulletDataMarisaBRank9,0x478368,global,252
 th06::g_CharacterPowerDataMarisaB,0x478468,global,108
-th06::g_AlphabetList,0x4784d4,global,4
+g_AlphabetList,0x4784d4,global,4
 th06::g_CharacterList,0x4784d8,global,24
 g_SpellcardsWeightsList,0x4784f0,global,20
 g_RightAlignedDifficultyList,0x478504,global,20

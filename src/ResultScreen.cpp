@@ -120,7 +120,7 @@ ZUN_ASSERT_TYPE(ResultScreen, 0x56b0, 4);
 static void MoveResultCursor(ResultScreen *r, i32 len);
 static ZunBool MoveResultCursorHorizontally(ResultScreen *r, i32 len);
 
-const char *g_AlphabetList = TH_KEYBOARD;
+static const char *g_AlphabetList = TH_KEYBOARD;
 
 // clang-format off
 const char *g_CharacterList[] = {
@@ -1143,7 +1143,6 @@ i32 ResultScreen::HandleResultKeyboard()
     return 0;
 }
 
-// TODO: Different codegen here in trial
 #pragma var_order(vm, saveInterrupt, i)
 i32 ResultScreen::HandleReplaySaveKeyboard()
 {
@@ -1160,16 +1159,13 @@ i32 ResultScreen::HandleReplaySaveKeyboard()
             {
                 saveInterrupt = 12;
             }
+            else if (g_Supervisor.framerateMultiplier < 0.99f)
+            {
+                saveInterrupt = 13;
+            }
             else
             {
-                if (g_Supervisor.framerateMultiplier < 0.99f)
-                {
-                    saveInterrupt = 13;
-                }
-                else
-                {
-                    saveInterrupt = 9;
-                }
+                saveInterrupt = 9;
             }
             vm = &this->vms[1];
             for (i = 0; i < ARRAY_SIZE_SIGNED(this->vms); i++, vm++)
@@ -1260,22 +1256,34 @@ i32 ResultScreen::HandleReplaySaveKeyboard()
         if (this->frameTimer == 0)
         {
             _mkdir("replay");
+#if BUILD_VERSION >= BUILD_VERSION_013
             ReplayData *replayLoaded;
+#else
+            FILE *replayLoaded;
+#endif
             for (i = 0; i < NORMAL_REPLAY_COUNT; i++)
             {
                 char replayToReadPath[64];
                 sprintf(replayToReadPath, "./replay/th6_%.2d.rpy", i + 1);
+#if BUILD_VERSION >= BUILD_VERSION_013
                 replayLoaded = (ReplayData *)FileSystem::OpenPath(replayToReadPath, EXTERNAL_FILE);
+#else
+                replayLoaded = fopen(replayToReadPath, "rb");
+#endif
                 if (replayLoaded == NULL)
                 {
                     continue;
                 }
-
+#if BUILD_VERSION >= BUILD_VERSION_013
                 if (ValidateReplayData(replayLoaded, g_LastFileSize) == ZUN_SUCCESS)
                 {
                     this->replays[i] = *replayLoaded;
                 }
                 ZUN_FREE(replayLoaded);
+#else
+                fread(&this->replays[i], sizeof(ReplayData), 1, replayLoaded);
+                fclose(replayLoaded);
+#endif
             }
         }
 
