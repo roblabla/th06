@@ -2001,7 +2001,7 @@ ZunResult MainMenu::ChoosePracticeLevel()
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(targetOpacity, window, vmIdx, curVm)
+#pragma var_order(targetOpacity, window, i, vm)
 ChainCallbackResult MainMenu_OnDraw(MainMenu *menu)
 {
     AnmVm *vm;

@@ -128,11 +128,6 @@ struct GameManager
     i32 maxRank;
     i32 minRank;
     i32 subRank;
-
-    friend i32 CharacterShotType()
-    {
-        return g_GameManager.shotType + g_GameManager.character * SHOTTYPES_PER_CHARACTER;
-    }
 };
 
 #define CURRENT_SHOTTYPE() SHOTTYPE_ID(g_GameManager.character, g_GameManager.shotType)
