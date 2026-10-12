@@ -140,6 +140,232 @@ CharacterData g_CharData[] = {
     /* Rin???  */ {4.0f, 2.0f, 4.0f, 2.0f, NULL, NULL},
 };
 
+#pragma var_order(idx, curBulletIdx, curBullet)
+static void SpawnBullets(Player *p, u32 timer)
+{
+    u32 idx = 0;
+    PlayerBullet *curBullet = p->bullets;
+    i32 curBulletIdx = 0;
+    for (; curBulletIdx < MAX_PLAYER_BULLETS; curBulletIdx++, curBullet++)
+    {
+        if (curBullet->bulletState != PLAYER_BULLET_STATE_INACTIVE)
+        {
+            continue;
+        }
+    WHILE_LOOP:
+        FireBulletResult bulletResult;
+        if (!p->isFocus)
+        {
+            bulletResult = p->fireBulletCallback(p, curBullet, idx, timer);
+        }
+        else
+        {
+            bulletResult = p->fireBulletFocusCallback(p, curBullet, idx, timer);
+        }
+        if (bulletResult >= 0)
+        {
+            curBullet->sprite.pos.x = curBullet->position.x;
+            curBullet->sprite.pos.y = curBullet->position.y;
+            curBullet->sprite.pos.z = 0.495f;
+            curBullet->bulletState = PLAYER_BULLET_STATE_FIRED;
+        }
+        if (bulletResult == FBR_STOP_SPAWNING)
+        {
+            return;
+        }
+        if (bulletResult > 0)
+        {
+            return;
+        }
+        idx++;
+        if (bulletResult == FBR_SPAWN_MORE)
+        {
+            goto WHILE_LOOP;
+        }
+    }
+}
+
+#pragma var_order(vectorY, vectorX, idx, vecLength, bullet)
+static void UpdatePlayerBullets(Player *player)
+{
+    f32 vectorX;
+    f32 vectorY;
+    PlayerBullet *bullet;
+    f32 vecLength;
+    i32 idx;
+
+    for (idx = 0; idx < ARRAY_SIZE_SIGNED(player->laserTimer); idx++)
+    {
+        if ((i32)player->laserTimer[idx] != 0)
+        {
+            player->laserTimer[idx]--;
+        }
+    }
+    bullet = &player->bullets[0];
+    for (idx = 0; idx < MAX_PLAYER_BULLETS; idx++, bullet++)
+    {
+        if (bullet->bulletState == PLAYER_BULLET_STATE_INACTIVE)
+        {
+            continue;
+        }
+
+        switch (bullet->bulletType)
+        {
+        case PLAYER_BULLET_TYPE_1:
+            if (bullet->bulletState == PLAYER_BULLET_STATE_FIRED)
+            {
+                if (player->positionOfLastEnemyHit.x > -100.0f && (i32)bullet->lifetime < 40 &&
+                    bullet->lifetime.HasTicked())
+                {
+                    vectorX = player->positionOfLastEnemyHit.x - bullet->position.x;
+                    vectorY = player->positionOfLastEnemyHit.y - bullet->position.y;
+
+                    vecLength = sqrtf(vectorX * vectorX + vectorY * vectorY) / (bullet->speed / 4.0f);
+                    if (vecLength < 1.0f)
+                    {
+                        vecLength = 1.0f;
+                    }
+
+                    vectorX = vectorX / vecLength + bullet->velocity.x;
+                    vectorY = vectorY / vecLength + bullet->velocity.y;
+
+                    vecLength = sqrtf(vectorX * vectorX + vectorY * vectorY);
+
+                    bullet->speed = ZUN_MIN(vecLength, 10.0f);
+
+                    if (bullet->speed < 1.0f)
+                    {
+                        bullet->speed = 1.0f;
+                    }
+
+                    bullet->velocity.x = vectorX * bullet->speed / vecLength;
+                    bullet->velocity.y = vectorY * bullet->speed / vecLength;
+                }
+                else
+                {
+                    if (bullet->speed < 10.0f)
+                    {
+                        bullet->speed += 0.33333333f;
+                        vectorX = bullet->velocity.x;
+                        vectorY = bullet->velocity.y;
+                        vecLength = sqrtf(vectorX * vectorX + vectorY * vectorY);
+                        bullet->velocity.x = vectorX * bullet->speed / vecLength;
+                        bullet->velocity.y = vectorY * bullet->speed / vecLength;
+                    }
+                }
+            }
+
+            break;
+
+        case PLAYER_BULLET_TYPE_2:
+            if (bullet->bulletState == PLAYER_BULLET_STATE_FIRED)
+            {
+                bullet->velocity.y -= 0.3f;
+            }
+            break;
+        case PLAYER_LASER:
+
+            if (player->laserTimer[bullet->bulletFrame] == 70)
+            {
+                bullet->sprite.pendingInterrupt = 1;
+            }
+            else if (player->laserTimer[bullet->bulletFrame] == 1)
+            {
+                bullet->sprite.pendingInterrupt = 1;
+            }
+
+            bullet->position = player->orbsPosition[bullet->spawnPositionIdx - 1];
+
+            bullet->position.x += bullet->motion.x;
+            bullet->position.y /= 2.0f;
+            bullet->position.z = 0.44f;
+
+            bullet->sprite.scaleY = bullet->position.y * 2.0f / 14.0f;
+
+            bullet->size.y = bullet->position.y * 2.0f;
+            break;
+        }
+
+        bullet->sprite.pos.x = bullet->position[0] += bullet->velocity.x * g_Supervisor.effectiveFramerateMultiplier;
+        bullet->sprite.pos.y = bullet->position[1] += bullet->velocity.y * g_Supervisor.effectiveFramerateMultiplier;
+        bullet->sprite.pos.z = bullet->position.z;
+
+        if (bullet->bulletType != PLAYER_LASER &&
+            !g_GameManager.IsInBounds(bullet->position.x, bullet->position.y, bullet->sprite.sprite->widthPx,
+                                      bullet->sprite.sprite->heightPx))
+        {
+            bullet->bulletState = PLAYER_BULLET_STATE_INACTIVE;
+        }
+
+        if (g_AnmManager->ExecuteScript(&bullet->sprite))
+        {
+            bullet->bulletState = PLAYER_BULLET_STATE_INACTIVE;
+        }
+        bullet->lifetime++;
+    }
+}
+
+#pragma var_order(i, bullet)
+static void DrawBullets(Player *p)
+{
+    PlayerBullet *bullet = p->bullets;
+    i32 i = 0;
+    for (; i < MAX_PLAYER_BULLETS; i++, bullet++)
+    {
+        if (bullet->bulletState != PLAYER_BULLET_STATE_FIRED)
+        {
+            continue;
+        }
+        if (bullet->sprite.autoRotate)
+        {
+            bullet->sprite.rotation.z = RADIANS(90.0f) - utils::AddNormalizeAngle(bullet->angle, RADIANS(180.0f));
+        }
+        g_AnmManager->Draw2(&bullet->sprite);
+    }
+}
+
+#pragma var_order(i, bullet)
+static void DrawBulletExplosions(Player *p)
+{
+    PlayerBullet *bullet = p->bullets;
+    i32 i = 0;
+    for (; i < MAX_PLAYER_BULLETS; i++, bullet++)
+    {
+        if (bullet->bulletState != PLAYER_BULLET_STATE_COLLIDED)
+        {
+            continue;
+        }
+        if (bullet->sprite.autoRotate)
+        {
+            bullet->sprite.rotation.z = RADIANS(90.0f) - utils::AddNormalizeAngle(bullet->angle, RADIANS(180.0f));
+        }
+        bullet->sprite.pos.z = 0.4f;
+        g_AnmManager->Draw2(&bullet->sprite);
+    }
+}
+
+static ZunResult UpdateFireBulletsTimer(Player *p)
+{
+    if ((i32)p->fireBulletTimer < 0)
+    {
+        return ZUN_SUCCESS;
+    }
+
+    if (p->fireBulletTimer.HasTicked() &&
+        (!g_Player.bombInfo.isInUse || g_GameManager.character != MARISA || g_GameManager.shotType != SHOT_TYPE_B))
+    {
+        SpawnBullets(p, (i32)p->fireBulletTimer);
+    }
+
+    p->fireBulletTimer++;
+
+    if ((i32)p->fireBulletTimer >= 30 || p->playerState == PLAYER_STATE_DEAD || p->playerState == PLAYER_STATE_SPAWNING)
+    {
+        p->fireBulletTimer = -1;
+    }
+    return ZUN_SUCCESS;
+}
+
 #pragma var_order(bullet, idx, enemyBottomRight, bulletBottomRight, enemyTopLeft, damage, bulletTopLeft)
 i32 Player::CalcDamageToEnemy(D3DXVECTOR3 *enemyPos, D3DXVECTOR3 *enemyHitboxSize, ZunBool *hitByBomb)
 {
@@ -793,226 +1019,11 @@ ZunResult Player::HandlePlayerInputs()
     this->orbsPosition[1].x += orbOffsetX;
     this->orbsPosition[0].y += orbOffsetY;
     this->orbsPosition[1].y += orbOffsetY;
-    if (IS_PRESSED(TH_BUTTON_SHOOT) && !g_Gui.HasCurrentMsgIdx())
+    if (IS_PRESSED(TH_BUTTON_SHOOT) && !g_Gui.IsMsgActive())
     {
         StartFireBulletTimer(this);
     }
     this->previousFrameInput = g_CurFrameInput;
-    return ZUN_SUCCESS;
-}
-
-#pragma var_order(relY, relX)
-f32 Player::AngleFromPlayer(D3DXVECTOR3 *pos)
-{
-    // NOTE: This is *not* a ZunVec2
-    float relX = pos->x - this->positionCenter.x;
-    float relY = pos->y - this->positionCenter.y;
-    if (relY == 0.0f && relX == 0.0f)
-    {
-        return RADIANS(90.0f);
-    }
-    return atan2f(relY, relX);
-}
-
-#pragma var_order(relY, relX)
-f32 Player::AngleToPlayer(D3DXVECTOR3 *pos)
-{
-    // NOTE: This is *not* a ZunVec2
-    float relX = this->positionCenter.x - pos->x;
-    float relY = this->positionCenter.y - pos->y;
-    if (relY == 0.0f && relX == 0.0f)
-    {
-        // Shoot down. An angle of 0 means to the right, and the angle goes
-        // clockwise.
-        return RADIANS(90.0f);
-    }
-    return atan2f(relY, relX);
-}
-
-#pragma var_order(vectorY, vectorX, idx, vecLength, bullet)
-static void UpdatePlayerBullets(Player *player)
-{
-    f32 vectorX;
-    f32 vectorY;
-    PlayerBullet *bullet;
-    f32 vecLength;
-    i32 idx;
-
-    for (idx = 0; idx < ARRAY_SIZE_SIGNED(player->laserTimer); idx++)
-    {
-        if ((i32)player->laserTimer[idx] != 0)
-        {
-            player->laserTimer[idx]--;
-        }
-    }
-    bullet = &player->bullets[0];
-    for (idx = 0; idx < MAX_PLAYER_BULLETS; idx++, bullet++)
-    {
-        if (bullet->bulletState == PLAYER_BULLET_STATE_INACTIVE)
-        {
-            continue;
-        }
-
-        switch (bullet->bulletType)
-        {
-        case PLAYER_BULLET_TYPE_1:
-            if (bullet->bulletState == PLAYER_BULLET_STATE_FIRED)
-            {
-                if (player->positionOfLastEnemyHit.x > -100.0f && (i32)bullet->lifetime < 40 &&
-                    bullet->lifetime.HasTicked())
-                {
-                    vectorX = player->positionOfLastEnemyHit.x - bullet->position.x;
-                    vectorY = player->positionOfLastEnemyHit.y - bullet->position.y;
-
-                    vecLength = sqrtf(vectorX * vectorX + vectorY * vectorY) / (bullet->speed / 4.0f);
-                    if (vecLength < 1.0f)
-                    {
-                        vecLength = 1.0f;
-                    }
-
-                    vectorX = vectorX / vecLength + bullet->velocity.x;
-                    vectorY = vectorY / vecLength + bullet->velocity.y;
-
-                    vecLength = sqrtf(vectorX * vectorX + vectorY * vectorY);
-
-                    bullet->speed = ZUN_MIN(vecLength, 10.0f);
-
-                    if (bullet->speed < 1.0f)
-                    {
-                        bullet->speed = 1.0f;
-                    }
-
-                    bullet->velocity.x = vectorX * bullet->speed / vecLength;
-                    bullet->velocity.y = vectorY * bullet->speed / vecLength;
-                }
-                else
-                {
-                    if (bullet->speed < 10.0f)
-                    {
-                        bullet->speed += 0.33333333f;
-                        vectorX = bullet->velocity.x;
-                        vectorY = bullet->velocity.y;
-                        vecLength = sqrtf(vectorX * vectorX + vectorY * vectorY);
-                        bullet->velocity.x = vectorX * bullet->speed / vecLength;
-                        bullet->velocity.y = vectorY * bullet->speed / vecLength;
-                    }
-                }
-            }
-
-            break;
-
-        case PLAYER_BULLET_TYPE_2:
-            if (bullet->bulletState == PLAYER_BULLET_STATE_FIRED)
-            {
-                bullet->velocity.y -= 0.3f;
-            }
-            break;
-        case PLAYER_LASER:
-
-            if (player->laserTimer[bullet->bulletFrame] == 70)
-            {
-                bullet->sprite.pendingInterrupt = 1;
-            }
-            else if (player->laserTimer[bullet->bulletFrame] == 1)
-            {
-                bullet->sprite.pendingInterrupt = 1;
-            }
-
-            bullet->position = player->orbsPosition[bullet->spawnPositionIdx - 1];
-
-            bullet->position.x += bullet->motion.x;
-            bullet->position.y /= 2.0f;
-            bullet->position.z = 0.44f;
-
-            bullet->sprite.scaleY = bullet->position.y * 2.0f / 14.0f;
-
-            bullet->size.y = bullet->position.y * 2.0f;
-            break;
-        }
-
-        bullet->sprite.pos.x = bullet->position[0] += bullet->velocity.x * g_Supervisor.effectiveFramerateMultiplier;
-        bullet->sprite.pos.y = bullet->position[1] += bullet->velocity.y * g_Supervisor.effectiveFramerateMultiplier;
-        bullet->sprite.pos.z = bullet->position.z;
-
-        if (bullet->bulletType != PLAYER_LASER &&
-            !g_GameManager.IsInBounds(bullet->position.x, bullet->position.y, bullet->sprite.sprite->widthPx,
-                                      bullet->sprite.sprite->heightPx))
-        {
-            bullet->bulletState = PLAYER_BULLET_STATE_INACTIVE;
-        }
-
-        if (g_AnmManager->ExecuteScript(&bullet->sprite))
-        {
-            bullet->bulletState = PLAYER_BULLET_STATE_INACTIVE;
-        }
-        bullet->lifetime++;
-    }
-}
-
-#pragma var_order(idx, curBulletIdx, curBullet)
-static void SpawnBullets(Player *p, u32 timer)
-{
-    u32 idx = 0;
-    PlayerBullet *curBullet = p->bullets;
-    i32 curBulletIdx = 0;
-    for (; curBulletIdx < MAX_PLAYER_BULLETS; curBulletIdx++, curBullet++)
-    {
-        if (curBullet->bulletState != PLAYER_BULLET_STATE_INACTIVE)
-        {
-            continue;
-        }
-    WHILE_LOOP:
-        FireBulletResult bulletResult;
-        if (!p->isFocus)
-        {
-            bulletResult = p->fireBulletCallback(p, curBullet, idx, timer);
-        }
-        else
-        {
-            bulletResult = p->fireBulletFocusCallback(p, curBullet, idx, timer);
-        }
-        if (bulletResult >= 0)
-        {
-            curBullet->sprite.pos.x = curBullet->position.x;
-            curBullet->sprite.pos.y = curBullet->position.y;
-            curBullet->sprite.pos.z = 0.495f;
-            curBullet->bulletState = PLAYER_BULLET_STATE_FIRED;
-        }
-        if (bulletResult == FBR_STOP_SPAWNING)
-        {
-            return;
-        }
-        if (bulletResult > 0)
-        {
-            return;
-        }
-        idx++;
-        if (bulletResult == FBR_SPAWN_MORE)
-        {
-            goto WHILE_LOOP;
-        }
-    }
-}
-
-static ZunResult UpdateFireBulletsTimer(Player *p)
-{
-    if ((i32)p->fireBulletTimer < 0)
-    {
-        return ZUN_SUCCESS;
-    }
-
-    if (p->fireBulletTimer.HasTicked() && (!g_Player.bombInfo.isInUse || g_GameManager.character != CHARA_MARISA ||
-                                           g_GameManager.shotType != SHOT_TYPE_B))
-    {
-        SpawnBullets(p, (i32)p->fireBulletTimer);
-    }
-
-    p->fireBulletTimer++;
-
-    if ((i32)p->fireBulletTimer >= 30 || p->playerState == PLAYER_STATE_DEAD || p->playerState == PLAYER_STATE_SPAWNING)
-    {
-        p->fireBulletTimer = -1;
-    }
     return ZUN_SUCCESS;
 }
 
@@ -1036,7 +1047,7 @@ static ChainCallbackResult Player_OnUpdate(Player *p)
     {
         p->bombInfo.calc(p);
     }
-    else if (!g_Gui.HasCurrentMsgIdx() && p->respawnTimer != 0 && g_GameManager.bombsRemaining > 0 &&
+    else if (!g_Gui.IsMsgActive() && p->respawnTimer != 0 && g_GameManager.bombsRemaining > 0 &&
              WAS_PRESSED(TH_BUTTON_BOMB) && p->bombInfo.calc != NULL)
     {
         g_GameManager.bombsUsed++;
@@ -1085,7 +1096,8 @@ static ChainCallbackResult Player_OnUpdate(Player *p)
                     g_ItemManager.SpawnItem(&p->positionCenter, ITEM_FULL_POWER, ITEM_STATE_SPAWNED_BY_PLAYER_DEATH);
                     g_GameManager.currentPower = 0;
                     g_Gui.flags.flag2 = 2;
-                    g_GameManager.extraLives = 255;
+                    // Disable earning lives from score if a continue is used
+                    g_GameManager.livesEarned = -1;
                 }
                 g_GameManager.DecreaseSubrank(1600);
             }
@@ -1202,25 +1214,6 @@ static ChainCallbackResult Player_OnUpdate(Player *p)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-#pragma var_order(bulletIdx, bullet)
-static void DrawBullets(Player *p)
-{
-    PlayerBullet *bullet = p->bullets;
-    i32 bulletIdx = 0;
-    for (; bulletIdx < MAX_PLAYER_BULLETS; bulletIdx++, bullet++)
-    {
-        if (bullet->bulletState != PLAYER_BULLET_STATE_FIRED)
-        {
-            continue;
-        }
-        if (bullet->sprite.autoRotate)
-        {
-            bullet->sprite.rotation.z = RADIANS(90.0f) - utils::AddNormalizeAngle(bullet->angle, RADIANS(180.0f));
-        }
-        g_AnmManager->Draw2(&bullet->sprite);
-    }
-}
-
 static ChainCallbackResult Player_OnDrawHighPrio(Player *p)
 {
     DrawBullets(p);
@@ -1252,30 +1245,38 @@ static ChainCallbackResult Player_OnDrawHighPrio(Player *p)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-#pragma var_order(bulletIdx, bullet)
-static void DrawBulletExplosions(Player *p)
-{
-    PlayerBullet *bullet = p->bullets;
-    i32 bulletIdx = 0;
-    for (; bulletIdx < MAX_PLAYER_BULLETS; bulletIdx++, bullet++)
-    {
-        if (bullet->bulletState != PLAYER_BULLET_STATE_COLLIDED)
-        {
-            continue;
-        }
-        if (bullet->sprite.autoRotate)
-        {
-            bullet->sprite.rotation.z = RADIANS(90.0f) - utils::AddNormalizeAngle(bullet->angle, RADIANS(180.0f));
-        }
-        bullet->sprite.pos.z = 0.4f;
-        g_AnmManager->Draw2(&bullet->sprite);
-    }
-}
-
 static ChainCallbackResult Player_OnDrawLowPrio(Player *p)
 {
     DrawBulletExplosions(p);
     return CHAIN_CALLBACK_RESULT_CONTINUE;
+}
+
+#pragma var_order(relY, relX)
+f32 Player::AngleFromPlayer(D3DXVECTOR3 *pos)
+{
+    // NOTE: This is *not* a ZunVec2
+    float relX = pos->x - this->positionCenter.x;
+    float relY = pos->y - this->positionCenter.y;
+    if (relY == 0.0f && relX == 0.0f)
+    {
+        return RADIANS(90.0f);
+    }
+    return atan2f(relY, relX);
+}
+
+#pragma var_order(relY, relX)
+f32 Player::AngleToPlayer(D3DXVECTOR3 *pos)
+{
+    // NOTE: This is *not* a ZunVec2
+    float relX = this->positionCenter.x - pos->x;
+    float relY = this->positionCenter.y - pos->y;
+    if (relY == 0.0f && relX == 0.0f)
+    {
+        // Shoot down. An angle of 0 means to the right, and the angle goes
+        // clockwise.
+        return RADIANS(90.0f);
+    }
+    return atan2f(relY, relX);
 }
 
 static ZunResult Player_AddedCallback(Player *p)
@@ -1285,7 +1286,7 @@ static ZunResult Player_AddedCallback(Player *p)
 
     switch (g_GameManager.character)
     {
-    case CHARA_REIMU:
+    case REIMU:
         if (g_Supervisor.IsNotLoadingNextStage() &&
             g_AnmManager->LoadAnm(ANM_FILE_PLAYER, "data/player00.anm", ANM_OFFSET_PLAYER) != ZUN_SUCCESS)
         {
@@ -1293,7 +1294,7 @@ static ZunResult Player_AddedCallback(Player *p)
         }
         g_AnmManager->SetAndExecuteScriptIdx(&p->playerSprite, ANM_SCRIPT_PLAYER_IDLE);
         break;
-    case CHARA_MARISA:
+    case MARISA:
         if (g_Supervisor.IsNotLoadingNextStage() &&
             g_AnmManager->LoadAnm(ANM_FILE_PLAYER, "data/player01.anm", ANM_OFFSET_PLAYER) != ZUN_SUCCESS)
         {
@@ -1318,7 +1319,7 @@ static ZunResult Player_AddedCallback(Player *p)
     p->grabItemSize.y = 12.0f;
     p->grabItemSize.z = 5.0f;
     p->playerDirection = MOVEMENT_NONE;
-    p->characterData = g_CharData[GameManager_CharacterShotType()];
+    p->characterData = g_CharData[CURRENT_SHOTTYPE()];
     p->characterData.diagonalMovementSpeed = p->characterData.orthogonalMovementSpeed / sqrtf(2.0f);
     p->characterData.diagonalMovementSpeedFocus = p->characterData.orthogonalMovementSpeedFocus / sqrtf(2.0f);
     p->fireBulletCallback = p->characterData.fireBulletCallback;
@@ -1333,8 +1334,8 @@ static ZunResult Player_AddedCallback(Player *p)
         curBullet->bulletState = 0;
     }
     p->fireBulletTimer = -1;
-    p->bombInfo.calc = g_BombData[GameManager_CharacterShotType()].calc;
-    p->bombInfo.draw = g_BombData[GameManager_CharacterShotType()].draw;
+    p->bombInfo.calc = g_BombData[CURRENT_SHOTTYPE()].calc;
+    p->bombInfo.draw = g_BombData[CURRENT_SHOTTYPE()].draw;
     p->bombInfo.isInUse = false;
     for (idx = 0; idx < ARRAY_SIZE_SIGNED(p->laserTimer); idx++)
     {

@@ -19,6 +19,10 @@ struct GuiFlags
 };
 ZUN_ASSERT_TYPE(GuiFlags, 0x4, 4);
 
+#define MSG_SCRIPTS_PER_CHARACTER 10
+
+#define MSG_SCRIPT_ID(character, num) ((num) + (character) * MSG_SCRIPTS_PER_CHARACTER)
+
 struct Gui
 {
     ZunResult ActualAddedCallback();
@@ -28,7 +32,7 @@ struct Gui
     ZunBool IsStageFinished();
 
     void UpdateStageElements();
-    ZunBool HasCurrentMsgIdx();
+    ZunBool IsMsgActive();
 
     void DrawStageElements();
     void DrawGameScene();

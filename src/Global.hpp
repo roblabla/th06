@@ -46,6 +46,8 @@ namespace th06
 #define SHOTTYPES_PER_CHARACTER 2
 #define SHOTTYPE_COUNT (CHARACTER_COUNT * SHOTTYPES_PER_CHARACTER)
 
+#define SHOTTYPE_ID(character, shottype) ((character) * SHOTTYPES_PER_CHARACTER + (shottype))
+
 namespace utils
 {
 ZunResult CheckForRunningGameInstance(void);

@@ -30,8 +30,8 @@ enum PlayerDirection
 
 enum Character
 {
-    CHARA_REIMU,
-    CHARA_MARISA,
+    REIMU,
+    MARISA,
 };
 
 enum ShotType

@@ -1,7 +1,6 @@
 #include "AnmManager.hpp"
 #include "ChainPriorities.hpp"
 #include "GameManager.hpp"
-#include "GameWindow.hpp"
 #include "Global.hpp"
 #include "Gui.hpp"
 #include "StageMenu.hpp"
@@ -616,7 +615,7 @@ i32 StageMenu::OnUpdateRetryMenu()
         g_GameManager.guiScore = g_GameManager.score;
         return 1;
     }
-    if (g_GameManager.numRetries >= 3 || g_GameManager.difficulty >= EXTRA)
+    if (g_GameManager.continuesUsed >= MAX_CONTINUE_CREDITS || g_GameManager.difficulty >= EXTRA)
     {
         g_GameManager.isInRetryMenu = false;
         g_Supervisor.curState = SUPERVISOR_STATE_RESULTSCREEN_FROMGAME;
@@ -731,8 +730,8 @@ i32 StageMenu::OnUpdateRetryMenu()
             {
                 this->menuSprites[i].SetInvisible();
             }
-            g_GameManager.numRetries++;
-            g_GameManager.guiScore = g_GameManager.numRetries;
+            g_GameManager.continuesUsed++;
+            g_GameManager.guiScore = g_GameManager.continuesUsed;
             g_GameManager.nextScoreIncrement = 0;
             g_GameManager.score = g_GameManager.guiScore;
 #if BUILD_VERSION >= BUILD_VERSION_102h
@@ -745,7 +744,7 @@ i32 StageMenu::OnUpdateRetryMenu()
             g_GameManager.grazeInStage = 0;
             g_GameManager.pointItemsCollectedInStage = 0;
             g_GameManager.currentPower = 0;
-            g_GameManager.extraLives = 0;
+            g_GameManager.livesEarned = 0;
             g_Gui.flags.flag0 = 2;
             g_Gui.flags.flag1 = 2;
             g_Gui.flags.flag3 = 2;
@@ -786,7 +785,7 @@ void StageMenu::OnDrawRetryMenu()
             this->menuSprites[RETRY_MENU_SPRITE_RETRIES_NUMBER].pos.x +=
                 8.0f * this->menuSprites[RETRY_MENU_SPRITE_RETRIES_NUMBER].scaleX;
             this->menuSprites[RETRY_MENU_SPRITE_RETRIES_NUMBER].sprite =
-                g_AnmManager->GetSprite(30 - g_GameManager.numRetries);
+                g_AnmManager->GetSprite(30 - g_GameManager.continuesUsed);
             g_AnmManager->DrawNoRotation(&this->menuSprites[RETRY_MENU_SPRITE_RETRIES_NUMBER]);
         }
         for (i32 i = RETRY_MENU_SPRITES_START; i < RETRY_MENU_SPRITES_END; i++)

@@ -1,6 +1,5 @@
 #define _WIN32_WINNT 0x0500
 #include "AnmManager.hpp"
-#include "GameWindow.hpp"
 #include "Global.hpp"
 #include "MidiOutput.hpp"
 #include "ScreenEffect.hpp"
@@ -218,11 +217,10 @@ static void GameWindow_Present()
 
 RenderResult GameWindow::Render()
 {
-    // NOTE: The difference in sorting between trial/release
-    // is actually caused by being static locals. The only
-    // reason this needs an #if is because of how the linker
-    // handles alignment of merged sections and a file-scope
-    // BSS hack causes extra padding at the front.
+    // These function-local statics are emitted next to their functions, so their order follows
+    // emission order, which differs between the /Od release and the /O2 trial. Unsorted, the
+    // compiler reproduces both orders by itself. Sorted, each one needs its own group: a group
+    // holding the f64 is aligned to 8 as a whole, but the first static has to land 4 past that.
 #if !TRIALBUILD
     BSS_SORT(L2) static i32 g_TickCountToEffectiveFramerate;
     BSS_SORT(L3) static f64 g_LastFrameTime;
@@ -830,11 +828,7 @@ namespace utils
 {
 ZunResult CheckForRunningGameInstance(void)
 {
-    // NOTE: The difference in sorting between trial/release
-    // is actually caused by being static locals. The only
-    // reason this needs an #if is because of how the linker
-    // handles alignment of merged sections and a file-scope
-    // BSS hack causes extra padding at the front.
+    // See GameWindow::Render for why these statics are sorted per version.
 #if !TRIALBUILD
     BSS_SORT(L4) static HANDLE g_ExclusiveMutex;
 #else

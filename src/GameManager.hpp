@@ -22,31 +22,24 @@ enum Difficulty
 
 enum StageNumber
 {
-    STAGE1,
-    STAGE2,
-    STAGE3,
-    STAGE4,
-    STAGE5,
-    FINAL_STAGE,
-    EXTRA_STAGE,
+    DummyStage,
+    Stage1,
+    Stage2,
+    Stage3,
+    Stage4,
+    Stage5,
+    Stage6,
+    ExtraStage,
 };
 
-#define GAME_REGION_POS_X 32.0f
-#define GAME_REGION_POS_Y 16.0f
+#define STAGE_COUNT 7
+#define MAIN_GAME_STAGE_COUNT (MAIN_GAME_STAGE_COUNT - 1)
 
-#define GAME_REGION_WIDTH 384.0f
-#define GAME_REGION_HEIGHT 448.0f
-
-#define GAME_REGION_POS_RIGHT (GAME_REGION_POS_X + GAME_REGION_WIDTH)
-#define GAME_REGION_POS_BOTTOM (GAME_REGION_POS_Y + GAME_REGION_HEIGHT)
-
-#define GAME_REGION_LEFT 0.0f
-#define GAME_REGION_TOP 0.0f
-
-#define GAME_REGION_RIGHT (GAME_REGION_LEFT + GAME_REGION_WIDTH)
-#define GAME_REGION_BOTTOM (GAME_REGION_TOP + GAME_REGION_HEIGHT)
+#define STAGE_INDEX(num) ((num) - 1)
 
 #define MAX_POWER 128
+
+#define MAX_CONTINUE_CREDITS 3
 
 struct GameManager;
 
@@ -95,6 +88,7 @@ struct GameManager
     i32 bombsUsed;
     i32 spellcardsCaptured;
     i8 isTimeStopped;
+    alignment_padding(0x3);
     Catk catk[CATK_COUNT];
     Clrd clrd[SHOTTYPE_COUNT];
     Pscr pscr[SHOTTYPE_COUNT][PSCR_NUM_STAGES][PSCR_NUM_DIFFICULTIES];
@@ -102,11 +96,11 @@ struct GameManager
     unreferenced_fields(0x2);
     u16 pointItemsCollectedInStage;
     u16 pointItemsCollected;
-    u8 numRetries;
+    u8 continuesUsed;
     i8 powerItemCountForScore;
     i8 livesRemaining;
     i8 bombsRemaining;
-    i8 extraLives;
+    i8 livesEarned;
     u8 character;
     u8 shotType;
     u8 isInGameMenu;
@@ -135,15 +129,13 @@ struct GameManager
     i32 minRank;
     i32 subRank;
 };
+
+#define CURRENT_SHOTTYPE() SHOTTYPE_ID(g_GameManager.character, g_GameManager.shotType)
+
 ZunResult GameManager_RegisterChain();
 void GameManager_CutChain();
-void GameManager_SetupCamera(f32 extraRenderDistance);
-void GameManager_SetupCameraStageBackground(f32 extraRenderDistance);
-
-inline i32 GameManager_CharacterShotType()
-{
-    return g_GameManager.shotType + g_GameManager.character * SHOTTYPES_PER_CHARACTER;
-}
+void SetupCamera(f32 extraRenderDistance);
+void SetupCameraStageBackground(f32 extraRenderDistance);
 
 ZUN_ASSERT_TYPE(GameManager, 0x1a80, 4);
 } // namespace th06

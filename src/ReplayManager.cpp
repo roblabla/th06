@@ -56,7 +56,7 @@ static ChainCallbackResult ReplayManager_OnUpdate(ReplayManager *mgr)
     if (inputs != mgr->replayInputs->inputKey)
     {
         mgr->replayInputs++;
-        mgr->replayInputStageBookmarks[g_GameManager.currentStage - 1] = mgr->replayInputs + 1;
+        mgr->replayInputStageBookmarks[STAGE_INDEX(g_GameManager.currentStage)] = mgr->replayInputs + 1;
         mgr->replayInputs->frameNum = mgr->frameId;
         mgr->replayInputs->inputKey = inputs;
     }
@@ -70,7 +70,7 @@ static ChainCallbackResult ReplayManager_OnUpdateDemoLowPrio(ReplayManager *mgr)
     {
         return CHAIN_CALLBACK_RESULT_CONTINUE;
     }
-    if (g_Gui.HasCurrentMsgIdx() && g_Gui.IsDialogueSkippable() && mgr->frameId % 3 != 2)
+    if (g_Gui.IsMsgActive() && g_Gui.IsDialogueSkippable() && mgr->frameId % 3 != 2)
     {
         return CHAIN_CALLBACK_RESULT_RESTART_FROM_FIRST_JOB;
     }
@@ -177,7 +177,7 @@ static ZunResult ReplayManager_AddedCallback(ReplayManager *mgr)
     {
         mgr->replayData = ZUN_NEW(ReplayData); // BUG: allocated with new, cleaned up with free
         memcpy(mgr->replayData->magic, REPLAY_MAGIC, 4);
-        mgr->replayData->shottypeChara = g_GameManager.character * SHOTTYPES_PER_CHARACTER + g_GameManager.shotType;
+        mgr->replayData->shottypeChara = CURRENT_SHOTTYPE();
         mgr->replayData->version = REPLAY_VERSION;
         mgr->replayData->difficulty = g_GameManager.difficulty;
         memcpy(mgr->replayData->name, "NO NAME", 4); // why is this 4
@@ -188,20 +188,21 @@ static ZunResult ReplayManager_AddedCallback(ReplayManager *mgr)
     }
     else
     {
-        StageReplayData *oldStageReplayData = mgr->replayData->stageReplayData[g_GameManager.currentStage - 2];
+        StageReplayData *oldStageReplayData =
+            mgr->replayData->stageReplayData[STAGE_INDEX(g_GameManager.currentStage) - 1];
         if (oldStageReplayData == NULL)
         {
             return ZUN_ERROR;
         }
         oldStageReplayData->score = g_GameManager.score;
     }
-    if (mgr->replayData->stageReplayData[g_GameManager.currentStage - 1] != NULL)
+    if (mgr->replayData->stageReplayData[STAGE_INDEX(g_GameManager.currentStage)] != NULL)
     {
         DebugPrint("error : replay.cpp");
     }
-    mgr->replayData->stageReplayData[g_GameManager.currentStage - 1] =
+    mgr->replayData->stageReplayData[STAGE_INDEX(g_GameManager.currentStage)] =
         (StageReplayData *)ZUN_ALLOC(STAGE_REPLAY_BUFFER_SIZE);
-    StageReplayData *stageReplayData = mgr->replayData->stageReplayData[g_GameManager.currentStage - 1];
+    StageReplayData *stageReplayData = mgr->replayData->stageReplayData[STAGE_INDEX(g_GameManager.currentStage)];
     stageReplayData->bombsRemaining = g_GameManager.bombsRemaining;
     stageReplayData->livesRemaining = g_GameManager.livesRemaining;
     stageReplayData->power = g_GameManager.currentPower;
@@ -238,13 +239,13 @@ static ZunResult ReplayManager_AddedCallbackDemo(ReplayManager *mgr)
             }
         }
     }
-    if (mgr->replayData->stageReplayData[g_GameManager.currentStage - 1] == NULL)
+    if (mgr->replayData->stageReplayData[STAGE_INDEX(g_GameManager.currentStage)] == NULL)
     {
         return ZUN_ERROR;
     }
-    replayData = mgr->replayData->stageReplayData[g_GameManager.currentStage - 1];
-    g_GameManager.character = mgr->replayData->shottypeChara / 2;
-    g_GameManager.shotType = mgr->replayData->shottypeChara % 2;
+    replayData = mgr->replayData->stageReplayData[STAGE_INDEX(g_GameManager.currentStage)];
+    g_GameManager.character = mgr->replayData->shottypeChara / SHOTTYPES_PER_CHARACTER;
+    g_GameManager.shotType = mgr->replayData->shottypeChara % SHOTTYPES_PER_CHARACTER;
     g_GameManager.difficulty = (Difficulty)mgr->replayData->difficulty;
     g_GameManager.pointItemsCollected = replayData->pointItemsCollected;
     g_Rng.Initialize(replayData->randomSeed);
@@ -254,9 +255,10 @@ static ZunResult ReplayManager_AddedCallbackDemo(ReplayManager *mgr)
     g_GameManager.currentPower = replayData->power;
     mgr->replayInputs = replayData->replayInputs;
     g_GameManager.powerItemCountForScore = replayData->powerItemCountForScore;
-    if (g_GameManager.currentStage >= 2 && mgr->replayData->stageReplayData[g_GameManager.currentStage - 2] != NULL)
+    if (g_GameManager.currentStage >= Stage2 &&
+        mgr->replayData->stageReplayData[STAGE_INDEX(g_GameManager.currentStage) - 1] != NULL)
     {
-        g_GameManager.score = mgr->replayData->stageReplayData[g_GameManager.currentStage - 2]->score;
+        g_GameManager.score = mgr->replayData->stageReplayData[STAGE_INDEX(g_GameManager.currentStage) - 1]->score;
         g_GameManager.guiScore = g_GameManager.score;
     }
     return ZUN_SUCCESS;
@@ -354,7 +356,7 @@ void StopRecordingReplay()
         mgr->replayInputs++;
         mgr->replayInputs->frameNum = 9999999;
         mgr->replayInputs->inputKey = 0;
-        mgr->replayInputStageBookmarks[g_GameManager.currentStage - 1] = mgr->replayInputs + 1;
+        mgr->replayInputStageBookmarks[STAGE_INDEX(g_GameManager.currentStage)] = mgr->replayInputs + 1;
     }
 }
 
@@ -409,7 +411,7 @@ void SaveReplay(const char *replayPath, const char *replayName)
                 replayCopy.slowdownRate = (1.0f - slowDown) * 100.0f;
                 replayCopy.slowdownRate2 = replayCopy.slowdownRate + 1.12f;
                 replayCopy.slowdownRate3 = replayCopy.slowdownRate + 2.34f;
-                mgr->replayData->stageReplayData[g_GameManager.currentStage - 1]->score = g_GameManager.score;
+                mgr->replayData->stageReplayData[STAGE_INDEX(g_GameManager.currentStage)]->score = g_GameManager.score;
                 strcpy(replayCopy.name, replayName);
                 _strdate(replayCopy.date);
                 replayCopy.key = g_Rng.GetRandomU16InRange(128) + 64;

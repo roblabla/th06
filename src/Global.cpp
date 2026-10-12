@@ -8,7 +8,6 @@
 #include <stdarg.h>
 #endif
 
-#include "GameWindow.hpp"
 #include "Global.hpp"
 #include "Supervisor.hpp"
 #include "ZunMath.hpp"

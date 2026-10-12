@@ -157,7 +157,7 @@ th06::GuiImpl::MsgRead,0x41878b,function
 th06::GuiImpl::RunMsg,0x4188c9,function
 th06::GuiImpl::DrawDialogue,0x4190ec,function
 th06::Gui::MsgWait,0x419572,function
-th06::Gui::HasCurrentMsgIdx,0x4195a2,function
+th06::Gui::IsMsgActive,0x4195a2,function
 th06::Gui::UpdateStageElements,0x4195bf,function
 th06::Gui::DrawGameScene,0x419c99,function
 th06::Gui::DrawStageElements,0x41adf3,function
@@ -175,8 +175,8 @@ th06::GameManager_RegisterChain,0x41ba6a,function
 th06::GameManager_AddedCallback,0x41bb02,function
 th06::GameManager_DeletedCallback,0x41c1f7,function
 th06::GameManager_CutChain,0x41c269,function
-th06::GameManager_SetupCameraStageBackground,0x41c28c,function
-th06::GameManager_SetupCamera,0x41c3f3,function
+th06::SetupCameraStageBackground,0x41c28c,function
+th06::SetupCamera,0x41c3f3,function
 th06::GameManager::IncreaseSubrank,0x41c57e,function
 th06::GameManager::DecreaseSubrank,0x41c5fa,function
 th06::GameManager::GameManager,0x41c676,function

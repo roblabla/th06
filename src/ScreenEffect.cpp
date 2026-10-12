@@ -1,7 +1,6 @@
 #include "ScreenEffect.hpp"
 #include "AnmManager.hpp"
 #include "ChainPriorities.hpp"
-#include "GameWindow.hpp"
 #include "Global.hpp"
 #include "Supervisor.hpp"
 #include "ZunTimer.hpp"

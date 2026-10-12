@@ -5,7 +5,6 @@
 #include "ChainPriorities.hpp"
 #include "Ending.hpp"
 #include "GameManager.hpp"
-#include "GameWindow.hpp"
 #include "Global.hpp"
 #include "MainMenu.hpp"
 #include "MusicRoom.hpp"
