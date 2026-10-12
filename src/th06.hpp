@@ -11,7 +11,6 @@
 #include "Ending.hpp"
 #include "EnemyManager.hpp"
 #include "GameManager.hpp"
-#include "GameWindow.hpp"
 #include "Global.hpp"
 #include "Gui.hpp"
 #include "ItemManager.hpp"

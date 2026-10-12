@@ -813,7 +813,7 @@ restart_sub_changed:
                             {
                                 catk->characterShotType[idx] = catk->characterShotType[idx - 1];
                             }
-                            catk->characterShotType[0] = GameManager_CharacterShotType();
+                            catk->characterShotType[0] = CURRENT_SHOTTYPE();
                         }
                         g_GameManager.spellcardsCaptured++;
                     }
@@ -1273,7 +1273,7 @@ static i32 *EclGetVar(Enemy *enemy, EclVarId *eclVarId, EclValueType *valueType)
         return &enemy->life;
 
     case ECL_VAR_PLAYER_SHOT:
-        g_PlayerShot = GameManager_CharacterShotType();
+        g_PlayerShot = CURRENT_SHOTTYPE();
         if (valueType != NULL)
             *valueType = ECL_VALUE_TYPE_INT;
         return &g_PlayerShot;

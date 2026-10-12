@@ -9,7 +9,6 @@
 #include "AsciiManager.hpp"
 #include "ChainPriorities.hpp"
 #include "GameManager.hpp"
-#include "GameWindow.hpp"
 #include "Global.hpp"
 #include "Player.hpp"
 #include "ReplayData.hpp"
@@ -219,7 +218,7 @@ ChainCallbackResult MainMenu_OnUpdate(MainMenu *menu)
             g_GameManager.demoFrames = 0;
             g_Supervisor.framerateMultiplier = 1.0f;
             strcpy(g_GameManager.replayFile, "data/demo/demo00.rpy");
-            g_GameManager.currentStage = 3;
+            g_GameManager.currentStage = STAGE_INDEX(Stage4);
             g_GameManager.difficulty = LUNATIC;
             g_Supervisor.curState = SUPERVISOR_STATE_GAMEMANAGER;
             return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
@@ -765,11 +764,11 @@ ChainCallbackResult MainMenu_OnUpdate(MainMenu *menu)
             {
                 if (g_GameManager.difficulty < EXTRA)
                 {
-                    g_GameManager.currentStage = STAGE1;
+                    g_GameManager.currentStage = STAGE_INDEX(Stage1);
                 }
                 else
                 {
-                    g_GameManager.currentStage = EXTRA_STAGE;
+                    g_GameManager.currentStage = STAGE_INDEX(ExtraStage);
                 }
             something:
                 g_GameManager.livesRemaining = g_Supervisor.cfg.lifeCount;
@@ -850,8 +849,7 @@ ChainCallbackResult MainMenu_OnUpdate(MainMenu *menu)
             }
             menu->cursor = g_GameManager.menuCursorBackup;
 
-            i32 stagesCleared =
-                min(6, g_GameManager.clrd[GameManager_CharacterShotType()].stagesCleared[g_GameManager.difficulty]);
+            i32 stagesCleared = min(6, g_GameManager.clrd[CURRENT_SHOTTYPE()].stagesCleared[g_GameManager.difficulty]);
             if (g_GameManager.difficulty == EASY && stagesCleared == 6)
             {
                 stagesCleared = 5;
@@ -863,8 +861,7 @@ ChainCallbackResult MainMenu_OnUpdate(MainMenu *menu)
         }
         break;
     case STATE_PRACTICE_LVL_SELECT: {
-        u32 chosenStage =
-            min(6, g_GameManager.clrd[GameManager_CharacterShotType()].stagesCleared[g_GameManager.difficulty]);
+        u32 chosenStage = min(6, g_GameManager.clrd[CURRENT_SHOTTYPE()].stagesCleared[g_GameManager.difficulty]);
         if (g_GameManager.difficulty == EASY && chosenStage == 6)
         {
             chosenStage = 5;
@@ -1130,25 +1127,25 @@ ZunBool MainMenu::WeirdSecondInputCheck()
     return false;
 }
 
-#pragma var_order(i, drawVm)
+#pragma var_order(i, vm)
 ZunResult MainMenu::DrawStartMenu(void)
 {
     i32 i = MoveCursor(this, 8);
 #if !TRIALBUILD
-    if (this->cursor == 1 && !g_GameManager.HasExtraUnlocked(CHARA_REIMU, SHOT_TYPE_A) &&
-        !g_GameManager.HasExtraUnlocked(CHARA_REIMU, SHOT_TYPE_B) &&
-        !g_GameManager.HasExtraUnlocked(CHARA_MARISA, SHOT_TYPE_A) &&
-        !g_GameManager.HasExtraUnlocked(CHARA_MARISA, SHOT_TYPE_B))
+    if (this->cursor == 1 && !g_GameManager.HasExtraUnlocked(REIMU, SHOT_TYPE_A) &&
+        !g_GameManager.HasExtraUnlocked(REIMU, SHOT_TYPE_B) &&
+        !g_GameManager.HasExtraUnlocked(MARISA, SHOT_TYPE_A) &&
+        !g_GameManager.HasExtraUnlocked(MARISA, SHOT_TYPE_B))
     {
         this->cursor += i;
     }
 #else
     for (;;)
     {
-        if (this->cursor == 1 && !g_GameManager.HasExtraUnlocked(CHARA_REIMU, SHOT_TYPE_A) &&
-            !g_GameManager.HasExtraUnlocked(CHARA_REIMU, SHOT_TYPE_B) &&
-            !g_GameManager.HasExtraUnlocked(CHARA_MARISA, SHOT_TYPE_A) &&
-            !g_GameManager.HasExtraUnlocked(CHARA_MARISA, SHOT_TYPE_B))
+        if (this->cursor == 1 && !g_GameManager.HasExtraUnlocked(REIMU, SHOT_TYPE_A) &&
+            !g_GameManager.HasExtraUnlocked(REIMU, SHOT_TYPE_B) &&
+            !g_GameManager.HasExtraUnlocked(MARISA, SHOT_TYPE_A) &&
+            !g_GameManager.HasExtraUnlocked(MARISA, SHOT_TYPE_B))
         {
             this->cursor += i;
         }
@@ -1195,10 +1192,10 @@ ZunResult MainMenu::DrawStartMenu(void)
                 break;
 #if !TRIALBUILD
             case 1:
-                if (g_GameManager.HasExtraUnlocked(CHARA_REIMU, SHOT_TYPE_A) ||
-                    g_GameManager.HasExtraUnlocked(CHARA_REIMU, SHOT_TYPE_B) ||
-                    g_GameManager.HasExtraUnlocked(CHARA_MARISA, SHOT_TYPE_A) ||
-                    g_GameManager.HasExtraUnlocked(CHARA_MARISA, SHOT_TYPE_B))
+                if (g_GameManager.HasExtraUnlocked(REIMU, SHOT_TYPE_A) ||
+                    g_GameManager.HasExtraUnlocked(REIMU, SHOT_TYPE_B) ||
+                    g_GameManager.HasExtraUnlocked(MARISA, SHOT_TYPE_A) ||
+                    g_GameManager.HasExtraUnlocked(MARISA, SHOT_TYPE_B))
                 {
                     for (i = 0; i < ARRAY_SIZE_SIGNED(this->vm); i++)
                     {
@@ -1977,7 +1974,7 @@ ZunResult MainMenu::ChoosePracticeLevel()
     {
         D3DXVECTOR3 textPos(320.0f, 200.0f, 0.0f);
         u32 alpha = (this->stateTimer < 30) ? this->stateTimer * 255 / 30 : 255;
-        i32 shottype = g_GameManager.character * SHOTTYPES_PER_CHARACTER + g_GameManager.shotType;
+        i32 shottype = CURRENT_SHOTTYPE();
 
         i32 reachedStage = min(6, g_GameManager.clrd[shottype].stagesCleared[g_GameManager.difficulty]);
         if (g_GameManager.difficulty == EASY && reachedStage == 6)
@@ -1990,17 +1987,17 @@ ZunResult MainMenu::ChoosePracticeLevel()
         {
             if (i == this->cursor)
             {
-                g_AsciiManager.SetColor(alpha << 24 | 0x00C0F0F0);
+                g_AsciiManager.color = alpha << 24 | 0x00C0F0F0;
             }
             else
             {
-                g_AsciiManager.SetColor((alpha >> 1) << 24 | 0x0080C0C0);
+                g_AsciiManager.color = (alpha >> 1) << 24 | 0x0080C0C0;
             }
             g_AsciiManager.AddFormatText(&textPos, "STAGE %d  %.9d", i + 1,
                                          g_GameManager.pscr[shottype][i][g_GameManager.difficulty].score);
             textPos.y += 24.0f;
         }
-        g_AsciiManager.SetColor(COLOR_WHITE);
+        g_AsciiManager.color = COLOR_WHITE;
     }
     return ZUN_SUCCESS;
 }
@@ -2008,12 +2005,12 @@ ZunResult MainMenu::ChoosePracticeLevel()
 #pragma var_order(targetOpacity, window, vmIdx, curVm)
 ChainCallbackResult MainMenu_OnDraw(MainMenu *menu)
 {
-    AnmVm *curVm;
-    i32 vmIdx;
+    AnmVm *vm;
+    i32 i;
     ZunRect window;
     i32 targetOpacity;
 
-    curVm = menu->vm;
+    vm = menu->vm;
     window.left = 0.0;
     window.top = 0.0;
     window.right = GAME_WINDOW_WIDTH;
@@ -2048,14 +2045,14 @@ ChainCallbackResult MainMenu_OnDraw(MainMenu *menu)
             COLOR_SET_ALPHA(menu->menuTextColor, targetOpacity * menu->numFramesSinceActive / menu->framesInactive +
                                                      COLOR_ALPHA(menu->minimumOpacity)));
     }
-    for (vmIdx = 0; vmIdx < 98; vmIdx++, curVm++)
+    for (i = 0; i < 98; i++, vm++)
     {
-        if (g_AnmManager->ShouldDraw(curVm))
+        if (g_AnmManager->ShouldDraw(vm))
         {
-            D3DXVECTOR3 posBackup = curVm->pos;
-            curVm->pos += curVm->posOffset;
-            g_AnmManager->Draw(curVm);
-            curVm->pos = posBackup;
+            D3DXVECTOR3 posBackup = vm->pos;
+            vm->pos += vm->posOffset;
+            g_AnmManager->Draw(vm);
+            vm->pos = posBackup;
         }
     }
     switch (menu->gameState)
@@ -2189,15 +2186,15 @@ ZunResult LoadDiffCharSelect(MainMenu *menu)
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(fileIdx, vm)
+#pragma var_order(i, vm)
 ZunResult LoadReplayMenu(MainMenu *menu)
 {
     AnmVm *vm;
-    i32 fileIdx;
+    i32 i;
 
-    for (fileIdx = ANM_FILE_TITLE01; fileIdx <= ANM_FILE_TITLE04; fileIdx++)
+    for (i = ANM_FILE_TITLE01; i <= ANM_FILE_TITLE04; i++)
     {
-        g_AnmManager->ReleaseAnm(fileIdx);
+        g_AnmManager->ReleaseAnm(i);
     }
 
     if (g_AnmManager->LoadSurface(0, "data/title/select00.jpg") != ZUN_SUCCESS)
@@ -2211,9 +2208,9 @@ ZunResult LoadReplayMenu(MainMenu *menu)
     }
 
     vm = &menu->vm[96];
-    for (fileIdx = ANM_SCRIPT_REPLAY_START; fileIdx <= ANM_SCRIPT_REPLAY_END; fileIdx++, vm++)
+    for (i = ANM_SCRIPT_REPLAY_START; i <= ANM_SCRIPT_REPLAY_END; i++, vm++)
     {
-        g_AnmManager->ExecuteAnmIdx(vm, fileIdx);
+        g_AnmManager->ExecuteAnmIdx(vm, i);
         vm->flags.isVisible = false;
         vm->flags.colorOp = AnmColorOp_Add;
 
@@ -2276,7 +2273,7 @@ static ZunResult MainMenu_AddedCallback(MainMenu *menu)
     }
     else
     {
-        menu->color1 = 0x80ffffff;
+        menu->color1 = COLOR_TRANSPARENT_WHITE;
         menu->color2 = COLOR_WHITE;
     }
     menu->minimumOpacity = 0;

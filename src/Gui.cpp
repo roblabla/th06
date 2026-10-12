@@ -7,7 +7,6 @@
 #include "Chain.hpp"
 #include "ChainPriorities.hpp"
 #include "GameManager.hpp"
-#include "GameWindow.hpp"
 #include "Global.hpp"
 #include "Player.hpp"
 #include "SoundPlayer.hpp"
@@ -174,7 +173,7 @@ ChainCallbackResult Gui_OnDraw(Gui *gui)
     {
         D3DXVECTOR3 stringPos(GAME_REGION_POS_X + 42.0f, GAME_REGION_POS_Y + 112.0f, 0.0f);
         g_AsciiManager.SetColor(COLOR_SUNSHINEYELLOW);
-        if (g_GameManager.currentStage < EXTRA_STAGE)
+        if (g_GameManager.currentStage < Stage6)
         {
             g_AsciiManager.AddFormatText(&stringPos, "Stage Clear\n\n");
         }
@@ -199,7 +198,7 @@ ChainCallbackResult Gui_OnDraw(Gui *gui)
         g_AsciiManager.SetColor(COLOR_LIGHT_RED);
         g_AsciiManager.AddFormatText(&stringPos, "    * Point Item %3d\n", g_GameManager.pointItemsCollectedInStage);
 
-        if (EXTRA_STAGE <= g_GameManager.currentStage)
+        if (g_GameManager.currentStage >= Stage6)
         {
             stringPos.y += 16.0f;
             g_AsciiManager.SetColor(COLOR_LIGHT_YELLOW);
@@ -343,7 +342,7 @@ ZunResult Gui::ActualAddedCallback()
         this->impl->loadingScreenSprite.activeSpriteIndex = -1;
         switch (g_GameManager.character)
         {
-        case CHARA_REIMU:
+        case REIMU:
             if (g_AnmManager->LoadAnm(ANM_FILE_FACE_CHARA_A, "data/face00a.anm", ANM_OFFSET_FACE_CHARA_A) !=
                 ZUN_SUCCESS)
             {
@@ -360,7 +359,7 @@ ZunResult Gui::ActualAddedCallback()
                 return ZUN_ERROR;
             }
             break;
-        case CHARA_MARISA:
+        case MARISA:
             if (g_AnmManager->LoadAnm(ANM_FILE_FACE_CHARA_A, "data/face01a.anm", ANM_OFFSET_FACE_CHARA_A) !=
                 ZUN_SUCCESS)
             {
@@ -386,7 +385,7 @@ ZunResult Gui::ActualAddedCallback()
     }
     switch (g_GameManager.currentStage)
     {
-    case 1:
+    case Stage1:
         if (g_AnmManager->LoadAnm(ANM_FILE_FACE_STAGE_A, "data/face03a.anm", ANM_OFFSET_FACE_STAGE_A) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
@@ -400,7 +399,7 @@ ZunResult Gui::ActualAddedCallback()
             return ZUN_ERROR;
         }
         break;
-    case 2:
+    case Stage2:
         if (g_AnmManager->LoadAnm(ANM_FILE_FACE_STAGE_A, "data/face05a.anm", ANM_OFFSET_FACE_STAGE_A) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
@@ -410,7 +409,7 @@ ZunResult Gui::ActualAddedCallback()
             return ZUN_ERROR;
         }
         break;
-    case 3:
+    case Stage3:
         if (g_AnmManager->LoadAnm(ANM_FILE_FACE_STAGE_A, "data/face06a.anm", ANM_OFFSET_FACE_STAGE_A) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
@@ -424,7 +423,7 @@ ZunResult Gui::ActualAddedCallback()
             return ZUN_ERROR;
         }
         break;
-    case 4:
+    case Stage4:
         if (g_AnmManager->LoadAnm(ANM_FILE_FACE_STAGE_A, "data/face08a.anm", ANM_OFFSET_FACE_STAGE_A) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
@@ -438,7 +437,7 @@ ZunResult Gui::ActualAddedCallback()
             return ZUN_ERROR;
         }
         break;
-    case 5:
+    case Stage5:
         if (g_AnmManager->LoadAnm(ANM_FILE_FACE_STAGE_A, "data/face09a.anm", ANM_OFFSET_FACE_STAGE_A) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
@@ -452,7 +451,7 @@ ZunResult Gui::ActualAddedCallback()
             return ZUN_ERROR;
         }
         break;
-    case 6:
+    case Stage6:
         if (g_AnmManager->LoadAnm(ANM_FILE_FACE_STAGE_A, "data/face09b.anm", ANM_OFFSET_FACE_STAGE_A) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
@@ -470,7 +469,7 @@ ZunResult Gui::ActualAddedCallback()
             return ZUN_ERROR;
         }
         break;
-    default:
+    default: // ExtraStage
         if (g_AnmManager->LoadAnm(ANM_FILE_FACE_STAGE_A, "data/face08a.anm", ANM_OFFSET_FACE_STAGE_A) != ZUN_SUCCESS)
         {
             return ZUN_ERROR;
@@ -590,12 +589,14 @@ void GuiImpl::MsgRead(i32 msgIdx)
     this->msg.textColorsA[1] = COLOR_RGB(COLOR_GUI_2);
     this->msg.textColorsB[0] = COLOR_RGB(COLOR_BLACK);
     this->msg.textColorsB[1] = COLOR_RGB(COLOR_BLACK);
-    this->msg.dialogueSkippable = 1;
-    if (g_GameManager.currentStage == 6 && (msgIdx == 0 || msgIdx == 10))
+    this->msg.dialogueSkippable = true;
+    if (g_GameManager.currentStage == Stage6 &&
+        (msgIdx == MSG_SCRIPT_ID(REIMU, 0) || msgIdx == MSG_SCRIPT_ID(MARISA, 0)))
     {
         g_AnmManager->LoadAnm(ANM_FILE_EFFECTS, "data/eff06.anm", ANM_OFFSET_EFFECTS);
     }
-    else if (g_GameManager.currentStage == 7 && (msgIdx == 0 || msgIdx == 10))
+    else if (g_GameManager.currentStage == ExtraStage &&
+             (msgIdx == MSG_SCRIPT_ID(REIMU, 0) || msgIdx == MSG_SCRIPT_ID(MARISA, 0)))
     {
         g_AnmManager->LoadAnm(ANM_FILE_EFFECTS, "data/eff07.anm", ANM_OFFSET_EFFECTS);
         g_AnmManager->LoadAnm(ANM_FILE_FACE_STAGE_A, "data/face12c.anm", ANM_OFFSET_FACE_STAGE_A);
@@ -706,14 +707,16 @@ ZunResult GuiImpl::RunMsg()
             break;
         case MSG_OPCODE_STAGE_RESULTS:
             this->finishedStage = TRUE;
-            if (g_GameManager.currentStage < 6)
+            if (g_GameManager.currentStage < Stage6)
             {
                 g_AnmManager->SetAndExecuteScriptIdx(&this->loadingScreenSprite,
                                                      ANM_SCRIPT_LOADING_SHOW_LOADING_SCREEN);
             }
             else
             {
-                g_GameManager.extraLives = 0xff;
+                // TODO: Is this to prevent earning extra lives
+                // during the final score tally?
+                g_GameManager.livesEarned = -1;
             }
             break;
         case MSG_OPCODE_MSG_HALT:
@@ -731,9 +734,9 @@ ZunResult GuiImpl::RunMsg()
             }
             if (
 #if !TRIALBUILD
-                g_GameManager.currentStage < 5 || (g_GameManager.difficulty != EASY && g_GameManager.currentStage == 5)
+                g_GameManager.currentStage < Stage5 || (g_GameManager.difficulty != EASY && g_GameManager.currentStage == Stage5)
 #else
-                g_GameManager.currentStage < 3
+                g_GameManager.currentStage < Stage3
 #endif
             )
             {
@@ -794,7 +797,8 @@ ZunResult GuiImpl::DrawDialogue()
     {
         return ZUN_ERROR;
     }
-    if (g_GameManager.currentStage == 6 && (this->msg.currentMsgIdx == 1 || this->msg.currentMsgIdx == 11))
+    if (g_GameManager.currentStage == Stage6 &&
+        (this->msg.currentMsgIdx == MSG_SCRIPT_ID(REIMU, 1) || this->msg.currentMsgIdx == MSG_SCRIPT_ID(MARISA, 1)))
     {
         return ZUN_SUCCESS;
     }
@@ -867,7 +871,7 @@ ZunBool Gui::MsgWait()
     return this->impl->msg.currentMsgIdx >= 0;
 }
 
-ZunBool Gui::HasCurrentMsgIdx()
+ZunBool Gui::IsMsgActive()
 {
     return this->impl->msg.currentMsgIdx >= 0;
 }
@@ -1008,7 +1012,7 @@ void Gui::UpdateStageElements()
         stageScore += g_GameManager.grazeInStage * 10;
         stageScore += g_GameManager.currentPower * 100;
         stageScore *= g_GameManager.pointItemsCollectedInStage;
-        if (6 <= g_GameManager.currentStage)
+        if (g_GameManager.currentStage >= Stage6)
         {
             stageScore += g_GameManager.livesRemaining * 3000000;
             stageScore += g_GameManager.bombsRemaining * 1000000;
@@ -1314,27 +1318,22 @@ void Gui::DrawGameScene()
 
 void Gui::DrawStageElements()
 {
-    D3DXVECTOR3 stageTextPos;
-
     if (this->impl->stageNameSprite.IsVisible())
     {
-        stageTextPos.x = 168.0f;
-        stageTextPos.y = 198.0f;
-        stageTextPos.z = 0.0f;
+        D3DXVECTOR3 stageTextPos(168.0f, 198.0f, 0.0f);
+
         if (!g_GameManager.demoMode)
         {
             g_AnmManager->Draw2(&this->impl->stageNameSprite);
 
-            // this looks like an inline function, maybe ZunColor is a struct?
-            ZunColor stageTextColor = COLOR_COMBINE_ALPHA(COLOR_SUNSHINEYELLOW, this->impl->stageNameSprite.color);
-            g_AsciiManager.SetColor(stageTextColor);
+            g_AsciiManager.SetColor(COLOR_COMBINE_ALPHA(COLOR_SUNSHINEYELLOW, this->impl->stageNameSprite.color));
 
-            if (g_GameManager.currentStage < EXTRA_STAGE)
+            if (g_GameManager.currentStage < Stage6)
             {
                 stageTextPos.x = 168.0f;
                 g_AsciiManager.AddFormatText(&stageTextPos, "STAGE %d", g_GameManager.currentStage);
             }
-            else if (g_GameManager.currentStage == EXTRA_STAGE)
+            else if (g_GameManager.currentStage == Stage6)
             {
                 stageTextPos.x = 136.0f;
                 g_AsciiManager.AddFormatText(&stageTextPos, "FINAL STAGE");
@@ -1347,8 +1346,7 @@ void Gui::DrawStageElements()
         }
         else
         {
-            ZunColor demoTextColor = COLOR_COMBINE_ALPHA(COLOR_SUNSHINEYELLOW, this->impl->stageNameSprite.color);
-            g_AsciiManager.SetColor(demoTextColor);
+            g_AsciiManager.SetColor(COLOR_COMBINE_ALPHA(COLOR_SUNSHINEYELLOW, this->impl->stageNameSprite.color));
 
             stageTextPos.x = 136.0f;
 

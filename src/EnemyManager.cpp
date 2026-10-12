@@ -178,7 +178,7 @@ void EnemyManager::RunEclTimeline()
     {
         this->timelineInstr = g_EclManager.timeline;
     }
-    if (!g_Gui.HasCurrentMsgIdx())
+    if (!g_Gui.IsMsgActive())
     {
         // Unclear what this is? It looks like it increases the subrank at
         // regular intervals, where the interval is made shorter based on the
@@ -315,14 +315,14 @@ void EnemyManager::RunEclTimeline()
                 }
                 break;
             case TIMELINE_OPCODE_MSG_READ:
-                if (g_GameManager.difficulty == EASY && g_GameManager.currentStage == 5 &&
+                if (g_GameManager.difficulty == EASY && g_GameManager.currentStage == Stage5 &&
                     this->timelineInstr->arg0 == 1)
                 {
-                    g_Gui.MsgRead(g_GameManager.character * 10 + 3);
+                    g_Gui.MsgRead(MSG_SCRIPT_ID(g_GameManager.character, 3));
                 }
                 else
                 {
-                    g_Gui.MsgRead(this->timelineInstr->arg0 + g_GameManager.character * 10);
+                    g_Gui.MsgRead(MSG_SCRIPT_ID(g_GameManager.character, this->timelineInstr->arg0));
                 }
                 break;
             case TIMELINE_OPCODE_MSG_WAIT:
@@ -354,7 +354,7 @@ void EnemyManager::RunEclTimeline()
         }
         this->timelineInstr = (TimelineInstr *)((u32)this->timelineInstr + this->timelineInstr->size);
     }
-    if (!g_Gui.HasCurrentMsgIdx())
+    if (!g_Gui.IsMsgActive())
     {
         g_GameManager.counat++;
     }
@@ -694,7 +694,7 @@ static ChainCallbackResult EnemyManager_OnUpdate(EnemyManager *mgr)
                     curEnemy->deathCallbackSub = -1;
                 }
             }
-            if (curEnemy->flags.isBoss && !g_Gui.HasCurrentMsgIdx())
+            if (curEnemy->flags.isBoss && !g_Gui.IsMsgActive())
             {
                 g_Gui.SetBossHealthBar(curEnemy->LifePercent());
             }

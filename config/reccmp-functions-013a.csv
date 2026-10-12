@@ -158,7 +158,7 @@ th06::Gui::EndEnemySpellcard,0x4100DD,function
 th06::Gui::IsDialogueSkippable,0x4100EA,function
 th06::GuiImpl::MsgRead,0x4100F5,function
 th06::Gui::MsgWait,0x4101D5,function
-th06::Gui::HasCurrentMsgIdx,0x4101F2,function
+th06::Gui::IsMsgActive,0x4101F2,function
 th06::Gui_CutChain,0x410203,function
 th06::Gui::IsStageFinished,0x410223,function
 th06::Gui::ShowBonusScore,0x410240,function
@@ -191,8 +191,8 @@ th06::GameManager::DecreaseSubrank,0x412C6B,function
 th06::GameManager::GameManager,0x412C9F,function
 th06::GameManager_AddedCallback,0x412CE1,function
 th06::GameManager_DeletedCallback,0x41317F,function
-th06::GameManager_SetupCameraStageBackground,0x4131E4,function
-th06::GameManager_SetupCamera,0x41330E,function
+th06::SetupCameraStageBackground,0x4131E4,function
+th06::SetupCamera,0x41330E,function
 th06::GameManager_OnUpdate,0x41344F,function
 th06::GameManager_RegisterChain,0x4136DA,function
 th06::ChainElem::ChainElem,0x413760,function

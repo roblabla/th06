@@ -4,7 +4,6 @@
 #include "Chain.hpp"
 #include "ChainPriorities.hpp"
 #include "GameManager.hpp"
-#include "GameWindow.hpp"
 #include "Global.hpp"
 #include "Player.hpp"
 #include "ScreenEffect.hpp"
@@ -543,10 +542,7 @@ static ChainCallbackResult Ending_OnDraw(Ending *ending)
 #pragma var_order(unusedshotTypeAndCharacter, shotTypeAndCharacter)
 static ZunResult Ending_AddedCallback(Ending *ending)
 {
-    i32 shotTypeAndCharacter;
-    i32 unusedshotTypeAndCharacter;
-
-    unusedshotTypeAndCharacter = g_GameManager.character * SHOTTYPES_PER_CHARACTER + g_GameManager.shotType;
+    i32 unusedshotTypeAndCharacter = CURRENT_SHOTTYPE();
 
     g_GameManager.isGameCompleted = true;
     g_Supervisor.isInEnding = true;
@@ -560,9 +556,9 @@ static ZunResult Ending_AddedCallback(Ending *ending)
     g_AnmManager->SetCurrentBlendMode(AnmBlendMode_NotSet);
     g_AnmManager->SetCurrentVertexShader(AnmVertexShader_NotSet);
 
-    shotTypeAndCharacter = g_GameManager.character * SHOTTYPES_PER_CHARACTER + g_GameManager.shotType;
+    i32 shotTypeAndCharacter = CURRENT_SHOTTYPE();
     ending->hasSeenEnding = false;
-    if (g_GameManager.numRetries == 0)
+    if (g_GameManager.continuesUsed == 0)
     {
         if (g_GameManager.clrd[shotTypeAndCharacter].stagesClearedWithoutContinues[g_GameManager.difficulty] ==
             ALL_CLEARED)
@@ -581,17 +577,17 @@ static ZunResult Ending_AddedCallback(Ending *ending)
     }
     g_GameManager.clrd[shotTypeAndCharacter].stagesCleared[g_GameManager.difficulty] = ALL_CLEARED;
 
-    if (g_GameManager.difficulty == EASY || g_GameManager.numRetries != 0)
+    if (g_GameManager.difficulty == EASY || g_GameManager.continuesUsed != 0)
     {
         switch (g_GameManager.character)
         {
-        case CHARA_REIMU:
+        case REIMU:
             if (ending->LoadEnding("data/end00b.end") != ZUN_SUCCESS)
             {
                 return ZUN_ERROR;
             }
             break;
-        case CHARA_MARISA:
+        case MARISA:
             if (ending->LoadEnding("data/end10b.end") != ZUN_SUCCESS)
             {
                 return ZUN_ERROR;
@@ -603,7 +599,7 @@ static ZunResult Ending_AddedCallback(Ending *ending)
     {
         switch (g_GameManager.character)
         {
-        case CHARA_REIMU:
+        case REIMU:
             if (g_GameManager.shotType == SHOT_TYPE_A)
             {
                 if (ending->LoadEnding("data/end00.end") != ZUN_SUCCESS)
@@ -619,7 +615,7 @@ static ZunResult Ending_AddedCallback(Ending *ending)
                 }
             }
             break;
-        case CHARA_MARISA:
+        case MARISA:
             if (g_GameManager.shotType == SHOT_TYPE_A)
             {
                 if (ending->LoadEnding("data/end10.end") != ZUN_SUCCESS)

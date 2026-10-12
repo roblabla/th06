@@ -120,7 +120,7 @@ ChainCallbackResult GameManager_OnUpdate(GameManager *gameManager)
     g_Supervisor.viewport.MinZ = 0.5f;
     g_Supervisor.viewport.MaxZ = 1.0f;
 
-    GameManager_SetupCamera(0);
+    SetupCamera(0);
 
     g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
     g_Supervisor.d3dDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER, g_Stage.skyFog.color, 1.0f, 0);
@@ -168,7 +168,7 @@ ChainCallbackResult GameManager_OnUpdate(GameManager *gameManager)
             gameManager->nextScoreIncrement = 0;
             gameManager->guiScore = gameManager->score;
         }
-        if (gameManager->extraLives >= 0 && g_ExtraLivesScores[gameManager->extraLives] <= gameManager->guiScore)
+        if (gameManager->livesEarned >= 0 && g_ExtraLivesScores[gameManager->livesEarned] <= gameManager->guiScore)
         {
             if (gameManager->livesRemaining < MAX_LIVES)
             {
@@ -176,7 +176,7 @@ ChainCallbackResult GameManager_OnUpdate(GameManager *gameManager)
                 g_SoundPlayer.PlaySoundByIdx(SOUND_1UP);
             }
             g_Gui.flags.flag0 = 2;
-            gameManager->extraLives++;
+            gameManager->livesEarned++;
             g_GameManager.IncreaseSubrank(200);
         }
         if (gameManager->highScore < gameManager->guiScore)
@@ -197,7 +197,6 @@ ChainCallbackResult GameManager_OnDraw(GameManager *gameManager)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-#pragma var_order(failedToLoadReplay, catk, i, catkCursor, scoredat, clrdIdx)
 static ZunResult GameManager_AddedCallback(GameManager *mgr)
 {
     static const char *g_EclFiles[] = {"dummy",
@@ -235,14 +234,9 @@ static ZunResult GameManager_AddedCallback(GameManager *mgr)
         /* EXTRA   */ {16, 14, 18},
     };
 
-    ScoreDat *scoredat;
-    u32 clrdIdx;
-    u32 catkCursor;
-    i32 i;
-    Catk *catk;
-
     ZunBool failedToLoadReplay = false;
     g_Supervisor.d3dDevice->ResourceManagerDiscardBytes(0);
+
     if (g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE)
     {
 #if BUILD_VERSION >= BUILD_VERSION_102h
@@ -263,29 +257,32 @@ static ZunResult GameManager_AddedCallback(GameManager *mgr)
         mgr->nextScoreIncrement = 0;
         mgr->highScore = 100000;
         mgr->currentPower = 0;
-        mgr->numRetries = 0;
-        if (mgr->currentStage >= 6)
+        mgr->continuesUsed = 0;
+        if (mgr->currentStage >= STAGE_INDEX(ExtraStage))
         {
             mgr->difficulty = EXTRA;
         }
         if (mgr->difficulty < EXTRA)
         {
-            mgr->extraLives = 0;
+            mgr->livesEarned = 0;
         }
         else
         {
-            mgr->extraLives = 4;
+            // Disable earning more lives
+            mgr->livesEarned = ARRAY_SIZE(g_ExtraLivesScores) - 1;
         }
         g_GameManager.powerItemCountForScore = 0;
         mgr->rank = 8;
         mgr->grazeInTotal = 0;
         mgr->pointItemsCollected = 0;
-        for (catk = mgr->catk, i = 0; i < CATK_COUNT; i++, catk++)
+
+        Catk *catk = mgr->catk;
+        for (i32 i = 0; i < CATK_COUNT; i++, catk++)
         {
             // Randomize catk content.
-            for (catkCursor = 0; catkCursor < sizeof(Catk) / sizeof(u16); catkCursor++)
+            for (u32 j = 0; j < sizeof(Catk) / sizeof(u16); j++)
             {
-                ((u16 *)catk)[catkCursor] = g_Rng.GetRandomU16();
+                ((u16 *)catk)[j] = g_Rng.GetRandomU16();
             }
             catk->base.magic = CATK_MAGIC;
             catk->base.unkLen = sizeof(Catk);
@@ -295,18 +292,19 @@ static ZunResult GameManager_AddedCallback(GameManager *mgr)
             catk->numAttempts = 0;
             catk->numSuccess = 0;
         }
-        scoredat = OpenScore("score.dat");
-        g_GameManager.highScore =
-            GetHighScore(scoredat, NULL, GameManager_CharacterShotType(), g_GameManager.difficulty);
-        ParseCatk(scoredat, mgr->catk);
-        ParseClrd(scoredat, mgr->clrd);
-        ParsePscr(scoredat, (Pscr *)mgr->pscr);
-        if (mgr->isInPracticeMode)
         {
-            g_GameManager.highScore =
-                mgr->pscr[GameManager_CharacterShotType()][g_GameManager.currentStage][g_GameManager.difficulty].score;
+            ScoreDat *scoredat = OpenScore("score.dat");
+            g_GameManager.highScore = GetHighScore(scoredat, NULL, CURRENT_SHOTTYPE(), g_GameManager.difficulty);
+            ParseCatk(scoredat, mgr->catk);
+            ParseClrd(scoredat, mgr->clrd);
+            ParsePscr(scoredat, (Pscr *)mgr->pscr);
+            if (mgr->isInPracticeMode)
+            {
+                g_GameManager.highScore =
+                    mgr->pscr[CURRENT_SHOTTYPE()][g_GameManager.currentStage][g_GameManager.difficulty].score;
+            }
+            ReleaseScoreDat(scoredat);
         }
-        ReleaseScoreDat(scoredat);
         mgr->rank = g_DifficultyInfo[g_GameManager.difficulty].rank;
         mgr->minRank = g_DifficultyInfo[g_GameManager.difficulty].minRank;
         mgr->maxRank = g_DifficultyInfo[g_GameManager.difficulty].maxRank;
@@ -323,27 +321,27 @@ static ZunResult GameManager_AddedCallback(GameManager *mgr)
     mgr->pointItemsCollectedInStage = 0;
     mgr->grazeInStage = 0;
     mgr->isInGameMenu = 0;
-    mgr->currentStage++;
+    mgr->currentStage++; // NOTE: this really should've been after the if
     if (!g_GameManager.isInReplay)
     {
-        clrdIdx = GameManager_CharacterShotType();
-        if (mgr->numRetries == 0 &&
-            mgr->clrd[clrdIdx].stagesClearedWithoutContinues[g_GameManager.difficulty] < mgr->currentStage - 1)
+        i32 shottype = CURRENT_SHOTTYPE();
+        if (mgr->continuesUsed == 0 &&
+            mgr->clrd[shottype].stagesClearedWithoutContinues[g_GameManager.difficulty] < mgr->currentStage - 1)
         {
-            mgr->clrd[clrdIdx].stagesClearedWithoutContinues[g_GameManager.difficulty] = mgr->currentStage - 1;
+            mgr->clrd[shottype].stagesClearedWithoutContinues[g_GameManager.difficulty] = mgr->currentStage - 1;
         }
-        if (mgr->clrd[clrdIdx].stagesCleared[g_GameManager.difficulty] < mgr->currentStage - 1)
+        if (mgr->clrd[shottype].stagesCleared[g_GameManager.difficulty] < mgr->currentStage - 1)
         {
-            mgr->clrd[clrdIdx].stagesCleared[g_GameManager.difficulty] = mgr->currentStage - 1;
+            mgr->clrd[shottype].stagesCleared[g_GameManager.difficulty] = mgr->currentStage - 1;
         }
     }
     if (mgr->isInPracticeMode)
     {
         switch (mgr->currentStage)
         {
-        case 1:
+        case Stage1:
             break;
-        case 2:
+        case Stage2:
             mgr->currentPower = MAX_POWER / 2;
             break;
         default:
@@ -358,9 +356,9 @@ static ZunResult GameManager_AddedCallback(GameManager *mgr)
         {
             failedToLoadReplay = true;
         }
-        while (g_ExtraLivesScores[mgr->extraLives] <= mgr->guiScore)
+        while (g_ExtraLivesScores[mgr->livesEarned] <= mgr->guiScore)
         {
-            mgr->extraLives++;
+            mgr->livesEarned++;
         }
         mgr->minRank = g_DifficultyInfoForReplay[g_GameManager.difficulty].minRank;
         mgr->maxRank = g_DifficultyInfoForReplay[g_GameManager.difficulty].maxRank;
@@ -485,7 +483,7 @@ void GameManager_CutChain()
 }
 
 #pragma var_order(cameraDistance, viewportMiddleHeight, viewportMiddleWidth, aspectRatio, fov)
-void GameManager_SetupCameraStageBackground(f32 extraRenderDistance)
+void SetupCameraStageBackground(f32 extraRenderDistance)
 {
     f32 fov;
     f32 aspectRatio;
@@ -509,7 +507,7 @@ void GameManager_SetupCameraStageBackground(f32 extraRenderDistance)
 }
 
 #pragma var_order(cameraDistance, viewportMiddleHeight, viewportMiddleWidth, aspectRatio, fov)
-void GameManager_SetupCamera(f32 extraRenderDistance)
+void SetupCamera(f32 extraRenderDistance)
 {
     f32 fov;
     f32 aspectRatio;

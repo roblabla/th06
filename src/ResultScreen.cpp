@@ -2,7 +2,6 @@
 #include "BulletManager.hpp"
 #include "Chain.hpp"
 #include "ChainPriorities.hpp"
-#include "GameWindow.hpp"
 #include "Global.hpp"
 #include "MainMenu.hpp"
 #include "ReplayManager.hpp"
@@ -842,10 +841,10 @@ static ChainCallbackResult ResultScreen_OnUpdate(ResultScreen *resultScreen)
             resultScreen->charUsed = resultScreen->cursor;
             g_AnmManager->DrawStringFormat2(&resultScreen->textLineVms[0], COLOR_RGB(COLOR_WHITE),
                                             COLOR_RGB(COLOR_BLACK),
-                                            g_CharacterList[resultScreen->charUsed * SHOTTYPES_PER_CHARACTER]);
+                                            g_CharacterList[SHOTTYPE_ID(resultScreen->charUsed, SHOT_TYPE_A)]);
             g_AnmManager->DrawStringFormat2(&resultScreen->textLineVms[1], COLOR_RGB(COLOR_WHITE),
                                             COLOR_RGB(COLOR_BLACK),
-                                            g_CharacterList[resultScreen->charUsed * SHOTTYPES_PER_CHARACTER + 1]);
+                                            g_CharacterList[SHOTTYPE_ID(resultScreen->charUsed, SHOT_TYPE_B)]);
         }
         if (resultScreen->frameTimer < 30)
         {
@@ -973,20 +972,20 @@ i32 ResultScreen::HandleResultKeyboard()
         }
 
         g_AnmManager->DrawStringFormat2(&this->textLineVms[SHOT_TYPE_A], COLOR_RGB(COLOR_WHITE), COLOR_RGB(COLOR_BLACK),
-                                        g_CharacterList[this->charUsed * SHOTTYPES_PER_CHARACTER + SHOT_TYPE_A]);
+                                        g_CharacterList[SHOTTYPE_ID(this->charUsed, SHOT_TYPE_A)]);
         if (g_GameManager.shotType != SHOT_TYPE_A)
         {
             this->textLineVms[0].color = COLOR_TRANSPARENT_WHITE;
         }
 
         g_AnmManager->DrawStringFormat2(&this->textLineVms[SHOT_TYPE_B], COLOR_RGB(COLOR_WHITE), COLOR_RGB(COLOR_BLACK),
-                                        g_CharacterList[this->charUsed * SHOTTYPES_PER_CHARACTER + SHOT_TYPE_B]);
+                                        g_CharacterList[SHOTTYPE_ID(this->charUsed, SHOT_TYPE_B)]);
         if (g_GameManager.shotType != SHOT_TYPE_B)
         {
             this->textLineVms[1].color = COLOR_TRANSPARENT_WHITE;
         }
 
-        this->hscr.character = this->charUsed * SHOTTYPES_PER_CHARACTER + g_GameManager.shotType;
+        this->hscr.character = SHOTTYPE_ID(this->charUsed, g_GameManager.shotType);
         this->hscr.difficulty = this->diffSelected;
         this->hscr.score = g_GameManager.score;
         this->hscr.base.version = TH6K_VERSION;
@@ -998,14 +997,13 @@ i32 ResultScreen::HandleResultKeyboard()
         }
         else
         {
-            this->hscr.stage = 99;
+            this->hscr.stage = ALL_CLEARED;
         }
 
         this->hscr.base.flag_9 = true;
         strcpy(this->hscr.name, "        ");
 
-        if (this->LinkScoreEx(&this->hscr, this->diffSelected,
-                              this->charUsed * SHOTTYPES_PER_CHARACTER + g_GameManager.shotType) >=
+        if (this->LinkScoreEx(&this->hscr, this->diffSelected, SHOTTYPE_ID(this->charUsed, g_GameManager.shotType)) >=
             HSCR_NUM_SCORES_SLOTS)
             goto RETURN_TO_STATS_SCREEN_WITHOUT_SOUND;
 
@@ -1155,7 +1153,7 @@ i32 ResultScreen::HandleReplaySaveKeyboard()
     case RESULT_SCREEN_STATE_SAVE_REPLAY_QUESTION:
         if (this->frameTimer == 60)
         {
-            if (g_GameManager.numRetries != 0)
+            if (g_GameManager.continuesUsed != 0)
             {
                 saveInterrupt = 12;
             }
@@ -1588,7 +1586,7 @@ ZunResult ResultScreen::CheckConfirmButton()
     return ZUN_SUCCESS;
 }
 
-#pragma var_order(vm, strPos, rating, completion, slowdownRate, color)
+#pragma var_order(vm, strPos, rating, completion, slowdownRate)
 u32 ResultScreen::DrawFinalStats()
 {
     // clang-format off
@@ -1607,7 +1605,6 @@ u32 ResultScreen::DrawFinalStats()
     f32 rating;
     D3DXVECTOR3 strPos;
     AnmVm *vm;
-    i32 color;
     f32 slowdownRate;
 
     switch (this->resultScreenState)
@@ -1616,8 +1613,7 @@ u32 ResultScreen::DrawFinalStats()
     case RESULT_SCREEN_STATE_STATS_TO_SAVE_TRANSITION:
 
         vm = &this->vms[37];
-        color = vm->color;
-        g_AsciiManager.SetColor(color);
+        g_AsciiManager.SetColor(vm->color);
         rating = 0.0f;
 
         completion = g_GameManager.difficulty < 4 ? g_GameManager.counat / 89500.0f : g_GameManager.counat / 39600.0f;
@@ -1655,9 +1651,9 @@ u32 ResultScreen::DrawFinalStats()
             rating += 70.0f;
         }
         strPos.y += 22.0f;
-        g_AsciiManager.AddFormatText(&strPos, "%9d", g_GameManager.numRetries);
+        g_AsciiManager.AddFormatText(&strPos, "%9d", g_GameManager.continuesUsed);
 
-        rating -= g_GameManager.numRetries * 10.0f;
+        rating -= g_GameManager.continuesUsed * 10.0f;
         strPos.y += 22.0f;
 
         g_AsciiManager.AddFormatText(&strPos, "%9d", g_GameManager.deaths);
@@ -1784,11 +1780,11 @@ static ChainCallbackResult ResultScreen_OnDraw(ResultScreen *resultScreen)
 
             ShootScoreListNodeA =
                 resultScreen
-                    ->scores[resultScreen->diffSelected][resultScreen->charUsed * SHOTTYPES_PER_CHARACTER + SHOT_TYPE_A]
+                    ->scores[resultScreen->diffSelected][SHOTTYPE_ID(resultScreen->charUsed, SHOT_TYPE_A)]
                     .next;
             ShootScoreListNodeB =
                 resultScreen
-                    ->scores[resultScreen->diffSelected][resultScreen->charUsed * SHOTTYPES_PER_CHARACTER + SHOT_TYPE_B]
+                    ->scores[resultScreen->diffSelected][SHOTTYPE_ID(resultScreen->charUsed, SHOT_TYPE_B)]
                     .next;
             for (i = 0; i < HSCR_NUM_SCORES_SLOTS; i++)
             {
@@ -2020,7 +2016,7 @@ static ChainCallbackResult ResultScreen_OnDraw(ResultScreen *resultScreen)
             {
                 g_AsciiManager.AddFormatText(
                     &pos, "No.%.2d %8s %8s %7s %9d", i + 1, resultScreen->replayName, resultScreen->defaultReplay.date,
-                    g_ShortCharacterList2[GameManager_CharacterShotType()], resultScreen->defaultReplay.score);
+                    g_ShortCharacterList2[CURRENT_SHOTTYPE()], resultScreen->defaultReplay.score);
                 g_AsciiManager.SetColor(COLOR_BARELY_BLUE);
 
                 *(u32 *)&name[0] = *(u32 *)"    ";
@@ -2150,10 +2146,10 @@ static ZunResult ResultScreen_AddedCallback(ResultScreen *resultScreen)
     }
 
     if (resultScreen->resultScreenState == RESULT_SCREEN_STATE_EXIT &&
-        g_GameManager.pscr[GameManager_CharacterShotType()][g_GameManager.currentStage - 1][g_GameManager.difficulty]
-                .score < g_GameManager.score)
+        g_GameManager.pscr[CURRENT_SHOTTYPE()][STAGE_INDEX(g_GameManager.currentStage)][g_GameManager.difficulty]
+            .score < g_GameManager.score)
     {
-        g_GameManager.pscr[GameManager_CharacterShotType()][g_GameManager.currentStage - 1][g_GameManager.difficulty]
+        g_GameManager.pscr[CURRENT_SHOTTYPE()][STAGE_INDEX(g_GameManager.currentStage)][g_GameManager.difficulty]
             .score = g_GameManager.score;
     }
 

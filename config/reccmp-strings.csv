@@ -23,7 +23,7 @@ address,type,x-text
 0x46A420,string,"魔符「スターダストレヴァリエ」"
 0x46A450,string,"恋符「マスタースパーク」"
 0x46a480,string,"敵データの読み込みに失敗しました、データが壊れてるか失われています\n"
-0x46a4e4,string,"error : sub anim overflow\n
+0x46a4e4,string,"error : sub anim overflow\n"
 0x46a500,string,"error : no Stack Ret\n"
 0x46A594,string,"data/eff05.anm"
 0x46a5a4,string,"data/eff04.anm"
