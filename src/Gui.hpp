@@ -21,7 +21,7 @@ ZUN_ASSERT_TYPE(GuiFlags, 0x4, 4);
 
 #define MSG_SCRIPTS_PER_CHARACTER 10
 
-#define MSG_SCRIPT_ID(character, num) ((num) + (character)*MSG_SCRIPTS_PER_CHARACTER)
+#define MSG_SCRIPT_ID(character, num) ((num) + (character) * MSG_SCRIPTS_PER_CHARACTER)
 
 struct Gui
 {

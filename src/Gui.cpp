@@ -734,7 +734,8 @@ ZunResult GuiImpl::RunMsg()
             }
             if (
 #if !TRIALBUILD
-                g_GameManager.currentStage < Stage5 || (g_GameManager.difficulty != EASY && g_GameManager.currentStage == Stage5)
+                g_GameManager.currentStage < Stage5 ||
+                (g_GameManager.difficulty != EASY && g_GameManager.currentStage == Stage5)
 #else
                 g_GameManager.currentStage < Stage3
 #endif

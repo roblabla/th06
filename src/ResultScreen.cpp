@@ -1779,13 +1779,9 @@ static ChainCallbackResult ResultScreen_OnDraw(ResultScreen *resultScreen)
             pos[1] += 18.0f;
 
             ShootScoreListNodeA =
-                resultScreen
-                    ->scores[resultScreen->diffSelected][SHOTTYPE_ID(resultScreen->charUsed, SHOT_TYPE_A)]
-                    .next;
+                resultScreen->scores[resultScreen->diffSelected][SHOTTYPE_ID(resultScreen->charUsed, SHOT_TYPE_A)].next;
             ShootScoreListNodeB =
-                resultScreen
-                    ->scores[resultScreen->diffSelected][SHOTTYPE_ID(resultScreen->charUsed, SHOT_TYPE_B)]
-                    .next;
+                resultScreen->scores[resultScreen->diffSelected][SHOTTYPE_ID(resultScreen->charUsed, SHOT_TYPE_B)].next;
             for (i = 0; i < HSCR_NUM_SCORES_SLOTS; i++)
             {
                 if (resultScreen->resultScreenState == RESULT_SCREEN_STATE_WRITING_HIGHSCORE_NAME)
@@ -2147,7 +2143,7 @@ static ZunResult ResultScreen_AddedCallback(ResultScreen *resultScreen)
 
     if (resultScreen->resultScreenState == RESULT_SCREEN_STATE_EXIT &&
         g_GameManager.pscr[CURRENT_SHOTTYPE()][STAGE_INDEX(g_GameManager.currentStage)][g_GameManager.difficulty]
-            .score < g_GameManager.score)
+                .score < g_GameManager.score)
     {
         g_GameManager.pscr[CURRENT_SHOTTYPE()][STAGE_INDEX(g_GameManager.currentStage)][g_GameManager.difficulty]
             .score = g_GameManager.score;

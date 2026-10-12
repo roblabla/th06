@@ -188,7 +188,8 @@ static ZunResult ReplayManager_AddedCallback(ReplayManager *mgr)
     }
     else
     {
-        StageReplayData *oldStageReplayData = mgr->replayData->stageReplayData[STAGE_INDEX(g_GameManager.currentStage) - 1];
+        StageReplayData *oldStageReplayData =
+            mgr->replayData->stageReplayData[STAGE_INDEX(g_GameManager.currentStage) - 1];
         if (oldStageReplayData == NULL)
         {
             return ZUN_ERROR;
@@ -254,7 +255,8 @@ static ZunResult ReplayManager_AddedCallbackDemo(ReplayManager *mgr)
     g_GameManager.currentPower = replayData->power;
     mgr->replayInputs = replayData->replayInputs;
     g_GameManager.powerItemCountForScore = replayData->powerItemCountForScore;
-    if (g_GameManager.currentStage >= Stage2 && mgr->replayData->stageReplayData[STAGE_INDEX(g_GameManager.currentStage) - 1] != NULL)
+    if (g_GameManager.currentStage >= Stage2 &&
+        mgr->replayData->stageReplayData[STAGE_INDEX(g_GameManager.currentStage) - 1] != NULL)
     {
         g_GameManager.score = mgr->replayData->stageReplayData[STAGE_INDEX(g_GameManager.currentStage) - 1]->score;
         g_GameManager.guiScore = g_GameManager.score;

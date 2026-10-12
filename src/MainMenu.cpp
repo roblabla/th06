@@ -1133,8 +1133,7 @@ ZunResult MainMenu::DrawStartMenu(void)
     i32 i = MoveCursor(this, 8);
 #if !TRIALBUILD
     if (this->cursor == 1 && !g_GameManager.HasExtraUnlocked(REIMU, SHOT_TYPE_A) &&
-        !g_GameManager.HasExtraUnlocked(REIMU, SHOT_TYPE_B) &&
-        !g_GameManager.HasExtraUnlocked(MARISA, SHOT_TYPE_A) &&
+        !g_GameManager.HasExtraUnlocked(REIMU, SHOT_TYPE_B) && !g_GameManager.HasExtraUnlocked(MARISA, SHOT_TYPE_A) &&
         !g_GameManager.HasExtraUnlocked(MARISA, SHOT_TYPE_B))
     {
         this->cursor += i;

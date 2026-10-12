@@ -351,8 +351,8 @@ static ZunResult UpdateFireBulletsTimer(Player *p)
         return ZUN_SUCCESS;
     }
 
-    if (p->fireBulletTimer.HasTicked() && (!g_Player.bombInfo.isInUse || g_GameManager.character != MARISA ||
-                                           g_GameManager.shotType != SHOT_TYPE_B))
+    if (p->fireBulletTimer.HasTicked() &&
+        (!g_Player.bombInfo.isInUse || g_GameManager.character != MARISA || g_GameManager.shotType != SHOT_TYPE_B))
     {
         SpawnBullets(p, (i32)p->fireBulletTimer);
     }
