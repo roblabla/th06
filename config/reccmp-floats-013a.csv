@@ -126,12 +126,10 @@ address,type,size
 0x46BCDC,float,4
 0x456B28,float,4
 0x456B2C,float,4
-0x456BA0,float,4
 0x456BC8,float,4
 0x456BCC,float,4
 0x456BE0,float,4
 0x456BE8,float,4
-0x456C04,float,4
 0x456C10,float,4
 0x456C20,float,4
 0x456CD4,float,4
