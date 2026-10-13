@@ -1,3 +1,5 @@
+#include "stdafx.h"
+
 //-----------------------------------------------------------------------------
 // File: DSUtil.cpp
 //
@@ -9,11 +11,7 @@
 //-----------------------------------------------------------------------------
 #define STRICT
 #include "zwave.hpp"
-#include "Global.hpp"
-#include <dsound.h>
 #include <dxerr8.h>
-#include <mmsystem.h>
-#include <windows.h>
 
 namespace th06
 {

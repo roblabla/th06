@@ -1,15 +1,8 @@
+#include "stdafx.h"
+
 #include "Ending.hpp"
-#include "AnmIdx.hpp"
-#include "AnmManager.hpp"
-#include "Chain.hpp"
 #include "ChainPriorities.hpp"
-#include "GameManager.hpp"
-#include "Global.hpp"
-#include "Player.hpp"
 #include "ScreenEffect.hpp"
-#include "Supervisor.hpp"
-#include "ZunTimer.hpp"
-#include "i18n.hpp"
 
 namespace th06
 {

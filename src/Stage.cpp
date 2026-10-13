@@ -1,16 +1,9 @@
+#include "stdafx.h"
+
 #include "Stage.hpp"
-#include "AnmIdx.hpp"
-#include "AnmManager.hpp"
-#include "Chain.hpp"
 #include "ChainPriorities.hpp"
-#include "GameManager.hpp"
-#include "Global.hpp"
 #include "Gui.hpp"
 #include "ScreenEffect.hpp"
-#include "Supervisor.hpp"
-#include "ZunColor.hpp"
-#include "ZunTimer.hpp"
-#include <d3d8.h>
 
 namespace th06
 {

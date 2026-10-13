@@ -1,14 +1,9 @@
+#include "stdafx.h"
+
 #include "EnemyManager.hpp"
-#include "AnmManager.hpp"
-#include "BulletManager.hpp"
-#include "Chain.hpp"
 #include "ChainPriorities.hpp"
 #include "EffectManager.hpp"
-#include "GameManager.hpp"
-#include "Global.hpp"
 #include "Gui.hpp"
-#include "Player.hpp"
-#include "decomp.hpp"
 
 namespace th06
 {

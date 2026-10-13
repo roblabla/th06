@@ -1,14 +1,9 @@
+#include "stdafx.h"
+
 #include "EnemyEclInstr.hpp"
-#include "BulletManager.hpp"
-#include "EclManager.hpp"
 #include "EffectManager.hpp"
-#include "Enemy.hpp"
 #include "EnemyManager.hpp"
-#include "GameManager.hpp"
-#include "Global.hpp"
 #include "Gui.hpp"
-#include "Player.hpp"
-#include "ZunBool.hpp"
 
 namespace th06
 {

@@ -1,24 +1,14 @@
+#include "stdafx.h"
+
 #include "Player.hpp"
 
-#include "AnmManager.hpp"
-#include "AnmVm.hpp"
 #include "BombData.hpp"
 #include "BulletData.hpp"
-#include "BulletManager.hpp"
 #include "ChainPriorities.hpp"
-#include "EclManager.hpp"
 #include "EffectManager.hpp"
 #include "EnemyManager.hpp"
-#include "GameManager.hpp"
-#include "Global.hpp"
 #include "Gui.hpp"
-#include "ItemManager.hpp"
 #include "ScreenEffect.hpp"
-#include "SoundPlayer.hpp"
-#include "Supervisor.hpp"
-#include "ZunBool.hpp"
-#include "ZunTimer.hpp"
-#include "i18n.hpp"
 
 namespace th06
 {
@@ -166,7 +156,7 @@ static void SpawnBullets(Player *p, u32 timer)
         {
             curBullet->sprite.pos.x = curBullet->position.x;
             curBullet->sprite.pos.y = curBullet->position.y;
-            curBullet->sprite.pos.z = 0.495f;
+            curBullet->sprite.SetPosZ(0.495f);
             curBullet->bulletState = PLAYER_BULLET_STATE_FIRED;
         }
         if (bulletResult == FBR_STOP_SPAWNING)
@@ -339,7 +329,7 @@ static void DrawBulletExplosions(Player *p)
         {
             bullet->sprite.rotation.z = RADIANS(90.0f) - utils::AddNormalizeAngle(bullet->angle, RADIANS(180.0f));
         }
-        bullet->sprite.pos.z = 0.4f;
+        bullet->sprite.SetPosZ(0.4f);
         g_AnmManager->Draw2(&bullet->sprite);
     }
 }

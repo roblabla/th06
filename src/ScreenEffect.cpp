@@ -1,9 +1,7 @@
+#include "stdafx.h"
+
 #include "ScreenEffect.hpp"
-#include "AnmManager.hpp"
 #include "ChainPriorities.hpp"
-#include "Global.hpp"
-#include "Supervisor.hpp"
-#include "ZunTimer.hpp"
 
 namespace th06
 {

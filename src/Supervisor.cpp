@@ -1,35 +1,20 @@
+#include "stdafx.h"
+
 #include "Supervisor.hpp"
-#include "AnmManager.hpp"
 #include "AsciiManager.hpp"
-#include "Chain.hpp"
 #include "ChainPriorities.hpp"
 #include "Ending.hpp"
-#include "GameManager.hpp"
-#include "Global.hpp"
 #include "MainMenu.hpp"
+#include "MidiOutput.hpp"
 #include "MusicRoom.hpp"
 #include "ReplayManager.hpp"
-#include "ResultScreen.hpp"
-#include "SoundPlayer.hpp"
 #include "TextHelper.hpp"
-#include "ZunTimer.hpp"
-#include "decomp.hpp"
-#include "i18n.hpp"
-
-#include <stdio.h>
-#include <string.h>
 
 namespace th06
 {
 AUTO_BSS_SORT(M1);
 
 MANUAL_BSS_SORT(M1) Supervisor g_Supervisor;
-} // namespace th06
-
-#include "MidiOutput.hpp"
-
-namespace th06
-{
 
 ChainCallbackResult Supervisor_OnUpdate(Supervisor *s)
 {

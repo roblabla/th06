@@ -313,6 +313,11 @@ struct AnmVm : AnmVmBase
         this->flags.isStopped = stopped;
     }
 
+    void SetPosZ(f32 z)
+    {
+        this->pos.z = z;
+    }
+
     D3DXVECTOR3 pos;
     f32 scaleInterpInitialY;
     f32 scaleInterpInitialX;

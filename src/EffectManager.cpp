@@ -1,11 +1,8 @@
+#include "stdafx.h"
+
 #include "EffectManager.hpp"
 
-#include "AnmManager.hpp"
-#include "Chain.hpp"
 #include "ChainPriorities.hpp"
-#include "GameManager.hpp"
-#include "Global.hpp"
-#include "ZunResult.hpp"
 
 namespace th06
 {

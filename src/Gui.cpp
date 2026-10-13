@@ -1,17 +1,10 @@
+#include "stdafx.h"
+
 #include "Gui.hpp"
 
-#include <stdio.h>
-
-#include "AnmManager.hpp"
 #include "AsciiManager.hpp"
-#include "Chain.hpp"
 #include "ChainPriorities.hpp"
-#include "GameManager.hpp"
-#include "Global.hpp"
-#include "Player.hpp"
-#include "SoundPlayer.hpp"
 #include "Stage.hpp"
-#include "ZunColor.hpp"
 
 namespace th06
 {

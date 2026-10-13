@@ -1,13 +1,10 @@
+#include "stdafx.h"
+
 #include "EclManager.hpp"
-#include "AnmManager.hpp"
 #include "EffectManager.hpp"
-#include "Enemy.hpp"
 #include "EnemyEclInstr.hpp"
 #include "EnemyManager.hpp"
-#include "GameManager.hpp"
-#include "Global.hpp"
 #include "Gui.hpp"
-#include "Player.hpp"
 #include "Stage.hpp"
 
 namespace th06

@@ -21,10 +21,12 @@
 #define AUTO_BSS_SORT(sort) __pragma(bss_seg(MACRO_STR(MACRO_CAT(.bss$, sort))))
 #define MANUAL_BSS_SORT(sort) __declspec(allocate(MACRO_STR(MACRO_CAT(.bss$, sort))))
 #define BSS_SORT(sort) AUTO_BSS_SORT(sort) MANUAL_BSS_SORT(sort)
+#define BSS_SORT_FIRST(sort, alignment) BSS_SORT(sort) __declspec(align(alignment))
 #else
 #define AUTO_BSS_SORT(sort)
 #define MANUAL_BSS_SORT(sort)
 #define BSS_SORT(sort)
+#define BSS_SORT_FIRST(sort, alignment)
 #endif
 
 // The trial is built with /O2, which drops the zero stores a dynamic initializer

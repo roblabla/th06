@@ -1,23 +1,16 @@
+#include "stdafx.h"
+
 #include "GameManager.hpp"
 #include "AsciiManager.hpp"
-#include "BulletManager.hpp"
 #include "ChainPriorities.hpp"
-#include "EclManager.hpp"
 #include "EffectManager.hpp"
 #include "EnemyManager.hpp"
-#include "Global.hpp"
 #include "Gui.hpp"
-#include "Player.hpp"
 #include "ReplayManager.hpp"
-#include "ResultScreen.hpp"
 #include "ScreenEffect.hpp"
-#include "SoundPlayer.hpp"
 #include "Stage.hpp"
-#include "Supervisor.hpp"
-#include "ZunTimer.hpp"
 
 #include <d3d8types.h>
-#include <d3dx8math.h>
 
 namespace th06
 {
