@@ -1,9 +1,6 @@
-#include "SoundPlayer.hpp"
+#include "stdafx.h"
 
-#include "Global.hpp"
-#include "Supervisor.hpp"
-#include "ZunTimer.hpp"
-#include "i18n.hpp"
+#include "SoundPlayer.hpp"
 
 namespace th06
 {

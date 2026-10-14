@@ -1,25 +1,13 @@
-#include <D3DX8.h>
+#include "stdafx.h"
+
 #include <direct.h>
-#include <stdio.h>
-#include <windows.h>
 
 #include "MainMenu.hpp"
 
-#include "AnmManager.hpp"
 #include "AsciiManager.hpp"
 #include "ChainPriorities.hpp"
-#include "GameManager.hpp"
-#include "Global.hpp"
-#include "Player.hpp"
-#include "ReplayData.hpp"
 #include "ReplayManager.hpp"
-#include "ResultScreen.hpp"
 #include "ScreenEffect.hpp"
-#include "SoundPlayer.hpp"
-#include "Supervisor.hpp"
-#include "ZunColor.hpp"
-#include "ZunTimer.hpp"
-#include "i18n.hpp"
 
 namespace th06
 {

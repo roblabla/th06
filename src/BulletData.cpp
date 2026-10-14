@@ -1,7 +1,4 @@
-#include "AnmIdx.hpp"
-#include "Player.hpp"
-#include "SoundPlayer.hpp"
-#include "decomp.hpp"
+#include "stdafx.h"
 
 namespace th06
 {

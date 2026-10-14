@@ -1,13 +1,6 @@
-#include "decomp.hpp"
-#include <Windows.h>
-#include <mmreg.h>
-#include <mmsystem.h>
+#include "stdafx.h"
 
-#include "Global.hpp"
 #include "MidiOutput.hpp"
-#include "Supervisor.hpp"
-#include "ZunTimer.hpp"
-#include "i18n.hpp"
 
 namespace th06
 {

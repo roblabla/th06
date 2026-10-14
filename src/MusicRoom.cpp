@@ -1,10 +1,8 @@
+#include "stdafx.h"
+
 #include "MusicRoom.hpp"
-#include "AnmManager.hpp"
 #include "AsciiManager.hpp"
-#include "Chain.hpp"
 #include "ChainPriorities.hpp"
-#include "Global.hpp"
-#include <string.h>
 
 namespace th06
 {

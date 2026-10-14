@@ -1,7 +1,6 @@
+#include "stdafx.h"
+
 #include "TextHelper.hpp"
-#include "Supervisor.hpp"
-#include "ZunTimer.hpp"
-#include "i18n.hpp"
 
 namespace th06
 {

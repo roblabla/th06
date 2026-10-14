@@ -1,31 +1,18 @@
-#include "AnmManager.hpp"
+#include "stdafx.h"
+
 #include "ChainPriorities.hpp"
-#include "GameManager.hpp"
-#include "Global.hpp"
 #include "Gui.hpp"
 #include "StageMenu.hpp"
-#include "Supervisor.hpp"
-#include "ZunTimer.hpp"
-#include <stdio.h>
 
-namespace th06
-{
-struct AsciiManager;
-} // namespace th06
-
-// Included after the first line of code on purpose: /YX only precompiles headers above it, and the release
-// emits InitializeVms right after AddedCallback, its first user, which MSVC only does for an inline it parsed
-// outside the precompiled header.
+// Keep AsciiManager.hpp outside the common PCH so its inline methods are
+// emitted after their first callers.
 #include "AsciiManager.hpp"
 
 namespace th06
 {
-#if !DISABLE_BSS_HACK
-BSS_SORT(A1) i32 g_AsciiManagerPad[4];
-#endif
 BSS_SORT(A3) AsciiManager g_AsciiManager;
 BSS_SORT(A4) ChainElem g_AsciiManagerCalcChain;
-BSS_SORT(A2) ChainElem g_AsciiManagerOnDrawMenusChain;
+BSS_SORT_FIRST(A2, 32) ChainElem g_AsciiManagerOnDrawMenusChain;
 BSS_SORT(A5) ChainElem g_AsciiManagerOnDrawPopupsChain;
 
 ChainCallbackResult AsciiManager_OnUpdate(AsciiManager *mgr)

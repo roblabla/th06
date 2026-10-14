@@ -4,7 +4,7 @@
 
 #include "AnmIdx.hpp"
 #include "AnmVm.hpp"
-#include "GameManager.hpp"
+#include "Supervisor.hpp"
 #include "ZunResult.hpp"
 #include "decomp.hpp"
 

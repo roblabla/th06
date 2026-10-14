@@ -1,22 +1,7 @@
-#define DIRECTINPUT_VERSION 0x0800
-#include <d3d8.h>
-#include <stdio.h>
-#include <string.h>
-#include <windows.h>
-
-#ifdef DEBUG
-#include <stdarg.h>
-#endif
+#include "stdafx.h"
 
 #include "Global.hpp"
-#include "Supervisor.hpp"
-#include "ZunMath.hpp"
-#include "ZunTimer.hpp"
-#include "i18n.hpp"
-#include "pbg3/Pbg3Archive.hpp"
 #include <ddraw.h>
-#include <dinput.h>
-#include <mmsystem.h>
 
 namespace th06
 {

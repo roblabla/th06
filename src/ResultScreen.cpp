@@ -1,15 +1,12 @@
+#include "stdafx.h"
+
 #include "ResultScreen.hpp"
-#include "BulletManager.hpp"
-#include "Chain.hpp"
+#include "AsciiManager.hpp"
 #include "ChainPriorities.hpp"
-#include "Global.hpp"
 #include "MainMenu.hpp"
 #include "ReplayManager.hpp"
-#include "SoundPlayer.hpp"
 #include "Stage.hpp"
-#include "i18n.hpp"
 #include <direct.h>
-#include <stdio.h>
 #include <time.h>
 
 namespace th06
@@ -447,15 +444,6 @@ void ReleaseScoreDat(ScoreDat *scoreDat)
     ZUN_FREE(scoreDat);
 }
 
-} // namespace th06
-
-#include "AnmManager.hpp"
-#include "AsciiManager.hpp"
-#include "GameManager.hpp"
-#include "Player.hpp"
-
-namespace th06
-{
 #pragma var_order(difficulty, highScoreSlot, fileBuffer, sizeOfFile, scoreNode, shottype, clrd, catk, pscr, stage,     \
                   shotType, originalByte, remainingSize, xorValue, bytes, sd)
 void WriteScore(ResultScreen *resultScreen)

@@ -1,13 +1,7 @@
-#include "AnmManager.hpp"
-#include "Global.hpp"
-#include "Supervisor.hpp"
-#include "TextHelper.hpp"
-#include "ZunMath.hpp"
-#include "ZunTimer.hpp"
-#include "decomp.hpp"
-#include "i18n.hpp"
+#include "stdafx.h"
 
-#include <stdio.h>
+#include "AnmManager.hpp"
+#include "TextHelper.hpp"
 
 namespace th06
 {
