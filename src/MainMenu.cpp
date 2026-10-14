@@ -1040,12 +1040,8 @@ static void DrawMenuItem(AnmVm *vm, int itemNumber, int cursor, D3DCOLOR current
     }
 }
 
-#pragma var_order(time, i)
 ZunResult MainMenu::BeginStartup()
 {
-    DWORD time;
-    i32 i;
-
     if (LoadTitleAnm(this) != ZUN_SUCCESS)
     {
         g_Supervisor.curState = SUPERVISOR_STATE_EXITSUCCESS;
@@ -1053,7 +1049,7 @@ ZunResult MainMenu::BeginStartup()
     }
     if (g_Supervisor.startupTimeBeforeMenuMusic > 0)
     {
-        time = timeGetTime();
+        DWORD time = timeGetTime();
         while (time - g_Supervisor.startupTimeBeforeMenuMusic >= 0 &&
                time - g_Supervisor.startupTimeBeforeMenuMusic < 3000)
         {
@@ -1062,7 +1058,7 @@ ZunResult MainMenu::BeginStartup()
         g_Supervisor.startupTimeBeforeMenuMusic = 0;
         g_Supervisor.PlayAudio("bgm/th06_01.mid");
     }
-    for (i = 0; i < ARRAY_SIZE_SIGNED(this->vm); i++)
+    for (i32 i = 0; i < ARRAY_SIZE_SIGNED(this->vm); i++)
     {
         this->vm[i].pendingInterrupt = 1;
         this->vm[i].flags.colorOp = AnmColorOp_Add;

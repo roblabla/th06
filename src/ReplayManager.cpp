@@ -3,7 +3,6 @@
 #include <stddef.h>
 #include <time.h>
 
-#include "Gui.hpp"
 #include "ReplayManager.hpp"
 
 namespace th06

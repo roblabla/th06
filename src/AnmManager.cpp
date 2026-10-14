@@ -1,4 +1,6 @@
 #include "stdafx.h"
+// Unused, but its inline code sits ahead of this file's functions and sets the /O2 trial's compile order.
+#include <iostream>
 
 #include "AnmManager.hpp"
 #include "TextHelper.hpp"

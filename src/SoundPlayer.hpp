@@ -76,6 +76,14 @@ struct SoundPlayer
     void PlaySoundByIdx(SoundIdx idx, i32 unused = 0);
     ZunResult PlayBGM(BOOL isLooping);
     void StopBGM();
+    void UpdateFades()
+    {
+        if (this->backgroundMusic != NULL)
+        {
+            this->backgroundMusic->UpdateFadeOut();
+        }
+    }
+
     void FadeOut(float seconds)
     {
         if (this->backgroundMusic != NULL)

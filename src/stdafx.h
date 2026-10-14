@@ -19,3 +19,4 @@
 #include "GameManager.hpp"
 #include "Enemy.hpp"
 #include "Player.hpp"
+#include "Gui.hpp"

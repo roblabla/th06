@@ -3,7 +3,6 @@
 #include "ItemManager.hpp"
 
 #include "AsciiManager.hpp"
-#include "Gui.hpp"
 
 namespace th06
 {

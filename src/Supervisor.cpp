@@ -1,4 +1,6 @@
 #include "stdafx.h"
+// Unused, but its inline code sits ahead of this file's functions and sets the /O2 trial's compile order.
+#include <streambuf>
 
 #include "Supervisor.hpp"
 #include "AsciiManager.hpp"
@@ -18,10 +20,7 @@ MANUAL_BSS_SORT(M1) Supervisor g_Supervisor;
 
 ChainCallbackResult Supervisor_OnUpdate(Supervisor *s)
 {
-    if (g_SoundPlayer.backgroundMusic != NULL)
-    {
-        g_SoundPlayer.backgroundMusic->UpdateFadeOut();
-    }
+    g_SoundPlayer.UpdateFades();
     g_LastFrameInput = g_CurFrameInput;
     g_CurFrameInput = Controller::GetInput();
     g_IsEigthFrameOfHeldInput = false;

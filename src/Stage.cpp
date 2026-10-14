@@ -2,7 +2,6 @@
 
 #include "Stage.hpp"
 #include "ChainPriorities.hpp"
-#include "Gui.hpp"
 #include "ScreenEffect.hpp"
 
 namespace th06

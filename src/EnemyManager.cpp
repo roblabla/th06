@@ -3,7 +3,6 @@
 #include "EnemyManager.hpp"
 #include "ChainPriorities.hpp"
 #include "EffectManager.hpp"
-#include "Gui.hpp"
 
 namespace th06
 {
@@ -125,13 +124,10 @@ Enemy *EnemyManager::SpawnEnemy(i32 eclSubId, D3DXVECTOR3 *pos, i16 life, i16 it
     return newEnemy;
 }
 
-#pragma var_order(effect, i)
 static void UpdateEffects(Enemy *enemy)
 {
     Effect *effect;
-    i32 i;
-
-    for (i = 0; i < enemy->effectIdx; i++)
+    for (i32 i = 0; i < enemy->effectIdx; i++)
     {
         effect = enemy->effectArray[i];
         if (!effect)
@@ -151,16 +147,14 @@ static void UpdateEffects(Enemy *enemy)
 
 void Enemy_ResetEffectArray(Enemy *enemy)
 {
-    i32 idx;
-
-    for (idx = 0; idx < enemy->effectIdx; idx++)
+    for (i32 i = 0; i < enemy->effectIdx; i++)
     {
-        if (!enemy->effectArray[idx])
+        if (!enemy->effectArray[i])
         {
             continue;
         }
-        enemy->effectArray[idx]->flag_17a = true;
-        enemy->effectArray[idx] = NULL;
+        enemy->effectArray[i]->flag_17a = true;
+        enemy->effectArray[i] = NULL;
     }
     enemy->effectIdx = 0;
 }
@@ -355,12 +349,8 @@ void EnemyManager::RunEclTimeline()
     }
 }
 
-#pragma var_order(curEnemy, i)
 ZunBool Enemy::HandleLifeCallback()
 {
-    i32 i;
-    Enemy *curEnemy;
-
     if (this->life < this->lifeCallbackThreshold)
     {
         this->life = this->lifeCallbackThreshold;
@@ -370,8 +360,8 @@ ZunBool Enemy::HandleLifeCallback()
         this->ResetRank();
         this->stackDepth = 0;
 
-        curEnemy = g_EnemyManager.enemies;
-        for (i = 0; i < MAX_ENEMY_COUNT; i++, curEnemy++)
+        Enemy *curEnemy = g_EnemyManager.enemies;
+        for (i32 i = 0; i < MAX_ENEMY_COUNT; i++, curEnemy++)
         {
             if (!curEnemy->flags.isSlotOccupied)
             {
@@ -395,12 +385,8 @@ ZunBool Enemy::HandleLifeCallback()
     return false;
 }
 
-#pragma var_order(curEnemy, i)
 ZunBool Enemy::HandleTimerCallback()
 {
-    Enemy *curEnemy;
-    i32 i;
-
     if (this->flags.isBoss)
     {
         g_Gui.SetSpellcardSeconds((this->timerCallbackThreshold - (i32)this->phaseTimer) / 60);
@@ -427,8 +413,8 @@ ZunBool Enemy::HandleTimerCallback()
             g_BulletManager.RemoveAllBullets(0);
         }
 
-        curEnemy = g_EnemyManager.enemies;
-        for (i = 0; i < MAX_ENEMY_COUNT; i++, curEnemy++)
+        Enemy *curEnemy = g_EnemyManager.enemies;
+        for (i32 i = 0; i < MAX_ENEMY_COUNT; i++, curEnemy++)
         {
             if (!curEnemy->flags.isSlotOccupied)
             {
@@ -477,22 +463,22 @@ void Enemy::ClampPos()
 {
     if (this->flags.shouldClampPos)
     {
-        if (this->position.x < this->lowerMoveLimit.x)
+        if (this->position[0] < this->lowerMoveLimit.x)
         {
-            this->position.x = this->lowerMoveLimit.x;
+            this->position[0] = this->lowerMoveLimit.x;
         }
-        else if (this->position.x > this->upperMoveLimit.x)
+        else if (this->position[0] > this->upperMoveLimit.x)
         {
-            this->position.x = this->upperMoveLimit.x;
+            this->position[0] = this->upperMoveLimit.x;
         }
 
-        if (this->position.y < this->lowerMoveLimit.y)
+        if (this->position[1] < this->lowerMoveLimit.y)
         {
-            this->position.y = this->lowerMoveLimit.y;
+            this->position[1] = this->lowerMoveLimit.y;
         }
-        else if (this->position.y > this->upperMoveLimit.y)
+        else if (this->position[1] > this->upperMoveLimit.y)
         {
-            this->position.y = this->upperMoveLimit.y;
+            this->position[1] = this->upperMoveLimit.y;
         }
     }
 }
@@ -521,7 +507,7 @@ static ChainCallbackResult EnemyManager_OnUpdate(EnemyManager *mgr)
         curEnemy->Move();
         curEnemy->ClampPos();
         if (curEnemy->flags.hasBeenInBounds == FALSE &&
-            g_GameManager.IsInBounds(curEnemy->position.x, curEnemy->position.y, curEnemy->primaryVm.sprite->widthPx,
+            g_GameManager.IsInBounds(curEnemy->position[0], curEnemy->position[1], curEnemy->primaryVm.sprite->widthPx,
                                      curEnemy->primaryVm.sprite->heightPx))
         {
             curEnemy->flags.hasBeenInBounds = TRUE;
