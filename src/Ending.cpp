@@ -493,7 +493,6 @@ ZunResult Ending::LoadEnding(const char *endFilePath)
     }
 }
 
-#pragma var_order(framesPressed, idx)
 static ChainCallbackResult Ending_OnUpdate(Ending *ending)
 {
     i32 framesSkipped = 0;

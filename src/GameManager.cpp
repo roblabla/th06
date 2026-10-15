@@ -5,7 +5,6 @@
 #include "ChainPriorities.hpp"
 #include "EffectManager.hpp"
 #include "EnemyManager.hpp"
-#include "Gui.hpp"
 #include "ReplayManager.hpp"
 #include "ScreenEffect.hpp"
 #include "Stage.hpp"
@@ -60,12 +59,8 @@ ZunBool GameManager::IsInBounds(f32 x, f32 y, f32 width, f32 height)
     return true;
 }
 
-#pragma var_order(scoreIncrement, isInMenu)
 ChainCallbackResult GameManager_OnUpdate(GameManager *gameManager)
 {
-    ZunBool isInMenu;
-    u32 scoreIncrement;
-
     if (gameManager->demoMode)
     {
         if (WAS_PRESSED(TH_BUTTON_ANY))
@@ -95,16 +90,7 @@ ChainCallbackResult GameManager_OnUpdate(GameManager *gameManager)
 #endif
     }
 
-    if (!gameManager->isInRetryMenu && !gameManager->isInGameMenu)
-    {
-        isInMenu = true;
-    }
-    else
-    {
-        isInMenu = false;
-    }
-
-    gameManager->isInMenu = isInMenu;
+    gameManager->isInMenu = (ZunBool)(!gameManager->isInRetryMenu && !gameManager->isInGameMenu);
 
     g_Supervisor.viewport.X = gameManager->gameRegionScreenPos.x;
     g_Supervisor.viewport.Y = gameManager->gameRegionScreenPos.y;
@@ -113,7 +99,7 @@ ChainCallbackResult GameManager_OnUpdate(GameManager *gameManager)
     g_Supervisor.viewport.MinZ = 0.5f;
     g_Supervisor.viewport.MaxZ = 1.0f;
 
-    SetupCamera(0);
+    SetupCamera(0.0f);
 
     g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
     g_Supervisor.d3dDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER, g_Stage.skyFog.color, 1.0f, 0);
@@ -135,7 +121,7 @@ ChainCallbackResult GameManager_OnUpdate(GameManager *gameManager)
             gameManager->score = gameManager->guiScore;
         }
 
-        scoreIncrement = (gameManager->score - gameManager->guiScore) >> 5;
+        u32 scoreIncrement = (gameManager->score - gameManager->guiScore) >> 5;
         if (scoreIncrement >= GUI_SCORE_STEP)
         {
             scoreIncrement = GUI_SCORE_STEP;
@@ -144,7 +130,7 @@ ChainCallbackResult GameManager_OnUpdate(GameManager *gameManager)
         {
             scoreIncrement = 10;
         }
-        scoreIncrement = scoreIncrement - scoreIncrement % 10;
+        scoreIncrement -= scoreIncrement % 10;
 
         if (gameManager->nextScoreIncrement < scoreIncrement)
         {
@@ -429,7 +415,6 @@ static ZunResult GameManager_AddedCallback(GameManager *mgr)
 
 static ZunResult GameManager_DeletedCallback(GameManager *mgr)
 {
-
     g_Supervisor.d3dDevice->ResourceManagerDiscardBytes(0);
     if (!g_GameManager.demoMode)
     {
@@ -478,17 +463,11 @@ void GameManager_CutChain()
 #pragma var_order(cameraDistance, viewportMiddleHeight, viewportMiddleWidth, aspectRatio, fov)
 void SetupCameraStageBackground(f32 extraRenderDistance)
 {
-    f32 fov;
-    f32 aspectRatio;
-    f32 viewportMiddleWidth;
-    f32 viewportMiddleHeight;
-    f32 cameraDistance;
-
-    viewportMiddleWidth = g_Supervisor.viewport.Width / 2.0f;
-    viewportMiddleHeight = g_Supervisor.viewport.Height / 2.0f;
-    aspectRatio = (f32)g_Supervisor.viewport.Width / (f32)g_Supervisor.viewport.Height;
-    fov = D3DXToRadian(30.0f);
-    cameraDistance = viewportMiddleHeight / (f32)tan(fov / 2.0f);
+    f32 viewportMiddleWidth = g_Supervisor.viewport.Width / 2.0f;
+    f32 viewportMiddleHeight = g_Supervisor.viewport.Height / 2.0f;
+    f32 aspectRatio = (f32)g_Supervisor.viewport.Width / (f32)g_Supervisor.viewport.Height;
+    f32 fov = D3DXToRadian(30.0f);
+    f32 cameraDistance = viewportMiddleHeight / (f32)tan(fov / 2.0f);
     D3DXMatrixLookAtLH(&g_Supervisor.viewMatrix,
                        &D3DXVECTOR3(viewportMiddleWidth, -viewportMiddleHeight, -cameraDistance),
                        &D3DXVECTOR3(viewportMiddleWidth, -viewportMiddleHeight, 0.0f), &D3DXVECTOR3(0.0f, 1.0f, 0.0f));
@@ -502,17 +481,11 @@ void SetupCameraStageBackground(f32 extraRenderDistance)
 #pragma var_order(cameraDistance, viewportMiddleHeight, viewportMiddleWidth, aspectRatio, fov)
 void SetupCamera(f32 extraRenderDistance)
 {
-    f32 fov;
-    f32 aspectRatio;
-    f32 viewportMiddleWidth;
-    f32 viewportMiddleHeight;
-    f32 cameraDistance;
-
-    viewportMiddleWidth = g_Supervisor.viewport.Width / 2.0f;
-    viewportMiddleHeight = g_Supervisor.viewport.Height / 2.0f;
-    aspectRatio = (f32)g_Supervisor.viewport.Width / (f32)g_Supervisor.viewport.Height;
-    fov = D3DXToRadian(30.0f);
-    cameraDistance = viewportMiddleHeight / (f32)tan(fov / 2.0f);
+    f32 viewportMiddleWidth = g_Supervisor.viewport.Width / 2.0f;
+    f32 viewportMiddleHeight = g_Supervisor.viewport.Height / 2.0f;
+    f32 aspectRatio = (f32)g_Supervisor.viewport.Width / (f32)g_Supervisor.viewport.Height;
+    f32 fov = D3DXToRadian(30.0f);
+    f32 cameraDistance = viewportMiddleHeight / (f32)tan(fov / 2.0f);
     D3DXMatrixLookAtLH(&g_Supervisor.viewMatrix,
                        &D3DXVECTOR3(viewportMiddleWidth, -viewportMiddleHeight,
                                     -cameraDistance * (f32)g_GameManager.stageCameraFacingDir.z),

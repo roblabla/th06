@@ -7,7 +7,6 @@
 #include "ChainPriorities.hpp"
 #include "EffectManager.hpp"
 #include "EnemyManager.hpp"
-#include "Gui.hpp"
 #include "ScreenEffect.hpp"
 
 namespace th06
@@ -67,7 +66,7 @@ static FireBulletResult FireSingleBullet(Player *player, PlayerBullet *bullet, i
         bullet->position[0] += bulletData->motion.x;
         bullet->position[1] += bulletData->motion.y;
 
-        bullet->position.z = 0.495f;
+        bullet->position[2] = 0.495f;
 
         bullet->size.x = bulletData->size.x;
         bullet->size.y = bulletData->size.y;
@@ -207,8 +206,8 @@ static void UpdatePlayerBullets(Player *player)
                 if (player->positionOfLastEnemyHit.x > -100.0f && (i32)bullet->lifetime < 40 &&
                     bullet->lifetime.HasTicked())
                 {
-                    vectorX = player->positionOfLastEnemyHit.x - bullet->position.x;
-                    vectorY = player->positionOfLastEnemyHit.y - bullet->position.y;
+                    vectorX = player->positionOfLastEnemyHit.x - bullet->position[0];
+                    vectorY = player->positionOfLastEnemyHit.y - bullet->position[1];
 
                     vecLength = sqrtf(vectorX * vectorX + vectorY * vectorY) / (bullet->speed / 4.0f);
                     if (vecLength < 1.0f)
@@ -281,7 +280,7 @@ static void UpdatePlayerBullets(Player *player)
         bullet->sprite.pos.z = bullet->position.z;
 
         if (bullet->bulletType != PLAYER_LASER &&
-            !g_GameManager.IsInBounds(bullet->position.x, bullet->position.y, bullet->sprite.sprite->widthPx,
+            !g_GameManager.IsInBounds(bullet->position[0], bullet->position[1], bullet->sprite.sprite->widthPx,
                                       bullet->sprite.sprite->heightPx))
         {
             bullet->bulletState = PLAYER_BULLET_STATE_INACTIVE;
@@ -438,7 +437,7 @@ i32 Player::CalcDamageToEnemy(D3DXVECTOR3 *enemyPos, D3DXVECTOR3 *enemyHitboxSiz
             {
                 g_AnmManager->SetAndExecuteScriptIdx(&bullet->sprite, bullet->sprite.anmFileIndex + 32);
                 g_EffectManager.SpawnParticles(PARTICLE_EFFECT_UNK_5, &bullet->position, 1, COLOR_WHITE);
-                bullet->position.z = 0.1f;
+                bullet->position[2] = 0.1f;
             }
             bullet->bulletState = PLAYER_BULLET_STATE_COLLIDED;
             bullet->velocity.x /= 8.0f;
@@ -884,24 +883,24 @@ ZunResult Player::HandlePlayerInputs()
     this->positionCenter[0] += speedX * this->speedMultiplierDuringBomb.x * g_Supervisor.effectiveFramerateMultiplier;
     this->positionCenter[1] += speedY * this->speedMultiplierDuringBomb.y * g_Supervisor.effectiveFramerateMultiplier;
 
-    if (this->positionCenter.x < g_GameManager.playerMovementAreaTopLeftPos.x)
+    if (this->positionCenter[0] < g_GameManager.playerMovementAreaTopLeftPos.x)
     {
-        this->positionCenter.x = g_GameManager.playerMovementAreaTopLeftPos.x;
+        this->positionCenter[0] = g_GameManager.playerMovementAreaTopLeftPos.x;
     }
-    else if (this->positionCenter.x >
+    else if (this->positionCenter[0] >
              g_GameManager.playerMovementAreaTopLeftPos.x + g_GameManager.playerMovementAreaSize.x)
     {
-        this->positionCenter.x = g_GameManager.playerMovementAreaTopLeftPos.x + g_GameManager.playerMovementAreaSize.x;
+        this->positionCenter[0] = g_GameManager.playerMovementAreaTopLeftPos.x + g_GameManager.playerMovementAreaSize.x;
     }
 
-    if (this->positionCenter.y < g_GameManager.playerMovementAreaTopLeftPos.y)
+    if (this->positionCenter[1] < g_GameManager.playerMovementAreaTopLeftPos.y)
     {
-        this->positionCenter.y = g_GameManager.playerMovementAreaTopLeftPos.y;
+        this->positionCenter[1] = g_GameManager.playerMovementAreaTopLeftPos.y;
     }
-    else if (this->positionCenter.y >
+    else if (this->positionCenter[1] >
              g_GameManager.playerMovementAreaTopLeftPos.y + g_GameManager.playerMovementAreaSize.y)
     {
-        this->positionCenter.y = g_GameManager.playerMovementAreaTopLeftPos.y + g_GameManager.playerMovementAreaSize.y;
+        this->positionCenter[1] = g_GameManager.playerMovementAreaTopLeftPos.y + g_GameManager.playerMovementAreaSize.y;
     }
 
     this->hitboxTopLeft = this->positionCenter - this->hitboxSize;
@@ -1105,9 +1104,9 @@ static ChainCallbackResult Player_OnUpdate(Player *p)
             if ((i32)p->invulnerabilityTimer >= 30)
             {
                 p->playerState = PLAYER_STATE_SPAWNING;
-                p->positionCenter.x = g_GameManager.gameRegionSize.x / 2.0f;
-                p->positionCenter.y = g_GameManager.gameRegionSize.y - 64.0f;
-                p->positionCenter.z = 0.2f;
+                p->positionCenter[0] = g_GameManager.gameRegionSize.x / 2.0f;
+                p->positionCenter[1] = g_GameManager.gameRegionSize.y - 64.0f;
+                p->positionCenter[2] = 0.2f;
                 p->invulnerabilityTimer = 0;
                 p->playerSprite.scaleY = p->playerSprite.scaleX = 3.0f;
                 g_AnmManager->SetAndExecuteScriptIdx(&p->playerSprite, ANM_SCRIPT_PLAYER_IDLE);
@@ -1258,8 +1257,8 @@ f32 Player::AngleFromPlayer(D3DXVECTOR3 *pos)
 f32 Player::AngleToPlayer(D3DXVECTOR3 *pos)
 {
     // NOTE: This is *not* a ZunVec2
-    float relX = this->positionCenter.x - pos->x;
-    float relY = this->positionCenter.y - pos->y;
+    float relX = this->positionCenter[0] - pos->x;
+    float relY = this->positionCenter[1] - pos->y;
     if (relY == 0.0f && relX == 0.0f)
     {
         // Shoot down. An angle of 0 means to the right, and the angle goes
@@ -1293,9 +1292,9 @@ static ZunResult Player_AddedCallback(Player *p)
         g_AnmManager->SetAndExecuteScriptIdx(&p->playerSprite, ANM_SCRIPT_PLAYER_IDLE);
         break;
     }
-    p->positionCenter.x = g_GameManager.gameRegionSize.x / 2.0f;
-    p->positionCenter.y = g_GameManager.gameRegionSize.y - 64.0f;
-    p->positionCenter.z = 0.49f;
+    p->positionCenter[0] = g_GameManager.gameRegionSize.x / 2.0f;
+    p->positionCenter[1] = g_GameManager.gameRegionSize.y - 64.0f;
+    p->positionCenter[2] = 0.49f;
     p->orbsPosition[0].z = 0.49f;
     p->orbsPosition[1].z = 0.49f;
     for (idx = 0; idx < PLAYER_BOMB_REGION_COUNT; idx++)

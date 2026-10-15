@@ -3,7 +3,6 @@
 #include "BombData.hpp"
 
 #include "EffectManager.hpp"
-#include "Gui.hpp"
 #include "ScreenEffect.hpp"
 
 namespace th06
@@ -180,7 +179,7 @@ void BombReimuACalc(Player *player)
     player->bombInfo.timer++;
 }
 
-#pragma var_order(local8, viewport, darkeningTimeLeft)
+#pragma var_order(darknessLevel, viewport, darkeningTimeLeft)
 static void DarkenViewport(Player *player)
 {
     ZunRect viewport;
@@ -210,38 +209,34 @@ static void DarkenViewport(Player *player)
     ScreenEffect_DrawSquare(&viewport, darknessLevel << 24);
 }
 
-#pragma var_order(bombSprite, idx)
 void BombReimuADraw(Player *player)
 {
-    i32 idx;
-    AnmVm *bombSprite;
-
     DarkenViewport(player);
-    bombSprite = &player->bombInfo.sprites[0][0];
-    for (idx = 0; idx < ARRAY_SIZE_SIGNED(player->bombInfo.sprites); idx++)
+    AnmVm *bombSprite = &player->bombInfo.sprites[0][0];
+    for (i32 i = 0; i < ARRAY_SIZE_SIGNED(player->bombInfo.sprites); i++)
     {
-        if (player->bombInfo.reimuABombProjectilesState[idx] == 0)
+        if (player->bombInfo.reimuABombProjectilesState[i] == 0)
         {
             bombSprite = &bombSprite[4];
             continue;
         }
 
-        bombSprite->pos = player->bombInfo.bombRegionPositions[idx] + bombSprite->posOffset;
+        bombSprite->pos = player->bombInfo.bombRegionPositions[i] + bombSprite->posOffset;
         player->ApplyGameRegionOffset(bombSprite);
         g_AnmManager->DrawNoRotation(bombSprite);
         bombSprite++;
 
-        bombSprite->pos = player->bombInfo.bombRegionPositions[idx] + bombSprite->posOffset;
+        bombSprite->pos = player->bombInfo.bombRegionPositions[i] + bombSprite->posOffset;
         player->ApplyGameRegionOffset(bombSprite);
         g_AnmManager->DrawNoRotation(bombSprite);
         bombSprite++;
 
-        bombSprite->pos = player->bombInfo.bombRegionPositions[idx] + bombSprite->posOffset;
+        bombSprite->pos = player->bombInfo.bombRegionPositions[i] + bombSprite->posOffset;
         player->ApplyGameRegionOffset(bombSprite);
         g_AnmManager->DrawNoRotation(bombSprite);
         bombSprite++;
 
-        bombSprite->pos = player->bombInfo.bombRegionPositions[idx] + bombSprite->posOffset;
+        bombSprite->pos = player->bombInfo.bombRegionPositions[i] + bombSprite->posOffset;
         player->ApplyGameRegionOffset(bombSprite);
         g_AnmManager->DrawNoRotation(bombSprite);
         bombSprite++;
@@ -328,15 +323,11 @@ void BombReimuBCalc(Player *player)
     player->bombInfo.timer++;
 }
 
-#pragma var_order(bombSprite, i)
 void BombReimuBDraw(Player *player)
 {
-    AnmVm *bombSprite;
-    i32 i;
-
     DarkenViewport(player);
-    bombSprite = player->bombInfo.sprites[0];
-    for (i = 0; i < 4; i++, bombSprite++)
+    AnmVm *bombSprite = player->bombInfo.sprites[0];
+    for (i32 i = 0; i < 4; i++, bombSprite++)
     {
         bombSprite->pos = player->bombInfo.bombRegionPositions[i] + bombSprite->posOffset;
         bombSprite->pos.x += g_GameManager.gameRegionScreenPos.x;
@@ -346,12 +337,12 @@ void BombReimuBDraw(Player *player)
     }
 }
 
-#pragma var_order(i, starSprite, pad)
+#pragma var_order(i, starSprite, unusedVector)
 void BombMarisaACalc(Player *player)
 {
-    i32 pad[3];
     AnmVm *starSprite;
     i32 i;
+    D3DXVECTOR3 unusedVector;
 
     if (player->bombInfo.timer >= player->bombInfo.duration)
     {
@@ -376,7 +367,6 @@ void BombMarisaACalc(Player *player)
             float starAngle = i * ZUN_2PI / 8.0f;
 
             player->bombInfo.bombRegionVelocities[i].x = cosf(starAngle) * 2;
-
             player->bombInfo.bombRegionVelocities[i].y = sinf(starAngle) * 2;
             player->bombInfo.bombRegionVelocities[i].z = 0.0f;
         }
@@ -409,17 +399,13 @@ void BombMarisaACalc(Player *player)
     player->bombInfo.timer++;
 }
 
-#pragma var_order(bombSprite, idx)
 void BombMarisaADraw(Player *player)
 {
-    AnmVm *bombSprite;
-    i32 idx;
-
     DarkenViewport(player);
-    bombSprite = &player->bombInfo.sprites[0][0];
-    for (idx = 0; idx < ARRAY_SIZE_SIGNED(player->bombInfo.sprites); idx++)
+    AnmVm *bombSprite = &player->bombInfo.sprites[0][0];
+    for (i32 i = 0; i < ARRAY_SIZE_SIGNED(player->bombInfo.sprites); i++)
     {
-        bombSprite->pos = player->bombInfo.bombRegionPositions[idx];
+        bombSprite->pos = player->bombInfo.bombRegionPositions[i];
         bombSprite->pos.x += g_GameManager.gameRegionScreenPos.x;
         bombSprite->pos.y += g_GameManager.gameRegionScreenPos.y;
         bombSprite->pos.z = 0.0f;
@@ -427,7 +413,7 @@ void BombMarisaADraw(Player *player)
         bombSprite->scaleY = 3.2f;
         g_AnmManager->Draw(bombSprite);
 
-        bombSprite->pos -= player->bombInfo.bombRegionVelocities[idx] * 6.0f;
+        bombSprite->pos -= player->bombInfo.bombRegionVelocities[i] * 6.0f;
         bombSprite->pos.x += -32.0f;
         bombSprite->pos.y += -32.0f;
         bombSprite->pos.z = 0.0f;
@@ -435,12 +421,12 @@ void BombMarisaADraw(Player *player)
         bombSprite->scaleY = 2.2f;
         g_AnmManager->Draw(bombSprite);
 
-        bombSprite->pos -= player->bombInfo.bombRegionVelocities[idx] * 2.0f;
+        bombSprite->pos -= player->bombInfo.bombRegionVelocities[i] * 2.0f;
         bombSprite->pos.x += 64.0f;
         bombSprite->pos.y += 64.0f;
         bombSprite->pos.z = 0.0f;
 
-        bombSprite->pos -= player->bombInfo.bombRegionVelocities[idx] * 2.0f;
+        bombSprite->pos -= player->bombInfo.bombRegionVelocities[i] * 2.0f;
         bombSprite->pos.x += -32.0f;
         bombSprite->pos.y += -32.0f;
         bombSprite->pos.z = 0.0f;
@@ -515,15 +501,11 @@ void BombMarisaBCalc(Player *player)
     player->bombInfo.timer++;
 }
 
-#pragma var_order(bombSprite, i)
 void BombMarisaBDraw(Player *player)
 {
-    AnmVm *bombSprite;
-    i32 i;
-
     DarkenViewport(player);
-    bombSprite = player->bombInfo.sprites[0];
-    for (i = 0; i < 4; i++)
+    AnmVm *bombSprite = player->bombInfo.sprites[0];
+    for (i32 i = 0; i < 4; i++)
     {
         float spriteAngle = (((ZUN_PI / 5.0f) * i) / 3.0f - ZUN_PI) + (ZUN_2PI / 5.0f);
         bombSprite->pos = player->positionCenter;

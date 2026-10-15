@@ -1,7 +1,6 @@
 #include "stdafx.h"
 
 #include "ChainPriorities.hpp"
-#include "Gui.hpp"
 #include "StageMenu.hpp"
 
 // Keep AsciiManager.hpp outside the common PCH so its inline methods are

@@ -429,7 +429,7 @@ void SoundPlayer::PlaySoundByIdx(SoundIdx idx, i32 unused)
     i32 i;
 
     SFXToPlay = g_SoundBufferIdxVol[idx].unk;
-    for (i = 0; i < 3; i++)
+    for (i = 0; i < ARRAY_SIZE_SIGNED(this->soundBuffersToPlay); i++)
     {
         if (this->soundBuffersToPlay[i] < 0)
         {
@@ -440,7 +440,7 @@ void SoundPlayer::PlaySoundByIdx(SoundIdx idx, i32 unused)
             return;
         }
     }
-    if (i >= 3)
+    if (i >= ARRAY_SIZE_SIGNED(this->soundBuffersToPlay))
     {
         return;
     }

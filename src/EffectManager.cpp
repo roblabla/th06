@@ -6,11 +6,6 @@
 
 namespace th06
 {
-inline EffectManager::EffectManager()
-{
-    this->Reset();
-}
-
 BSS_SORT(D1) EffectManager g_EffectManager;
 BSS_SORT(D2) ChainElem g_EffectManagerCalcChain;
 BSS_SORT(D3) ChainElem g_EffectManagerDrawChain;
@@ -24,9 +19,9 @@ EffectCallbackResult Effect_RandomSplash(Effect *effect)
 {
     if (effect->timer == 0 && effect->timer.HasTicked())
     {
-        effect->unk_11c.x = (g_Rng.GetRandomF32InRange(256.0f) - 128.0f) / 12.0f;
-        effect->unk_11c.y = (g_Rng.GetRandomF32InRange(256.0f) - 128.0f) / 12.0f;
-        effect->unk_11c.z = 0.0f;
+        effect->unk_11c[0] = (g_Rng.GetRandomF32InRange(256.0f) - 128.0f) / 12.0f;
+        effect->unk_11c[1] = (g_Rng.GetRandomF32InRange(256.0f) - 128.0f) / 12.0f;
+        effect->unk_11c[2] = 0.0f;
 
         effect->unk_128 = -effect->unk_11c / 19.0f;
     }
@@ -41,9 +36,9 @@ EffectCallbackResult Effect_RandomSplashBig(Effect *effect)
 {
     if (effect->timer == 0 && effect->timer.HasTicked())
     {
-        effect->unk_11c.x = (g_Rng.GetRandomF32InRange(256.0f) - 128.0f) * 4.0f / 33.0f;
-        effect->unk_11c.y = (g_Rng.GetRandomF32InRange(256.0f) - 128.0f) * 4.0f / 33.0f;
-        effect->unk_11c.z = 0.0f;
+        effect->unk_11c[0] = (g_Rng.GetRandomF32InRange(256.0f) - 128.0f) * 4.0f / 33.0f;
+        effect->unk_11c[1] = (g_Rng.GetRandomF32InRange(256.0f) - 128.0f) * 4.0f / 33.0f;
+        effect->unk_11c[2] = 0.0f;
 
         effect->unk_128 = -effect->unk_11c / 20.0f;
     }

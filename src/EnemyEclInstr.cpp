@@ -3,7 +3,6 @@
 #include "EnemyEclInstr.hpp"
 #include "EffectManager.hpp"
 #include "EnemyManager.hpp"
-#include "Gui.hpp"
 
 namespace th06
 {

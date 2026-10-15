@@ -4,7 +4,6 @@
 #include "EffectManager.hpp"
 #include "EnemyEclInstr.hpp"
 #include "EnemyManager.hpp"
-#include "Gui.hpp"
 #include "Stage.hpp"
 
 namespace th06
@@ -898,11 +897,9 @@ restart_sub_changed:
             g_EnemyManager.SpawnEnemy(args.subId, args.pos.AsD3dXVec(), args.life, args.itemDrop, args.score);
             break;
         }
-#pragma var_order(currentEnemy, idx)
         case ECL_OPCODE_ENEMY_KILL_ALL: {
-            Enemy *currentEnemy;
-            i32 idx;
-            for (currentEnemy = &g_EnemyManager.enemies[0], idx = 0; idx < MAX_ENEMY_COUNT; idx++, currentEnemy++)
+            Enemy *currentEnemy = &g_EnemyManager.enemies[0];
+            for (i32 i = 0; i < MAX_ENEMY_COUNT; i++, currentEnemy++)
             {
                 if (!currentEnemy->flags.isSlotOccupied)
                 {
@@ -974,7 +971,7 @@ restart_sub_changed:
             utils::AddNormalizeAngle(enemy->angle, g_Supervisor.effectiveFramerateMultiplier * enemy->angularVelocity);
         enemy->speed = g_Supervisor.effectiveFramerateMultiplier * enemy->acceleration + enemy->speed;
         sincosmul(&enemy->axisSpeed, enemy->angle, enemy->speed);
-        enemy->axisSpeed.z = 0.0f;
+        enemy->axisSpeed[2] = 0.0f;
         break;
     case EnemyMove_Interp: {
         enemy->moveInterpTimer--;

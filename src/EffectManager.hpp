@@ -36,7 +36,10 @@ enum ParticleEffects
 
 struct EffectManager
 {
-    EffectManager();
+    EffectManager()
+    {
+        this->Reset();
+    }
 
     void Reset();
     Effect *SpawnParticles(i32 effectIdx, D3DXVECTOR3 *pos, i32 count, ZunColor color);
