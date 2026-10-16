@@ -401,17 +401,16 @@ void ExInsBatWingEffect(Enemy *enemy, EclRawInstr *instr)
         particlePos.y += sinf(finalAngle) * distanceModifier;
         effect = g_EffectManager.SpawnParticles(PARTICLE_EFFECT_UNK_19, &particlePos, 1, COLOR_DEEPBLUE);
         effect->unk_11c.x = (g_Rng.GetRandomF32InRange(40.0f) - 20.0f) / 60.0f;
-        effect->unk_11c.y = (8.0f * baseAngleModifier) / 60.0f - (4.0f / 15.0f);
+        effect->unk_11c.y = 8.0f * baseAngleModifier / 60.0f - (4.0f / 15.0f);
         effect->unk_11c.z = 0.0f;
         effect->unk_128 = -effect->unk_11c / 120.0f;
 
-        // TODO: Different codegen here in trial
         particlePos = enemy->position;
         particlePos.x -= cosf(finalAngle) * distanceModifier;
         particlePos.y += sinf(finalAngle) * distanceModifier;
         effect = g_EffectManager.SpawnParticles(PARTICLE_EFFECT_UNK_19, &particlePos, 1, COLOR_DEEPBLUE);
         effect->unk_11c.x = (g_Rng.GetRandomF32InRange(40.0f) - 20.0f) / 60.0f;
-        effect->unk_11c.y = (8.0f * baseAngleModifier) / 60.0f - (4.0f / 15.0f);
+        effect->unk_11c.y = 8.0f * baseAngleModifier / 60.0f - (4.0f / 15.0f);
         effect->unk_11c.z = 0.0f;
         effect->unk_128 = -effect->unk_11c / 120.0f;
     }

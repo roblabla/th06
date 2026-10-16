@@ -1488,8 +1488,8 @@ i32 MainMenu::ReplayHandling()
             g_Supervisor.framerateMultiplier = 1.0f;
             strcpy(g_GameManager.replayFile, this->replayFilePaths[this->chosenReplay]);
             g_GameManager.difficulty = (Difficulty)this->currentReplay->difficulty;
-            g_GameManager.character = this->currentReplay->shottypeChara / 2;
-            g_GameManager.shotType = this->currentReplay->shottypeChara % 2;
+            g_GameManager.character = this->currentReplay->shottypeChara / SHOTTYPES_PER_CHARACTER;
+            g_GameManager.shotType = this->currentReplay->shottypeChara % SHOTTYPES_PER_CHARACTER;
 #if !TRIALBUILD
             cur = 0;
             while (this->currentReplay->stageReplayData[cur] == NULL)

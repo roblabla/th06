@@ -399,7 +399,7 @@ th06::Player::RegisterChain
 th06::Player::CutChain
 th06::Player::CalcItemBoxCollision
 th06::Player::CheckGraze
-th06::Player::CalcKillBoxCollision
+th06::Player::CheckCollision
 th06::Player::CalcLaserHitbox
 th06::Player::CalcDamageToEnemy
 th06::Player::ScoreGraze

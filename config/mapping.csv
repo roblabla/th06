@@ -308,7 +308,7 @@ th06::FireBulletReimuB,0x426420,0x22,default,,FireBulletResult,Player*,PlayerBul
 th06::FireBulletMarisaA,0x426450,0x22,default,,FireBulletResult,Player*,PlayerBullet*,u32,u32
 th06::FireBulletMarisaB,0x426480,0x22,default,,FireBulletResult,Player*,PlayerBullet*,u32,u32
 th06::Player::CalcDamageToEnemy,0x4264b0,0x77d,__thiscall,,i32,Player*,D3DXVECTOR3*,D3DXVECTOR3*,i32*
-th06::Player::CalcKillBoxCollision,0x426c40,0x1b0,__thiscall,,i32,Player*,D3DXVECTOR3*,D3DXVECTOR3*
+th06::Player::CheckCollision,0x426c40,0x1b0,__thiscall,,i32,Player*,D3DXVECTOR3*,D3DXVECTOR3*
 th06::Player::CheckGraze,0x426df0,0x1dd,__thiscall,,i32,Player*,D3DXVECTOR3*,D3DXVECTOR3*
 th06::Player::CalcItemBoxCollision,0x426fd0,0x1ba,__thiscall,,i32,Player*,D3DXVECTOR3*,D3DXVECTOR3*
 th06::Player::CalcLaserHitbox,0x427190,0x49c,__thiscall,,i32,Player*,D3DXVECTOR3*,D3DXVECTOR3*,D3DXVECTOR3*,f32,i32

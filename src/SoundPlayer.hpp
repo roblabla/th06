@@ -56,6 +56,8 @@ ZUN_ASSERT_TYPE(SoundEffectData, 0x8, 4);
 // This is more than the actual number of sound effects
 #define SOUND_EFFECT_COUNT 128
 
+#define SFX_QUEUE_LENGTH 3
+
 struct SoundPlayer
 {
     SoundPlayer()
@@ -106,7 +108,7 @@ struct SoundPlayer
     DWORD backgroundMusicThreadId;
     HANDLE backgroundMusicThreadHandle;
     unreferenced_fields(0x4);
-    i32 soundBuffersToPlay[3];
+    i32 soundBuffersToPlay[SFX_QUEUE_LENGTH];
     CStreamingSound *backgroundMusic;
     HANDLE backgroundMusicUpdateEvent;
     BOOL isLooping;
