@@ -110,6 +110,13 @@ struct EclRawInstrLaserArgs
 };
 ZUN_ASSERT_TYPE(EclRawInstrLaserArgs, 0x34, 4);
 
+struct EclRawInstrLaserOffsetArgs
+{
+    i32 laserId;
+    D3DXVECTOR3 offset;
+};
+ZUN_ASSERT_TYPE(EclRawInstrLaserOffsetArgs, 0x10, 4);
+
 struct EclRawInstrSpellcardEffectArgs
 {
     i32 effectColorId;
