@@ -470,13 +470,11 @@ restart_sub_changed:
         }
         case ECL_OPCODE_SHOOT_INTERVAL:
             enemy->shootInterval = GET_INSTR_INT_ARG(0);
-            // TODO: Different codegen here in trial
             enemy->shootInterval += g_GameManager.RankLerpInt(enemy->shootInterval / 5, -enemy->shootInterval / 5);
             enemy->shootIntervalTimer = 0;
             break;
         case ECL_OPCODE_SHOOT_INTERVAL_DELAYED:
             enemy->shootInterval = GET_INSTR_INT_ARG(0);
-            // TODO: Different codegen here in trial
             enemy->shootInterval += g_GameManager.RankLerpInt(enemy->shootInterval / 5, -enemy->shootInterval / 5);
             if (enemy->shootInterval != 0)
             {
@@ -536,7 +534,6 @@ restart_sub_changed:
         case ECL_OPCODE_LASER_ROTATE:
             if (enemy->lasers[GET_INSTR_INT_ARG(0)] != NULL)
             {
-                // TODO: Different codegen here in trial
                 enemy->lasers[GET_INSTR_INT_ARG(0)]->angle += *EclGetVarFloat(enemy, &GET_INSTR_FLOAT_ARG(1), NULL);
             }
             break;
@@ -773,7 +770,6 @@ restart_sub_changed:
                 length = strlen(catk->name);
                 while (length > 0)
                 {
-                    // TODO: Different codegen here in trial
                     csum += catk->name[--length];
                 }
                 if (catk->nameCsum != (u8)csum)
@@ -1011,7 +1007,6 @@ restart_sub_changed:
         if (enemy->moveInterpTimer <= 0)
         {
             enemy->flags.movementMode = EnemyMove_AxisSpeed;
-            // TODO: Different codegen here in trial
             enemy->position = enemy->moveInterpStartPos + enemy->moveInterp;
             enemy->axisSpeed = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
         }

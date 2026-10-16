@@ -130,14 +130,12 @@ struct MidiOutput : MidiTimer
     ZunResult LoadFile(const char *midiPath);
     ZunResult Play();
 
-    // TODO: Different codegen here in trial
     ZunResult LoadAndPlay(const char *midiPath)
     {
         this->StopPlayback();
         this->LoadFile(midiPath);
         return this->Play();
     }
-    // TODO: Different codegen here in trial
     ZunResult ParseAndPlay(i32 idx)
     {
         this->StopPlayback();
