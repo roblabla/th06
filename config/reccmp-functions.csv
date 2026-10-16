@@ -59,7 +59,7 @@ th06::EclMathSub,0x40b4d0,function
 th06::EclMathMul,0x40b580,function
 th06::EclMathDiv,0x40b650,function
 th06::EclMathMod,0x40b700,function
-th06::EclMathAtan2,0x40b7d0,function
+th06::EclMathLineAngle,0x40b7d0,function
 D3DXVec3Length,0x40b890,function
 th06::ExInsCirnoRainbowBallJank,0x40b8e0,function
 th06::ExInsShootAtRandomArea,0x40ba80,function

@@ -73,7 +73,7 @@ th06::EclMathSub,0x405B00,function
 th06::EclMathMul,0x405BB0,function
 th06::EclMathDiv,0x405C70,function
 th06::EclMathMod,0x405D20,function
-th06::EclMathAtan2,0x405E00,function
+th06::EclMathLineAngle,0x405E00,function
 th06::EclMoveDirTime,0x405F10,function
 th06::EclMovePosTime,0x406010,function
 th06::EclMoveTime,0x406150,function

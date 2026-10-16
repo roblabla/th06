@@ -4,15 +4,22 @@
 #include "EffectManager.hpp"
 #include "EnemyManager.hpp"
 
+#define GET_ARG(type, num) ((type *)&curInstr->args)[num]
+#define GET_STRING_ARG(num) &GET_ARG(char, num)
+#define GET_INT_ARG(num) GET_ARG(i32, num)
+#define GET_SHORT_ARG(num) GET_ARG(i16, num)
+#define GET_FLOAT_ARG(num) GET_ARG(float, num)
+#define GET_VAR_ARG(num) GET_ARG(EclVarId, num)
+
 namespace th06
 {
 #pragma var_order(i, currentBullet, effectIndex)
-void ExInsCirnoRainbowBallJank(Enemy *enemy, EclRawInstr *instr)
+void ExInsCirnoRainbowBallJank(Enemy *enemy, EclRawInstr *curInstr)
 {
     i32 i;
 
     Bullet *currentBullet = g_BulletManager.bullets;
-    i32 effectIndex = instr->args.exInstr.i32Param;
+    i32 effectIndex = GET_INT_ARG(1);
 
     g_EffectManager.SpawnParticles(PARTICLE_EFFECT_UNK_12, &enemy->position, 1, COLOR_WHITE);
     for (i = 0; i < MAX_ENEMY_BULLETS; i++, currentBullet++)
@@ -41,11 +48,9 @@ void ExInsCirnoRainbowBallJank(Enemy *enemy, EclRawInstr *instr)
     }
 }
 
-void ExInsShootAtRandomArea(Enemy *enemy, EclRawInstr *instr)
+void ExInsShootAtRandomArea(Enemy *enemy, EclRawInstr *curInstr)
 {
-    f32 bulletSpeed;
-
-    bulletSpeed = instr->args.exInstr.i32Param;
+    f32 bulletSpeed = GET_INT_ARG(1);
     enemy->bulletProps.position = enemy->position + enemy->shootOffset;
     enemy->bulletProps.position.x = (g_Rng.GetRandomF32InRange(bulletSpeed) + enemy->position.x) - bulletSpeed / 2.0f;
     bulletSpeed *= 0.75f;
@@ -55,7 +60,7 @@ void ExInsShootAtRandomArea(Enemy *enemy, EclRawInstr *instr)
 
 #pragma var_order(i, propsSpeedBackup, starPatterTarget1, targetDistance, starPatternTarget0, patternPosition,         \
                   baseTargetPosition)
-void ExInsShootStarPattern(Enemy *enemy, EclRawInstr *instr)
+void ExInsShootStarPattern(Enemy *enemy, EclRawInstr *curInstr)
 {
 #define ENEMY_POS 0
 #define PLAYER_POS 1
@@ -168,7 +173,7 @@ i32 g_PatchouliShottypeVars[CHARACTER_COUNT][SHOTTYPES_PER_CHARACTER][3] = {
 };
 // clang-format on
 
-void ExInsPatchouliShottypeSetVars(Enemy *enemy, EclRawInstr *instr)
+void ExInsPatchouliShottypeSetVars(Enemy *enemy, EclRawInstr *curInstr)
 {
     enemy->currentContext.int1 = g_PatchouliShottypeVars[g_GameManager.character][g_GameManager.shotType][0];
     enemy->currentContext.int2 = g_PatchouliShottypeVars[g_GameManager.character][g_GameManager.shotType][1];
@@ -176,7 +181,7 @@ void ExInsPatchouliShottypeSetVars(Enemy *enemy, EclRawInstr *instr)
 }
 
 #pragma var_order(playerBulletOffsetY, playerBulletOffsetX, bulletsLeft, i, currentBullet)
-void ExInsStage56Func4(Enemy *enemy, EclRawInstr *instr)
+void ExInsStage56Func4(Enemy *enemy, EclRawInstr *curInstr)
 {
     i32 bulletsLeft;
     Bullet *currentBullet;
@@ -184,10 +189,10 @@ void ExInsStage56Func4(Enemy *enemy, EclRawInstr *instr)
     f32 playerBulletOffsetX;
     f32 playerBulletOffsetY;
 
-    if (instr->args.exInstr.i32Param < 2)
+    if (GET_INT_ARG(1) < 2)
     {
         g_EffectManager.SpawnParticles(PARTICLE_EFFECT_UNK_12, &enemy->position, 1, COLOR_WHITE);
-        g_GameManager.isTimeStopped = instr->args.exInstr.u8Param;
+        g_GameManager.isTimeStopped = GET_INT_ARG(1);
     }
     else
     {
@@ -282,7 +287,7 @@ void ExInsStage56Func4(Enemy *enemy, EclRawInstr *instr)
 
 #pragma var_order(patternPosition, i, bulletProps, sinOut, bpPositionOffset, matrixOutSeed, matrixIn, bulletAngle,     \
                   cosOut, matrixInSeed, matrixOut)
-void ExInsStage5Func5(Enemy *enemy, EclRawInstr *instr)
+void ExInsStage5Func5(Enemy *enemy, EclRawInstr *curInstr)
 {
     if (enemy->currentContext.int2 % 9 == 0)
     {
@@ -363,7 +368,7 @@ void ExInsStage5Func5(Enemy *enemy, EclRawInstr *instr)
 }
 
 #pragma var_order(effect, baseAngleModifier, distanceModifier, finalAngle, particlePos)
-void ExInsBatWingEffect(Enemy *enemy, EclRawInstr *instr)
+void ExInsBatWingEffect(Enemy *enemy, EclRawInstr *curInstr)
 {
     i32 baseAngleModifier;
     f32 distanceModifier;
@@ -420,22 +425,20 @@ void ExInsBatWingEffect(Enemy *enemy, EclRawInstr *instr)
 
 #pragma var_order(laserProps, i, lengthMultiplier, attackType, innerLoopCount, angleDiff, outerLoopCount, laserAngle,  \
                   randomAngleModifier, positionVectors)
-void ExInsStage6Func7(Enemy *enemy, EclRawInstr *instr)
+void ExInsStage6Func7(Enemy *enemy, EclRawInstr *curInstr)
 {
     f32 angleDiff;
-    i32 attackType;
     i32 i;
     i32 innerLoopCount;
     f32 laserAngle;
     EnemyShooter laserProps;
     f32 lengthMultiplier;
     i32 outerLoopCount;
-    f32 randomAngleModifier;
 
     D3DXVECTOR3 positionVectors[8];
 
-    attackType = instr->args.exInstr.i32Param;
-    randomAngleModifier = g_Rng.GetRandomF32InRange(ZUN_2PI);
+    i32 attackType = GET_INT_ARG(1);
+    f32 randomAngleModifier = g_Rng.GetRandomF32InRange(ZUN_2PI);
 
     for (outerLoopCount = 0; outerLoopCount < 2; outerLoopCount++)
     {
@@ -537,7 +540,7 @@ void ExInsStage6Func7(Enemy *enemy, EclRawInstr *instr)
 }
 
 #pragma var_order(bulletProps, changedBullets, i, currentBullet)
-void ExInsStage6Func8(Enemy *enemy, EclRawInstr *instr)
+void ExInsStage6Func8(Enemy *enemy, EclRawInstr *curInstr)
 {
     i32 changedBullets;
     Bullet *currentBullet;
@@ -576,7 +579,7 @@ void ExInsStage6Func8(Enemy *enemy, EclRawInstr *instr)
 }
 
 #pragma var_order(unusedShooter, i, local64, currentBullet, randomAngleModifier)
-void ExInsStage6Func9(Enemy *enemy, EclRawInstr *instr)
+void ExInsStage6Func9(Enemy *enemy, EclRawInstr *curInstr)
 {
     Bullet *currentBullet;
     f32 distance;
@@ -623,7 +626,7 @@ void ExInsStage6Func9(Enemy *enemy, EclRawInstr *instr)
 }
 
 #pragma var_order(unusedShooter, i, currentBullet, unusedRandomAngle)
-void ExInsStage6Func11(Enemy *enemy, EclRawInstr *instr)
+void ExInsStage6Func11(Enemy *enemy, EclRawInstr *curInstr)
 {
     Bullet *currentBullet = g_BulletManager.bullets;
     i32 i;
@@ -655,14 +658,14 @@ void ExInsStage6Func11(Enemy *enemy, EclRawInstr *instr)
     }
 }
 
-void ExInsHandleBatTransformation(Enemy *enemy, EclRawInstr *instr)
+void ExInsHandleBatTransformation(Enemy *enemy, EclRawInstr *curInstr)
 {
     if (enemy->life <= 0)
     {
         return;
     }
 
-    ExInsBatWingEffect(enemy, instr);
+    ExInsBatWingEffect(enemy, curInstr);
     if (g_Player.bombInfo.isInUse)
     {
         if (enemy->anmPoseLeft >= 0) // Check if poses are enabled
@@ -689,7 +692,7 @@ void ExInsHandleBatTransformation(Enemy *enemy, EclRawInstr *instr)
     }
 }
 
-void ExInsStage4Func12(Enemy *enemy, EclRawInstr *instr)
+void ExInsStage4Func12(Enemy *enemy, EclRawInstr *curInstr)
 {
     for (i32 i = 0; i < 8; i++)
     {
@@ -704,12 +707,12 @@ void ExInsStage4Func12(Enemy *enemy, EclRawInstr *instr)
 }
 
 #pragma var_order(i, bulletProps, basePatternAngle, numPatterns)
-void ExInsStageXFunc13(Enemy *enemy, EclRawInstr *instr)
+void ExInsStageXFunc13(Enemy *enemy, EclRawInstr *curInstr)
 {
     EnemyShooter bulletProps = enemy->bulletProps;
     i32 i;
 
-    i32 numPatterns = instr->args.exInstr.i32Param;
+    i32 numPatterns = GET_INT_ARG(1);
     f32 basePatternAngle = enemy->currentContext.float2;
     if (enemy->currentContext.int3 % 6 == 0)
     {
@@ -726,7 +729,7 @@ void ExInsStageXFunc13(Enemy *enemy, EclRawInstr *instr)
 }
 
 #pragma var_order(bulletPosition, i, angleSin, currentLaser, angleCos, positionMultiplier)
-void ExInsStageXFunc14(Enemy *enemy, EclRawInstr *instr)
+void ExInsStageXFunc14(Enemy *enemy, EclRawInstr *curInstr)
 {
     f32 angleCos;
     f32 angleSin;
@@ -760,7 +763,7 @@ void ExInsStageXFunc14(Enemy *enemy, EclRawInstr *instr)
 }
 
 #pragma var_order(unusedShooter, totalIterations, i, innerBullet, enemyAngle, distance, currentBullet, bulletsAngle, j)
-void ExInsStageXFunc15(Enemy *enemy, EclRawInstr *instr)
+void ExInsStageXFunc15(Enemy *enemy, EclRawInstr *curInstr)
 {
     f32 bulletsAngle;
     Bullet *currentBullet;
@@ -820,13 +823,13 @@ void ExInsStageXFunc15(Enemy *enemy, EclRawInstr *instr)
         }
     }
 
-    ExInsHandleBatTransformation(enemy, instr);
+    ExInsHandleBatTransformation(enemy, curInstr);
     enemy->currentContext.int3 = totalIterations;
 }
 
 #define RAGE_TIME_THRESHOLD 7200
 
-void ExInsFlandreFinalContextUpdate(Enemy *enemy, EclRawInstr *instr)
+void ExInsFlandreFinalContextUpdate(Enemy *enemy, EclRawInstr *curInstr)
 {
     i32 remainingLife = enemy->life;
     if (enemy->phaseTimer >= RAGE_TIME_THRESHOLD)
@@ -834,7 +837,7 @@ void ExInsFlandreFinalContextUpdate(Enemy *enemy, EclRawInstr *instr)
         remainingLife = 0;
     }
 
-    if (instr->args.exInstr.i32Param == 0)
+    if (GET_INT_ARG(1) == 0)
     {
         enemy->currentContext.float3 = 2.0f - (f32)((remainingLife * 1.0f) / 6000.0f);
         enemy->currentContext.counter1 = (remainingLife * 240) / 6000 + 40;

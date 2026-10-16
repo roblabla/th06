@@ -214,9 +214,8 @@ Effect *EffectManager::SpawnParticles(i32 effectIdx, D3DXVECTOR3 *pos, i32 count
         effect->timer = 0;
         effect->flag_17a = false;
         effect->unk_17b = 0;
-        count--;
 
-        if (count == 0)
+        if (--count == 0)
             break;
 
         if (this->nextIndex == 0)

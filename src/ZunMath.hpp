@@ -15,23 +15,17 @@ struct ZunVec3
     f32 x;
     f32 y;
     f32 z;
-
-    D3DXVECTOR3 *AsD3dXVec()
-    {
-        return (D3DXVECTOR3 *)this;
-    }
 };
+ZUN_ASSERT_SIZE(ZunVec3, 0xC);
 
-inline void ZunVec3_SetVecCorners(ZunVec3 *topLeftCorner, ZunVec3 *bottomRightCorner, const D3DXVECTOR3 *centerPosition,
-                                  const D3DXVECTOR3 *size)
+inline void SetVecCorners(D3DXVECTOR3 *topLeftCorner, D3DXVECTOR3 *bottomRightCorner,
+                                  const D3DXVECTOR3 *centerPosition, const D3DXVECTOR3 *size)
 {
     topLeftCorner->x = centerPosition->x - size->x / 2.0f;
     topLeftCorner->y = centerPosition->y - size->y / 2.0f;
     bottomRightCorner->x = size->x / 2.0f + centerPosition->x;
     bottomRightCorner->y = size->y / 2.0f + centerPosition->y;
 }
-
-ZUN_ASSERT_SIZE(ZunVec3, 0xC);
 
 #define ZUN_MIN(x, y) ((x) > (y) ? (y) : (x))
 #define ZUN_PI ((f32)(3.14159265358979323846))
