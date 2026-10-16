@@ -239,7 +239,7 @@ restart_sub_changed:
             break;
         case ECL_OPCODE_MATH_LINE_ANGLE:
             EclMathLineAngle(enemy, GET_INSTR_VAR_ARG(0), &GET_FLOAT_ARG(1), &GET_FLOAT_ARG(2), &GET_FLOAT_ARG(3),
-                         &GET_FLOAT_ARG(4));
+                             &GET_FLOAT_ARG(4));
             break;
 #pragma var_order(rhs, lhs)
         case ECL_OPCODE_CMP_INT: {
@@ -537,8 +537,7 @@ restart_sub_changed:
             if (enemy->lasers[GET_INSTR_INT_ARG(0)] != NULL)
             {
                 // TODO: Different codegen here in trial
-                enemy->lasers[GET_INSTR_INT_ARG(0)]->angle +=
-                    *EclGetVarFloat(enemy, &GET_INSTR_FLOAT_ARG(1), NULL);
+                enemy->lasers[GET_INSTR_INT_ARG(0)]->angle += *EclGetVarFloat(enemy, &GET_INSTR_FLOAT_ARG(1), NULL);
             }
             break;
         case ECL_OPCODE_LASER_ROTATE_FROM_PLAYER:
@@ -552,13 +551,11 @@ restart_sub_changed:
         case ECL_OPCODE_LASER_OFFSET:
             if (enemy->lasers[GET_INSTR_INT_ARG(0)] != NULL)
             {
-                enemy->lasers[GET_INSTR_INT_ARG(0)]->pos =
-                    enemy->position + *(D3DXVECTOR3*)&GET_INSTR_FLOAT_ARG(1);
+                enemy->lasers[GET_INSTR_INT_ARG(0)]->pos = enemy->position + *(D3DXVECTOR3 *)&GET_INSTR_FLOAT_ARG(1);
             }
             break;
         case ECL_OPCODE_LASER_TEST:
-            if (enemy->lasers[GET_INSTR_INT_ARG(0)] != NULL &&
-                enemy->lasers[GET_INSTR_INT_ARG(0)]->inUse)
+            if (enemy->lasers[GET_INSTR_INT_ARG(0)] != NULL && enemy->lasers[GET_INSTR_INT_ARG(0)]->inUse)
             {
                 enemy->currentContext.compareRegister = 0;
             }
@@ -568,8 +565,7 @@ restart_sub_changed:
             }
             break;
         case ECL_OPCODE_LASER_CANCEL:
-            if (enemy->lasers[GET_INSTR_INT_ARG(0)] != NULL &&
-                enemy->lasers[GET_INSTR_INT_ARG(0)]->inUse &&
+            if (enemy->lasers[GET_INSTR_INT_ARG(0)] != NULL && enemy->lasers[GET_INSTR_INT_ARG(0)]->inUse &&
                 enemy->lasers[GET_INSTR_INT_ARG(0)]->state < LASER_STATE_DESPAWNING)
             {
                 enemy->lasers[GET_INSTR_INT_ARG(0)]->state = LASER_STATE_DESPAWNING;
@@ -1089,7 +1085,7 @@ restart_sub_changed:
 #pragma var_order(args, angle)
 static void EclMoveDirTime(Enemy *enemy, EclRawInstr *instr)
 {
-    void* args = instr->args;
+    void *args = instr->args;
 
     f32 angle = *EclGetVarFloat(enemy, &GET_FLOAT_ARG(1), NULL);
 
@@ -1107,7 +1103,7 @@ static void EclMoveDirTime(Enemy *enemy, EclRawInstr *instr)
 
 static void EclMovePosTime(Enemy *enemy, EclRawInstr *instr)
 {
-    void* args = instr->args;
+    void *args = instr->args;
 
     D3DXVECTOR3 newPos;
     newPos.x = *EclGetVarFloat(enemy, &GET_FLOAT_ARG(1), NULL);
@@ -1126,7 +1122,7 @@ static void EclMovePosTime(Enemy *enemy, EclRawInstr *instr)
 
 static void EclMoveTime(Enemy *enemy, EclRawInstr *instr)
 {
-    void* args = instr->args;
+    void *args = instr->args;
 
     f32 angle = *EclGetVarFloat(enemy, &enemy->angle, NULL);
 
