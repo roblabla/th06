@@ -552,7 +552,7 @@ static ChainCallbackResult EnemyManager_OnUpdate(EnemyManager *mgr)
             if (curEnemy->flags.isCollidable && curEnemy->flags.isInteractable)
             {
                 enemyHitbox = curEnemy->hitboxDimensions / 1.5f;
-                if (g_Player.CalcKillBoxCollision(&curEnemy->position, &enemyHitbox) == 1 &&
+                if (g_Player.CheckCollision(&curEnemy->position, &enemyHitbox) == COLLISION_HIT &&
                     curEnemy->flags.isInteractable && !curEnemy->flags.isBoss)
                 {
                     curEnemy->life -= 10;

@@ -310,7 +310,7 @@ th06::FireBulletReimuB,0x426420,function
 th06::FireBulletMarisaA,0x426450,function
 th06::FireBulletMarisaB,0x426480,function
 th06::Player::CalcDamageToEnemy,0x4264b0,function
-th06::Player::CalcKillBoxCollision,0x426c40,function
+th06::Player::CheckCollision,0x426c40,function
 th06::Player::CheckGraze,0x426df0,function
 th06::Player::CalcItemBoxCollision,0x426fd0,function
 th06::Player::CalcLaserHitbox,0x427190,function

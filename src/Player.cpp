@@ -486,7 +486,7 @@ i32 Player::CalcDamageToEnemy(D3DXVECTOR3 *enemyPos, D3DXVECTOR3 *enemyHitboxSiz
 
 #pragma var_order(bombProjectileTopLeft, curBombIdx, bulletBottomRight, bulletTopLeft, curBombProjectile,              \
                   bombProjectileBottomRight)
-i32 Player::CalcKillBoxCollision(D3DXVECTOR3 *bulletCenter, D3DXVECTOR3 *bulletSize)
+i32 Player::CheckCollision(D3DXVECTOR3 *bulletCenter, D3DXVECTOR3 *bulletSize)
 {
     PlayerRect *curBombProjectile;
     D3DXVECTOR3 bulletTopLeft, bulletBottomRight;
@@ -511,22 +511,22 @@ i32 Player::CalcKillBoxCollision(D3DXVECTOR3 *bulletCenter, D3DXVECTOR3 *bulletS
         if (!(bombProjectileTopLeft.x > bulletBottomRight.x || bombProjectileBottomRight.x < bulletTopLeft.x ||
               bombProjectileTopLeft.y > bulletBottomRight.y || bombProjectileBottomRight.y < bulletTopLeft.y))
         {
-            return 2;
+            return COLLISION_GRAZE;
         }
     }
     if (this->hitboxTopLeft.x > bulletBottomRight.x || this->hitboxTopLeft.y > bulletBottomRight.y ||
         this->hitboxBottomRight.x < bulletTopLeft.x || this->hitboxBottomRight.y < bulletTopLeft.y)
     {
-        return 0;
+        return COLLISION_NONE;
     }
     else if (this->playerState != PLAYER_STATE_ALIVE)
     {
-        return 1;
+        return COLLISION_HIT;
     }
     else
     {
         this->Die();
-        return 1;
+        return COLLISION_HIT;
     }
 }
 
@@ -562,23 +562,23 @@ i32 Player::CheckGraze(D3DXVECTOR3 *center, D3DXVECTOR3 *size)
         if (!(bombTopLeft.x > bulletBottomRight.x || bombBottomRight.x < bulletTopLeft.x ||
               bombTopLeft.y > bulletBottomRight.y || bombBottomRight.y < bulletTopLeft.y))
         {
-            return 2;
+            return CANCELED_BY_BOMB;
         }
     }
 
     if (this->playerState == PLAYER_STATE_DEAD || this->playerState == PLAYER_STATE_SPAWNING)
     {
-        return 0;
+        return GRAZE_FALSE;
     }
     if (this->hitboxTopLeft.x > bulletBottomRight.x || this->hitboxBottomRight.x < bulletTopLeft.x ||
         this->hitboxTopLeft.y > bulletBottomRight.y || this->hitboxBottomRight.y < bulletTopLeft.y)
     {
-        return 0;
+        return GRAZE_FALSE;
     }
 
     // Bullet clips player's graze hitbox, add score and check for death upon return
     this->ScoreGraze(center);
-    return 1;
+    return GRAZE_TRUE;
 }
 
 #pragma var_order(itemBottomRight, itemTopLeft)
@@ -632,7 +632,7 @@ i32 Player::CalcLaserHitbox(D3DXVECTOR3 *laserCenter, D3DXVECTOR3 *laserSize, D3
     }
     if (!canGraze)
     {
-        return 0;
+        return COLLISION_NONE;
     }
 
     laserTopLeft.x -= 48.0f;
@@ -643,24 +643,24 @@ i32 Player::CalcLaserHitbox(D3DXVECTOR3 *laserCenter, D3DXVECTOR3 *laserSize, D3
     if (playerRelativeTopLeft.x > laserBottomRight.x || playerRelativeBottomRight.x < laserTopLeft.x ||
         playerRelativeTopLeft.y > laserBottomRight.y || playerRelativeBottomRight.y < laserTopLeft.y)
     {
-        return 0;
+        return COLLISION_NONE;
     }
     if (this->playerState == PLAYER_STATE_DEAD || this->playerState == PLAYER_STATE_SPAWNING)
     {
-        return 0;
+        return COLLISION_NONE;
     }
 
     this->ScoreGraze(&this->positionCenter);
-    return 2;
+    return COLLISION_GRAZE;
 
 LASER_COLLISION:
     if (this->playerState != PLAYER_STATE_ALIVE)
     {
-        return 0;
+        return COLLISION_NONE;
     }
 
     this->Die();
-    return 1;
+    return COLLISION_HIT;
 }
 
 void Player::ScoreGraze(D3DXVECTOR3 *center)
@@ -689,8 +689,6 @@ void Player::ScoreGraze(D3DXVECTOR3 *center)
 
 void Player::Die()
 {
-    int curLaserTimerIdx;
-
     g_EnemyManager.spellcardInfo.isCapturing = false;
     g_EffectManager.SpawnParticles(PARTICLE_EFFECT_UNK_12, &this->positionCenter, 1, COLOR_NEONBLUE);
     g_EffectManager.SpawnParticles(PARTICLE_EFFECT_UNK_6, &this->positionCenter, 16, COLOR_WHITE);
@@ -698,9 +696,9 @@ void Player::Die()
     this->invulnerabilityTimer = 0;
     g_SoundPlayer.PlaySoundByIdx(SOUND_PICHUN);
     g_GameManager.deaths++;
-    for (curLaserTimerIdx = 0; curLaserTimerIdx < ARRAY_SIZE_SIGNED(this->laserTimer); curLaserTimerIdx++)
+    for (i32 i = 0; i < ARRAY_SIZE_SIGNED(this->laserTimer); i++)
     {
-        this->laserTimer[curLaserTimerIdx] = 2;
+        this->laserTimer[i] = 2;
     }
 }
 
@@ -717,11 +715,10 @@ ZunResult Player::HandlePlayerInputs()
 {
     f32 orbOffsetX;
     f32 orbOffsetY;
-    f32 speedX;
-    f32 speedY;
 
-    speedX = 0.0f;
-    speedY = 0.0f;
+    f32 speedX = 0.0f;
+    f32 speedY = 0.0f;
+
     PlayerDirection playerDirection = this->playerDirection;
 
     this->playerDirection = MOVEMENT_NONE;

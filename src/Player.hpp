@@ -72,6 +72,19 @@ enum PlayerBulletState
     PLAYER_BULLET_STATE_COLLIDED,
 };
 
+enum CollisionResult
+{
+    COLLISION_NONE,
+    COLLISION_HIT,
+    COLLISION_GRAZE
+};
+enum GrazeResult
+{
+    GRAZE_FALSE,
+    GRAZE_TRUE,
+    CANCELED_BY_BOMB
+};
+
 struct PlayerRect
 {
     ZunVec2 pos;
@@ -176,7 +189,7 @@ struct Player
     f32 AngleFromPlayer(D3DXVECTOR3 *pos);
     f32 AngleToPlayer(D3DXVECTOR3 *pos);
     i32 CheckGraze(D3DXVECTOR3 *center, D3DXVECTOR3 *size);
-    i32 CalcKillBoxCollision(D3DXVECTOR3 *bulletCenter, D3DXVECTOR3 *bulletSize);
+    i32 CheckCollision(D3DXVECTOR3 *bulletCenter, D3DXVECTOR3 *bulletSize);
     i32 CalcLaserHitbox(D3DXVECTOR3 *laserCenter, D3DXVECTOR3 *laserSize, D3DXVECTOR3 *rotation, f32 angle,
                         ZunBool canGraze);
     i32 CalcDamageToEnemy(D3DXVECTOR3 *enemyPos, D3DXVECTOR3 *enemySize, ZunBool *hitByBomb);

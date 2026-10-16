@@ -399,7 +399,7 @@ ZunResult SoundPlayer::InitSoundBuffers()
     }
     else
     {
-        for (idx = 0; idx < 3; idx++)
+        for (idx = 0; idx < SFX_QUEUE_LENGTH; idx++)
         {
             this->soundBuffersToPlay[idx] = -1;
         }
@@ -429,7 +429,7 @@ void SoundPlayer::PlaySoundByIdx(SoundIdx idx, i32 unused)
     i32 i;
 
     SFXToPlay = g_SoundBufferIdxVol[idx].unk;
-    for (i = 0; i < ARRAY_SIZE_SIGNED(this->soundBuffersToPlay); i++)
+    for (i = 0; i < SFX_QUEUE_LENGTH; i++)
     {
         if (this->soundBuffersToPlay[i] < 0)
         {
@@ -440,7 +440,7 @@ void SoundPlayer::PlaySoundByIdx(SoundIdx idx, i32 unused)
             return;
         }
     }
-    if (i >= ARRAY_SIZE_SIGNED(this->soundBuffersToPlay))
+    if (i >= SFX_QUEUE_LENGTH)
     {
         return;
     }
@@ -460,7 +460,7 @@ void SoundPlayer::PlaySounds()
     {
         return;
     }
-    for (idx = 0; idx < ARRAY_SIZE_SIGNED(this->soundBuffersToPlay); idx++)
+    for (idx = 0; idx < SFX_QUEUE_LENGTH; idx++)
     {
         if (this->soundBuffersToPlay[idx] < 0)
         {

@@ -332,7 +332,7 @@ th06::Player_AddedCallback,0x41BAC0,function
 th06::Player_DeletedCallback,0x41BDB0,function
 th06::Player_RegisterChain,0x41BDD0,function
 th06::PlayerBombInfo::PlayerBombInfo,0x41BEC0,function
-th06::Player::CalcKillBoxCollision,0x41BF10,function
+th06::Player::CheckCollision,0x41BF10,function
 th06::Player::CheckGraze,0x41C090,function
 th06::Player::CalcLaserHitbox,0x41C230,function
 th06::Player::Player,0x41C4C0,function

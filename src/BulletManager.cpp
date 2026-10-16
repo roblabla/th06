@@ -631,15 +631,12 @@ Laser *BulletManager::SpawnLaserPattern(EnemyShooter *bulletProps)
     return laser;
 }
 
-#pragma var_order(grazeState, idx, bulletSpeed, length, laserSize, curBullet, laserColor, curLaser, laserCenter)
+#pragma var_order(checkResult, idx, bulletSpeed, length, laserSize, curBullet, laserColor, curLaser, laserCenter)
 static ChainCallbackResult BulletManager_OnUpdate(BulletManager *mgr)
 {
-    i32 laserColor;
-    f32 length;
-
     f32 bulletSpeed;
     i32 idx;
-    i32 grazeState;
+    i32 checkResult;
 
     Bullet *curBullet = &mgr->bullets[0];
 
@@ -649,13 +646,19 @@ static ChainCallbackResult BulletManager_OnUpdate(BulletManager *mgr)
     }
 
     g_ItemManager.OnUpdate();
+
+#if BUILD_VERSION >= BUILD_VERSION_013
     mgr->bulletCount = 0;
+#endif
+
     for (idx = 0; idx < MAX_ENEMY_BULLETS; idx++, curBullet++)
     {
         if (curBullet->state == BULLET_STATE_INACTIVE)
             continue;
 
+#if BUILD_VERSION >= BUILD_VERSION_013
         mgr->bulletCount++;
+#endif
         switch (curBullet->state)
         {
         case BULLET_STATE_SPAWNING_FAST:
@@ -722,8 +725,8 @@ static ChainCallbackResult BulletManager_OnUpdate(BulletManager *mgr)
                     else
                     {
                         curBullet->angle = utils::AddNormalizeAngle(
-                            curBullet->angle, g_Supervisor.effectiveFramerateMultiplier * curBullet->exVelAngle);
-                        curBullet->speed += g_Supervisor.effectiveFramerateMultiplier * curBullet->exVelSpeed;
+                            curBullet->angle, curBullet->exVelAngle * g_Supervisor.effectiveFramerateMultiplier);
+                        curBullet->speed += curBullet->exVelSpeed * g_Supervisor.effectiveFramerateMultiplier;
                         // Has to be done in asm. Just, great.
                         sincosmul(&curBullet->velocity, curBullet->angle, curBullet->speed);
                     }
@@ -732,9 +735,7 @@ static ChainCallbackResult BulletManager_OnUpdate(BulletManager *mgr)
                 {
                     if (curBullet->timer >= curBullet->dirChangeInterval * (curBullet->dirChangeNumTimes + 1))
                     {
-                        curBullet->dirChangeNumTimes++;
-
-                        if (curBullet->dirChangeNumTimes >= curBullet->dirChangeMaxTimes)
+                        if (++curBullet->dirChangeNumTimes >= curBullet->dirChangeMaxTimes)
                         {
                             curBullet->exFlags &= ~EX_ANGLE_ADD;
                         }
@@ -758,9 +759,7 @@ static ChainCallbackResult BulletManager_OnUpdate(BulletManager *mgr)
                 {
                     if (curBullet->timer >= curBullet->dirChangeInterval * (curBullet->dirChangeNumTimes + 1))
                     {
-                        curBullet->dirChangeNumTimes++;
-
-                        if (curBullet->dirChangeNumTimes >= curBullet->dirChangeMaxTimes)
+                        if (++curBullet->dirChangeNumTimes >= curBullet->dirChangeMaxTimes)
                         {
                             curBullet->exFlags &= ~EX_ANGLE_SET;
                         }
@@ -784,9 +783,7 @@ static ChainCallbackResult BulletManager_OnUpdate(BulletManager *mgr)
                 {
                     if (curBullet->timer >= curBullet->dirChangeInterval * (curBullet->dirChangeNumTimes + 1))
                     {
-                        curBullet->dirChangeNumTimes++;
-
-                        if (curBullet->dirChangeNumTimes >= curBullet->dirChangeMaxTimes)
+                        if (++curBullet->dirChangeNumTimes >= curBullet->dirChangeMaxTimes)
                         {
                             curBullet->exFlags &= ~EX_ANGLE_PLAYER;
                         }
@@ -825,9 +822,8 @@ static ChainCallbackResult BulletManager_OnUpdate(BulletManager *mgr)
                         curBullet->speed = curBullet->dirChangeSpeed;
                         bulletSpeed = curBullet->speed;
                         sincosmul(&curBullet->velocity, curBullet->angle, bulletSpeed);
-                        curBullet->dirChangeNumTimes++;
 
-                        if (curBullet->dirChangeNumTimes >= curBullet->dirChangeMaxTimes)
+                        if (++curBullet->dirChangeNumTimes >= curBullet->dirChangeMaxTimes)
                         {
                             curBullet->exFlags &= ~EX_BOUNCE_TBLR;
                         }
@@ -853,9 +849,8 @@ static ChainCallbackResult BulletManager_OnUpdate(BulletManager *mgr)
                         curBullet->speed = curBullet->dirChangeSpeed;
                         bulletSpeed = curBullet->speed;
                         sincosmul(&curBullet->velocity, curBullet->angle, bulletSpeed);
-                        curBullet->dirChangeNumTimes++;
 
-                        if (curBullet->dirChangeNumTimes >= curBullet->dirChangeMaxTimes)
+                        if (++curBullet->dirChangeNumTimes >= curBullet->dirChangeMaxTimes)
                         {
                             curBullet->exFlags &= ~EX_BOUNCE_TLR;
                         }
@@ -868,6 +863,8 @@ static ChainCallbackResult BulletManager_OnUpdate(BulletManager *mgr)
                                           curBullet->sprites.spriteBullet.sprite->widthPx,
                                           curBullet->sprites.spriteBullet.sprite->heightPx))
             {
+                // If any of these ex are set the bullet could *maybe* come back inbounds,
+                // so give it a bit of leniency for being offscreen.
                 if (!(curBullet->exFlags & EX_ANGLE_ADD) && !(curBullet->exFlags & EX_ANGLE_SET) &&
                     !(curBullet->exFlags & EX_ANGLE_PLAYER) && !(curBullet->exFlags & EX_BOUNCE_TBLR) &&
                     !(curBullet->exFlags & EX_BOUNCE_TLR) && curBullet->outOfBoundsTime == 0)
@@ -875,15 +872,10 @@ static ChainCallbackResult BulletManager_OnUpdate(BulletManager *mgr)
                     memset(curBullet, 0, sizeof(Bullet));
                     continue;
                 }
-                else
+                else if (++curBullet->outOfBoundsTime >= 256)
                 {
-                    curBullet->outOfBoundsTime++;
-
-                    if (curBullet->outOfBoundsTime >= 256)
-                    {
-                        memset(curBullet, 0, sizeof(Bullet));
-                        continue;
-                    }
+                    memset(curBullet, 0, sizeof(Bullet));
+                    continue;
                 }
             }
             else
@@ -893,14 +885,14 @@ static ChainCallbackResult BulletManager_OnUpdate(BulletManager *mgr)
 
             if (curBullet->isGrazed == FALSE)
             {
-                grazeState = g_Player.CheckGraze(&curBullet->pos, &curBullet->sprites.grazeSize);
+                checkResult = g_Player.CheckGraze(&curBullet->pos, &curBullet->sprites.grazeSize);
 
-                if (grazeState == 1)
+                if (checkResult == GRAZE_TRUE)
                 {
                     curBullet->isGrazed = TRUE;
                     goto bulletGrazed;
                 }
-                else if (grazeState == 2)
+                else if (checkResult == CANCELED_BY_BOMB)
                 {
                     curBullet->state = BULLET_STATE_DESPAWNING;
                     g_ItemManager.SpawnItem(&curBullet->pos, ITEM_POINT_BULLET, ITEM_STATE_MAGNETED);
@@ -909,11 +901,11 @@ static ChainCallbackResult BulletManager_OnUpdate(BulletManager *mgr)
             else if (curBullet->isGrazed == TRUE)
             {
             bulletGrazed:
-                grazeState = g_Player.CalcKillBoxCollision(&curBullet->pos, &curBullet->sprites.grazeSize);
-                if (grazeState != 0)
+                checkResult = g_Player.CheckCollision(&curBullet->pos, &curBullet->sprites.grazeSize);
+                if (checkResult != COLLISION_NONE)
                 {
                     curBullet->state = BULLET_STATE_DESPAWNING;
-                    if (grazeState == 2)
+                    if (checkResult == COLLISION_GRAZE)
                     {
                         g_ItemManager.SpawnItem(&curBullet->pos, ITEM_POINT_BULLET, ITEM_STATE_MAGNETED);
                     }
@@ -934,8 +926,14 @@ static ChainCallbackResult BulletManager_OnUpdate(BulletManager *mgr)
     }
 
     Laser *curLaser = &mgr->lasers[0];
-    D3DXVECTOR3 laserCenter;
+
     D3DXVECTOR3 laserSize;
+    i32 laserAlpha;
+    D3DXVECTOR3 laserCenter;
+    f32 length;
+
+#define LASER_GRAZE_RATE 12
+
     for (idx = 0; idx < MAX_ENEMY_LASERS; idx++, curLaser++)
     {
         if (!curLaser->inUse)
@@ -943,7 +941,7 @@ static ChainCallbackResult BulletManager_OnUpdate(BulletManager *mgr)
             continue;
         }
 
-        curLaser->endOffset += g_Supervisor.effectiveFramerateMultiplier * curLaser->speed;
+        curLaser->endOffset += curLaser->speed * g_Supervisor.effectiveFramerateMultiplier;
 
         if (curLaser->startLength < curLaser->endOffset - curLaser->startOffset)
         {
@@ -969,14 +967,17 @@ static ChainCallbackResult BulletManager_OnUpdate(BulletManager *mgr)
         case LASER_STATE_START_DELAY:
             if (curLaser->flags & LASER_FLAG_FADE_IN_OUT)
             {
-                laserColor = (f32)curLaser->timer * 255.0f / curLaser->startTime;
+                laserAlpha = (f32)curLaser->timer * 255.0f / curLaser->startTime;
 
-                if (laserColor > 255)
+                if (laserAlpha > 255)
                 {
-                    laserColor = 255;
+                    laserAlpha = 255;
                 }
 
-                curLaser->vm.color = laserColor << 24;
+                // BUG: This is meant to only set the alpha value,
+                // but overwrites the entire color with black.
+                // The fading flag is unused, so this doesn't matter.
+                curLaser->vm.color = laserAlpha << 24;
             }
             else
             {
@@ -1000,7 +1001,7 @@ static ChainCallbackResult BulletManager_OnUpdate(BulletManager *mgr)
             if (curLaser->timer >= curLaser->hitboxStartTime)
             {
                 g_Player.CalcLaserHitbox(&laserCenter, &laserSize, &curLaser->pos, curLaser->angle,
-                                         (i32)curLaser->timer % 12 == 0);
+                                         MULTIPLE_OF(curLaser->timer, LASER_GRAZE_RATE));
             }
 
             if (curLaser->timer < curLaser->startTime)
@@ -1012,7 +1013,7 @@ static ChainCallbackResult BulletManager_OnUpdate(BulletManager *mgr)
             curLaser->state++;
         case LASER_STATE_ACTIVE:
             g_Player.CalcLaserHitbox(&laserCenter, &laserSize, &curLaser->pos, curLaser->angle,
-                                     (i32)curLaser->timer % 12 == 0);
+                                     MULTIPLE_OF(curLaser->timer, LASER_GRAZE_RATE));
 
             if (curLaser->timer < curLaser->duration)
             {
@@ -1030,33 +1031,33 @@ static ChainCallbackResult BulletManager_OnUpdate(BulletManager *mgr)
         case LASER_STATE_DESPAWNING:
             if (curLaser->flags & LASER_FLAG_FADE_IN_OUT)
             {
-                laserColor = (f32)curLaser->timer * 255.0f / curLaser->startTime;
+                laserAlpha = (f32)curLaser->timer * 255.0f / curLaser->startTime;
 
-                if (laserColor > 255)
+                if (laserAlpha > 255)
                 {
-                    laserColor = 255;
+                    laserAlpha = 255;
                 }
 
-                curLaser->vm.color = laserColor << 24;
+                // BUG: This is meant to only set the alpha value,
+                // but overwrites the entire color with black.
+                // The fading flag is unused, so this doesn't matter.
+                curLaser->vm.color = laserAlpha << 24;
             }
-            else
+            else if (curLaser->despawnDuration > 0)
             {
-                if (curLaser->despawnDuration > 0)
-                {
-                    length = curLaser->width - ((f32)curLaser->timer * curLaser->width) / curLaser->despawnDuration;
-                    curLaser->vm.scaleX = (f32)(length / 16.0f);
-                    // Bug: ZUN intended to set laserSize.y instead of laserSize.x
-                    // This way, for hitboxEndDelay ticks after the laser starts despawning,
-                    // the laser would have a thinner hitbox.
-                    // Setting laserSize.x results in a tiny hitbox at the laser midpoint.
-                    laserSize.x = length / 2.0f;
-                }
+                length = curLaser->width - ((f32)curLaser->timer * curLaser->width) / curLaser->despawnDuration;
+                curLaser->vm.scaleX = (f32)(length / 16.0f);
+                // Bug: ZUN intended to set laserSize.y instead of laserSize.x
+                // This way, for hitboxEndDelay ticks after the laser starts despawning,
+                // the laser would have a thinner hitbox.
+                // Setting laserSize.x results in a tiny hitbox at the laser midpoint.
+                laserSize.x = length / 2.0f;
             }
 
             if (curLaser->timer < curLaser->hitboxEndDelay)
             {
                 g_Player.CalcLaserHitbox(&laserCenter, &laserSize, &curLaser->pos, curLaser->angle,
-                                         (i32)curLaser->timer % 12 == 0);
+                                         MULTIPLE_OF(curLaser->timer, LASER_GRAZE_RATE));
             }
 
             if (curLaser->timer < curLaser->despawnDuration)
