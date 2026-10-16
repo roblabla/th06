@@ -358,18 +358,18 @@ static ZunResult UpdateFireBulletsTimer(Player *p)
 #pragma var_order(bullet, idx, enemyBottomRight, bulletBottomRight, enemyTopLeft, damage, bulletTopLeft)
 i32 Player::CalcDamageToEnemy(D3DXVECTOR3 *enemyPos, D3DXVECTOR3 *enemyHitboxSize, ZunBool *hitByBomb)
 {
-    ZunVec3 bulletTopLeft;
+    D3DXVECTOR3 bulletTopLeft;
     i32 damage;
-    ZunVec3 enemyTopLeft;
+    D3DXVECTOR3 enemyTopLeft;
     i32 idx;
     PlayerBullet *bullet;
 
-    ZunVec3 bulletBottomRight;
-    ZunVec3 enemyBottomRight;
+    D3DXVECTOR3 bulletBottomRight;
+    D3DXVECTOR3 enemyBottomRight;
 
     damage = 0;
 
-    ZunVec3_SetVecCorners(&enemyTopLeft, &enemyBottomRight, enemyPos, enemyHitboxSize);
+    SetVecCorners(&enemyTopLeft, &enemyBottomRight, enemyPos, enemyHitboxSize);
     bullet = &this->bullets[0];
     if (hitByBomb)
     {
@@ -383,7 +383,7 @@ i32 Player::CalcDamageToEnemy(D3DXVECTOR3 *enemyPos, D3DXVECTOR3 *enemyHitboxSiz
             continue;
         }
 
-        ZunVec3_SetVecCorners(&bulletTopLeft, &bulletBottomRight, &bullet->position, &bullet->size);
+        SetVecCorners(&bulletTopLeft, &bulletBottomRight, &bullet->position, &bullet->size);
 
         if (bulletTopLeft.y > enemyBottomRight.y || bulletTopLeft.x > enemyBottomRight.x ||
             bulletBottomRight.y < enemyTopLeft.y || bulletBottomRight.x < enemyTopLeft.x)
@@ -448,10 +448,10 @@ i32 Player::CalcDamageToEnemy(D3DXVECTOR3 *enemyPos, D3DXVECTOR3 *enemyHitboxSiz
             this->particleTimer++;
             if (this->particleTimer % 8 == 0)
             {
-                *bulletTopLeft.AsD3dXVec() = *enemyPos;
+                bulletTopLeft = *enemyPos;
                 bulletTopLeft.x = bullet->position.x;
 
-                g_EffectManager.SpawnParticles(PARTICLE_EFFECT_UNK_5, bulletTopLeft.AsD3dXVec(), 1, COLOR_WHITE);
+                g_EffectManager.SpawnParticles(PARTICLE_EFFECT_UNK_5, &bulletTopLeft, 1, COLOR_WHITE);
             }
         }
     }
@@ -462,8 +462,8 @@ i32 Player::CalcDamageToEnemy(D3DXVECTOR3 *enemyPos, D3DXVECTOR3 *enemyHitboxSiz
             continue;
         }
 
-        *bulletTopLeft.AsD3dXVec() = this->bombRegionPositions[idx] - this->bombRegionSizes[idx] / 2.0f;
-        *bulletBottomRight.AsD3dXVec() = this->bombRegionPositions[idx] + this->bombRegionSizes[idx] / 2.0f;
+        bulletTopLeft = this->bombRegionPositions[idx] - this->bombRegionSizes[idx] / 2.0f;
+        bulletBottomRight = this->bombRegionPositions[idx] + this->bombRegionSizes[idx] / 2.0f;
         if (bulletTopLeft.x > enemyBottomRight.x || bulletBottomRight.x < enemyTopLeft.x ||
             bulletTopLeft.y > enemyBottomRight.y || bulletBottomRight.y < enemyTopLeft.y)
         {

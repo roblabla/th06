@@ -670,7 +670,6 @@ static ChainCallbackResult BulletManager_OnUpdate(BulletManager *mgr)
             }
             goto HELL;
         case BULLET_STATE_SPAWNING_NORMAL:
-            // TODO: Different codegen here in trial
             curBullet->pos += curBullet->velocity / 2.5f * g_Supervisor.effectiveFramerateMultiplier;
 
             if (g_AnmManager->ExecuteScript(&curBullet->sprites.spriteSpawnEffectNormal) == 0)
@@ -679,7 +678,6 @@ static ChainCallbackResult BulletManager_OnUpdate(BulletManager *mgr)
             }
             goto HELL;
         case BULLET_STATE_SPAWNING_SLOW:
-            // TODO: Different codegen here in trial
             curBullet->pos += curBullet->velocity / 3.0f * g_Supervisor.effectiveFramerateMultiplier;
 
             if (g_AnmManager->ExecuteScript(&curBullet->sprites.spriteSpawnEffectSlow) == 0)

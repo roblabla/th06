@@ -69,67 +69,13 @@ struct TimelineInstr
     TimelineInstrArgs args;
 };
 
-union EclRawInstrArg {
-    struct
-    {
-        i8 a;
-        i8 b;
-        i8 c;
-        i8 d;
-    } by;
-    struct
-    {
-        i16 lo;
-        i16 hi;
-    } sh;
-    f32 f32;
-    i32 i32;
-    EclVarId id;
-};
-
-struct EclRawInstrAluArgs
-{
-    EclVarId res;
-    EclRawInstrArg arg1;
-    EclRawInstrArg arg2;
-    EclRawInstrArg arg3;
-    EclRawInstrArg arg4;
-};
-
-struct EclRawInstrJumpArgs
-{
-    i32 time;
-    i32 offset;
-    EclVarId var;
-};
-
-struct EclRawInstrCallArgs
-{
-    i32 eclSub;
-    i32 int0;
-    f32 float0;
-    EclVarId cmpLhs;
-    i32 cmpRhs;
-};
-
-struct EclRawInstrCmpArgs
-{
-    EclRawInstrArg lhs;
-    EclRawInstrArg rhs;
-};
-
-struct EclRawInstrAnmSetSlotArgs
-{
-    i32 vmIdx;
-    i32 scriptIdx;
-};
-
 struct EclRawInstrAnmSetDeathArgs
 {
     i8 deathParticle1;
     i8 deathParticle2;
     i8 deathAnm3;
 };
+ZUN_ASSERT_TYPE(EclRawInstrAnmSetDeathArgs, 0x3, 1);
 
 struct EclRawInstrBulletArgs
 {
@@ -143,6 +89,7 @@ struct EclRawInstrBulletArgs
     f32 angle2;
     i32 flags;
 };
+ZUN_ASSERT_TYPE(EclRawInstrBulletArgs, 0x20, 4);
 
 struct EclRawInstrLaserArgs
 {
@@ -161,52 +108,15 @@ struct EclRawInstrLaserArgs
     i32 hitboxEndDelay;
     i32 flags;
 };
-
-struct EclRawInstrLaserOpArgs
-{
-    i32 laserIdx;
-    ZunVec3 arg1;
-};
-
-struct EclRawInstrBulletEffectsArgs
-{
-    EclVarId ivar1;
-    EclVarId ivar2;
-    EclVarId ivar3;
-    EclVarId ivar4;
-    f32 fvar1;
-    f32 fvar2;
-    f32 fvar3;
-    f32 fvar4;
-};
+ZUN_ASSERT_TYPE(EclRawInstrLaserArgs, 0x34, 4);
 
 struct EclRawInstrSpellcardEffectArgs
 {
     i32 effectColorId;
-    ZunVec3 pos;
+    D3DXVECTOR3 pos;
     f32 effectDistance;
 };
-
-struct EclRawInstrMoveBoundSetArgs
-{
-    ZunVec2 lowerMoveLimit;
-    ZunVec2 upperMoveLimit;
-};
-
-struct EclRawInstrAnmSetPosesArgs
-{
-    i16 anmPoseDefault;
-    i16 anmPoseNeutralFromLeft;
-    i16 anmPoseNeutralFromRight;
-    i16 anmPoseLeft;
-    i16 anmPoseRight;
-};
-
-struct EclRawInstrSetInterruptArgs
-{
-    i32 interruptSub;
-    i32 interruptId;
-};
+ZUN_ASSERT_TYPE(EclRawInstrSpellcardEffectArgs, 0x14, 4);
 
 struct EclRawInstrSpellcardStartArgs
 {
@@ -214,77 +124,17 @@ struct EclRawInstrSpellcardStartArgs
     i16 spellcardId;
     char spellcardName[34]; // BUG(?): All other instructions are DWORD aligned, this feels like a mistake
 };
-
-struct EclRawInstrEffectParticleArgs
-{
-    i32 effectId;
-    i32 numParticles;
-    ZunColor particleColor;
-};
+ZUN_ASSERT_TYPE(EclRawInstrSpellcardStartArgs, 0x26, 2);
 
 struct EclRawInstrEnemyCreateArgs
 {
     i32 subId;
-    ZunVec3 pos;
+    D3DXVECTOR3 pos;
     i16 life;
     i16 itemDrop;
     i32 score;
 };
-ZUN_ASSERT_SIZE(EclRawInstrEnemyCreateArgs, 0x18);
-
-struct EclRawInstrAnmInterruptSlotArgs
-{
-    i32 vmId;
-    i32 interruptId;
-};
-
-struct EclRawInstrBulletRankInfluenceArgs
-{
-    f32 bulletRankSpeedLow;
-    f32 bulletRankSpeedHigh;
-    i32 bulletRankAmount1Low;
-    i32 bulletRankAmount1High;
-    i32 bulletRankAmount2Low;
-    i32 bulletRankAmount2High;
-};
-
-struct EclRawInstrExInstrArgs
-{
-    u32 exInstrIndex;
-    union {
-        i32 i32Param;
-        u8 u8Param;
-    };
-};
-
-union EclRawInstrArgs {
-    EclRawInstrAluArgs alu;
-    EclRawInstrCmpArgs cmp;
-    EclRawInstrJumpArgs jump;
-    EclRawInstrCallArgs call;
-    i32 anmMainScriptIdx;
-    EclRawInstrAnmSetPosesArgs anmSetPoses;
-    EclRawInstrAnmSetSlotArgs anmSetSlot;
-    EclRawInstrAnmSetDeathArgs anmSetDeath;
-    ZunVec3 float3;
-    EclRawInstrBulletArgs bullet;
-    EclRawInstrLaserArgs laser;
-    EclRawInstrLaserOpArgs laserOp;
-    EclRawInstrBulletEffectsArgs bulletEffects;
-    EclRawInstrSpellcardEffectArgs spellcardEffect;
-    EclRawInstrMoveBoundSetArgs moveBoundSet;
-    EclRawInstrSetInterruptArgs setInterrupt;
-    EclRawInstrSpellcardStartArgs spellcardStart;
-    EclRawInstrEffectParticleArgs effectParticle;
-    EclVarId timeToAdd;
-    ItemType itemId;
-    EclRawInstrEnemyCreateArgs enemyCreate;
-    EclRawInstrAnmInterruptSlotArgs anmInterruptSlot;
-    SoundIdx bulletSound;
-    EclRawInstrBulletRankInfluenceArgs bulletRankInfluence;
-    EclRawInstrExInstrArgs exInstr;
-    i32 setInt;
-};
+ZUN_ASSERT_TYPE(EclRawInstrEnemyCreateArgs, 0x18, 4);
 
 struct EclRawInstr
 {
@@ -296,8 +146,9 @@ struct EclRawInstr
     // on that difficulty (1) or run it (0).
     u8 skipForDifficulty;
     unreferenced_fields(0x2);
-    EclRawInstrArgs args;
+    unsigned char args[];
 };
+ZUN_ASSERT_TYPE(EclRawInstr, 0xC, 4);
 
 struct EclRawHeader
 {
@@ -444,7 +295,7 @@ enum EclOpcode
     ECL_OPCODE_ENEMY_FLAG_DISABLE_CALLSTACK,
     ECL_OPCODE_BULLET_RANK_INFLUENCE,
     ECL_OPCODE_ENEMY_FLAG_INVISIBLE,
-    ECL_OPCODE_PHASE_TIMER_CLEAR,
+    ECL_OPCODE_PHASE_ADVANCE,
     ECL_OPCODE_LASER_CLEAR_ALL,
     ECL_OPCODE_SPELLCARD_FLAG_TIMEOUT,
 };
