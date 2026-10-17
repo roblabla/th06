@@ -14,6 +14,7 @@ class IPbg3Parser
     void Reset();
     u32 ReadVarInt();
     u32 ReadMagic();
+    u8 ReadUnalignedByte();
     BOOL ReadString(char *out, u32 maxSize);
     virtual BOOL ReadBit() = 0;
     virtual u32 ReadInt(u32 numBitsAsPowersOf2) = 0;
