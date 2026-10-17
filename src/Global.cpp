@@ -19,7 +19,7 @@ ControllerMapping g_ControllerMapping = {
     -1, -1, -1, 3
 #else
     0,  1,  0,  -1, -1,
-    -1, -1, -1, -1
+    -1, -1, -1, 0
 #endif
 };
 

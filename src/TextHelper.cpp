@@ -1,58 +1,9 @@
 #include "stdafx.h"
 
 #include "TextHelper.hpp"
-#include <string>
 
 namespace th06
 {
-
-// Reconstruction of discarded font utilities, based on TH10 at 0x436890
-// and 0x4372a0/0x437380. Names and the exact TH06 implementation remain uncertain.
-struct TextFont
-{
-    HFONT font;
-    i32 width;
-    i32 height;
-    std::string name;
-    i32 weight;
-
-    TextFont()
-    {
-        font = NULL;
-        width = 0;
-        height = 16;
-        weight = FW_SEMIBOLD;
-        name = TH_FONT_NAME;
-    }
-
-    ~TextFont()
-    {
-        Release();
-    }
-
-    void SetName(const char *value)
-    {
-        name = value;
-    }
-
-    void Release()
-    {
-        if (font != NULL)
-        {
-            DeleteObject(font);
-            font = NULL;
-        }
-    }
-
-    HFONT Create()
-    {
-        Release();
-        font = CreateFont(height, width, 0, 0, weight, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
-                          CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_MODERN | DEFAULT_PITCH, name.c_str());
-        return font;
-    }
-};
-
 struct FormatInfo
 {
     D3DFORMAT format;
@@ -74,9 +25,6 @@ class TextHelper
     bool ReleaseBuffer();
     bool InvertAlpha(i32 x, i32 y, i32 spriteWidth, i32 fontHeight);
     bool CopyTextToSurface(LPDIRECT3DSURFACE8 outSurface);
-
-    bool DrawStringWithFont(i32 x, i32 y, HFONT font, COLORREF color, COLORREF shadow, const char *text);
-    bool DrawString(i32 x, i32 y, i32 fontSize, COLORREF color, COLORREF shadow, const char *text);
 
     bool IsAllocated()
     {
@@ -191,12 +139,9 @@ bool TextHelper::AllocateBufferWithFallback(i32 width, i32 height, D3DFORMAT for
     return false;
 }
 
-bool TextHelper::DrawString(i32 x, i32 y, i32 fontSize, COLORREF color, COLORREF shadow, const char *text)
+void strlen_dummy(const char *a)
 {
-    TextFont font;
-    font.width = 0;
-    font.height = fontSize;
-    return DrawStringWithFont(x, y, font.Create(), color, shadow, text);
+    strlen(a);
 }
 
 #pragma var_order(imageWidthInBytes, deviceContext, originalBitmapObj, bitmapInfo, formatInfo, bitmapObj, bitmapData)
@@ -365,6 +310,11 @@ bool TextHelper::CopyTextToSurface(LPDIRECT3DSURFACE8 outSurface)
     return true;
 }
 
+void memmove_dummy(void *a, void *b, size_t c)
+{
+    memmove(a, b, c);
+}
+
 #define TEXT_BUFFER_HEIGHT 64
 void TextHelper_CreateTextBuffer()
 {
@@ -377,36 +327,18 @@ void TextHelper_ReleaseTextBuffer()
     SAFE_RELEASE(g_TextBufferSurface);
 }
 
-bool TextHelper::DrawStringWithFont(i32 x, i32 y, HFONT font, COLORREF color, COLORREF shadow, const char *text)
+// Stand-in for a TextHelper function that /OPT:REF stripped from every build. Its
+// references are still visible: 0.13a, 1.00 and 1.02h all pull DrawTextA right
+// after Global's USER32 imports (only D3DX's own text code calls it). th10's
+// TextHelper still has a DrawText-based renderer, so it was likely an early version.
+void Fake_SetBkMode_SetTextColor_DrawTextA_CxxThrowException()
 {
-    if (text == NULL)
-    {
-        return false;
-    }
-    HGDIOBJ previous = SelectObject(hdc, font);
-    SetBkMode(hdc, TRANSPARENT);
-    if (shadow != (COLORREF)-1)
-    {
-        SetTextColor(hdc, shadow);
-        RECT r0 = {x, y, x + width - 2, y + height - 2};
-        DrawText(hdc, text, -1, &r0, 0);
-        RECT r1 = {x + 2, y, x + width + 2, y + height};
-        RECT r2 = {x + 1, y + 2, x + width + 1, y + height + 2};
-        // This repeated shadow rectangle is also present in the TH10 renderer.
-        RECT r3 = {x + 2, y, x + width + 2, y + height};
-        RECT r4 = {x, y + 2, x + width, y + height + 2};
-        RECT r5 = {x + 2, y + 2, x + width + 2, y + height + 2};
-        DrawText(hdc, text, -1, &r1, 0);
-        DrawText(hdc, text, -1, &r2, 0);
-        DrawText(hdc, text, -1, &r3, 0);
-        DrawText(hdc, text, -1, &r4, 0);
-        DrawText(hdc, text, -1, &r5, 0);
-    }
-    SetTextColor(hdc, color);
-    RECT r = {x + 1, y + 1, x + width + 1, y + height + 1};
-    DrawText(hdc, text, -1, &r, 0);
-    SelectObject(hdc, previous);
-    return true;
+    SetBkMode(NULL, 0);
+    SetTextColor(NULL, 0);
+    DrawText(NULL, NULL, 0, NULL, 0);
+    // NOTE: Using throw instead includes TypeInfo/RTTI
+    // objects, which breaks library code order.
+    _CxxThrowException(NULL, NULL);
 }
 
 #pragma var_order(hdc, font, textSurfaceDesc, h, textHelper, hdc, srcRect, destRect, destSurface)
