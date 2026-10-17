@@ -1,12 +1,11 @@
 #include "stdafx.h"
 
-#include "AsciiManager.hpp"
 #include "ChainPriorities.hpp"
 #include "StageMenu.hpp"
 
-// Unnecessary include, but forces vector constructor iterator
-// to the top of the trial build.
-#include "EffectManager.hpp"
+// Keep AsciiManager.hpp outside the common PCH so its inline methods are
+// emitted after their first callers.
+#include "AsciiManager.hpp"
 
 namespace th06
 {
