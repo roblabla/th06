@@ -546,9 +546,10 @@ restart_sub_changed:
             }
             break;
         case ECL_OPCODE_LASER_OFFSET:
-            if (enemy->lasers[GET_INSTR_INT_ARG(0)] != NULL)
+            if (enemy->lasers[GET_INSTR_ARG(EclRawInstrLaserOffsetArgs, 0).laserId] != NULL)
             {
-                enemy->lasers[GET_INSTR_INT_ARG(0)]->pos = enemy->position + *(D3DXVECTOR3 *)&GET_INSTR_FLOAT_ARG(1);
+                enemy->lasers[GET_INSTR_ARG(EclRawInstrLaserOffsetArgs, 0).laserId]->pos =
+                    enemy->position + GET_INSTR_ARG(EclRawInstrLaserOffsetArgs, 0).offset;
             }
             break;
         case ECL_OPCODE_LASER_TEST:
