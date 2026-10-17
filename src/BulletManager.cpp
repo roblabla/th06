@@ -631,7 +631,7 @@ Laser *BulletManager::SpawnLaserPattern(EnemyShooter *bulletProps)
     return laser;
 }
 
-#pragma var_order(checkResult, idx, bulletSpeed, length, laserSize, curBullet, laserColor, curLaser, laserCenter)
+#pragma var_order(checkResult, idx, bulletSpeed, length, laserSize, curBullet, laserAlpha, curLaser, laserCenter)
 static ChainCallbackResult BulletManager_OnUpdate(BulletManager *mgr)
 {
     f32 bulletSpeed;
@@ -1044,7 +1044,7 @@ static ChainCallbackResult BulletManager_OnUpdate(BulletManager *mgr)
             else if (curLaser->despawnDuration > 0)
             {
                 length = curLaser->width - ((f32)curLaser->timer * curLaser->width) / curLaser->despawnDuration;
-                curLaser->vm.scaleX = (f32)(length / 16.0f);
+                curLaser->vm.scaleX = length / 16.0f;
                 // Bug: ZUN intended to set laserSize.y instead of laserSize.x
                 // This way, for hitboxEndDelay ticks after the laser starts despawning,
                 // the laser would have a thinner hitbox.

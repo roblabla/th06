@@ -7,6 +7,10 @@
 // emitted after their first callers.
 #include "AsciiManager.hpp"
 
+// Unnecessary include, but forces vector constructor iterator
+// to the top of the trial build.
+#include "EffectManager.hpp"
+
 namespace th06
 {
 BSS_SORT(A3) AsciiManager g_AsciiManager;
