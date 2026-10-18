@@ -460,13 +460,13 @@ th06::CWaveFile::Close
 th06::CWaveFile::~CWaveFile
 th06::IPbg3Parser::Reset
 th06::IPbg3Parser::ReadVarInt
-th06::IPbg3Parser::ReadMagic
+th06::IPbg3Parser::ReadInt
 th06::IPbg3Parser::ReadString
 th06::Pbg3Parser::Pbg3Parser
 th06::Pbg3Parser::OpenArchive
 th06::Pbg3Parser::Close
 th06::Pbg3Parser::ReadBit
-th06::Pbg3Parser::ReadInt
+th06::Pbg3Parser::ReadBits
 th06::Pbg3Parser::ReadByte
 th06::Pbg3Parser::SeekToOffset
 th06::Pbg3Parser::SeekToNextByte

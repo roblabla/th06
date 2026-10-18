@@ -471,7 +471,7 @@ th06::CWaveFile::Read,0x43c080,0x239,__thiscall,,u32,CWaveFile*,u32*,u32,u32*
 th06::CWaveFile::Close,0x43c2c0,0x2f,__thiscall,,u32,CWaveFile*
 th06::IPbg3Parser::Reset,0x43c2f0,0x13,__thiscall,,void,IPbg3Parser*
 th06::IPbg3Parser::ReadVarInt,0x43c310,0x5f,__thiscall,,u32,IPbg3Parser*
-th06::IPbg3Parser::ReadMagic,0x43c380,0x40,__thiscall,,i32,IPbg3Parser*
+th06::IPbg3Parser::ReadInt,0x43c380,0x40,__thiscall,,i32,IPbg3Parser*
 th06::IPbg3Parser::ReadString,0x43c3c0,0x49,__thiscall,,i32,IPbg3Parser*,char*,u32
 th06::IPbg3Parser::~IPbg3Parser,0x43c410,0x7,__thiscall,,void,IPbg3Parser*
 th06::IPbg3Parser::`scalar_deleting_destructor',0x43c420,0x20,__thiscall,,Pbg3Parser*,IPbg3Parser*,u8
@@ -479,7 +479,7 @@ th06::Pbg3Parser::Pbg3Parser,0x43c440,0x5a,__thiscall,,Pbg3Parser*,Pbg3Parser*
 th06::Pbg3Parser::OpenArchive,0x43c4a0,0x49,__thiscall,,u32,Pbg3Parser*,char*
 th06::Pbg3Parser::Close,0x43c4f0,0x11,__thiscall,,u8,Pbg3Parser*
 th06::Pbg3Parser::ReadBit,0x43c510,0x59,__thiscall,,i32,Pbg3Parser*
-th06::Pbg3Parser::ReadInt,0x43c570,0x7b,__thiscall,,u32,Pbg3Parser*,char
+th06::Pbg3Parser::ReadBits,0x43c570,0x7b,__thiscall,,u32,Pbg3Parser*,char
 th06::Pbg3Parser::ReadByte,0x43c5f0,0x16,__thiscall,,u8,Pbg3Parser*
 th06::Pbg3Parser::SeekToOffset,0x43c610,0x40,__thiscall,,u32,Pbg3Parser*,u32
 th06::Pbg3Parser::SeekToNextByte,0x43c650,0x27,__thiscall,,u32,Pbg3Parser*

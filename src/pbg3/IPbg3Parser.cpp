@@ -4,11 +4,11 @@ namespace th06
 {
 void IPbg3Parser::Reset()
 {
-    this->bitIdxInCurByte = 128;
-    this->offsetInFile = 0;
+    this->bitMask = 128;
+    this->offset = 0;
     this->fileSize = 0;
     this->curByte = 0;
-    this->crc = 0;
+    this->checksum = 0;
 }
 
 u32 IPbg3Parser::ReadVarInt()
@@ -54,12 +54,12 @@ u32 IPbg3Parser::ReadVarInt()
     return res;
 }
 
-u32 IPbg3Parser::ReadMagic()
+u32 IPbg3Parser::ReadInt()
 {
-    u32 b0 = this->ReadInt(8);
-    u32 b1 = b0 + (this->ReadInt(8) << 8);
-    u32 b2 = b1 + (this->ReadInt(8) << 16);
-    u32 b3 = b2 + (this->ReadInt(8) << 24);
+    u32 b0 = this->ReadBits(8);
+    u32 b1 = b0 + (this->ReadBits(8) << 8);
+    u32 b2 = b1 + (this->ReadBits(8) << 16);
+    u32 b3 = b2 + (this->ReadBits(8) << 24);
 
     return b3;
 }
@@ -71,7 +71,7 @@ BOOL IPbg3Parser::ReadString(char *out, u32 maxSize)
 
     for (u32 idx = 0; idx < maxSize; idx++)
     {
-        out[idx] = this->ReadUnalignedByte();
+        out[idx] = this->ReadChar();
         if (out[idx] == '\0')
         {
             return TRUE;
@@ -79,10 +79,5 @@ BOOL IPbg3Parser::ReadString(char *out, u32 maxSize)
     }
 
     return FALSE;
-}
-
-u8 IPbg3Parser::ReadUnalignedByte()
-{
-    return this->ReadInt(8);
 }
 } // namespace th06

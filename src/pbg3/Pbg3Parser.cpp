@@ -37,29 +37,29 @@ i32 Pbg3Parser::ReadBit()
         return FALSE;
     }
 
-    if (this->bitIdxInCurByte == 0x80)
+    if (this->bitMask == 0x80)
     {
         this->curByte = FileAbstraction::ReadByte();
         if (this->curByte == PBG_EOF)
         {
             return FALSE;
         }
-        this->offsetInFile += 1;
-        this->crc += this->curByte;
+        this->offset += 1;
+        this->checksum += this->curByte;
     }
 
-    i32 res = this->curByte & this->bitIdxInCurByte;
-    this->bitIdxInCurByte >>= 1;
-    if (this->bitIdxInCurByte == 0)
+    i32 res = this->curByte & this->bitMask;
+    this->bitMask >>= 1;
+    if (this->bitMask == 0)
     {
-        this->bitIdxInCurByte = 0x80;
+        this->bitMask = 0x80;
     }
     return res != 0;
 }
 
-u32 Pbg3Parser::ReadInt(u32 numBitsAsPowersOf2)
+u32 Pbg3Parser::ReadBits(u32 numBits)
 {
-    u32 remainingBits = 1 << (numBitsAsPowersOf2 - 1);
+    u32 remainingBits = 1 << (numBits - 1);
     u32 result = 0;
 
     if (!this->HasNonNullHandle())
@@ -69,26 +69,26 @@ u32 Pbg3Parser::ReadInt(u32 numBitsAsPowersOf2)
 
     while (remainingBits != 0)
     {
-        if (this->bitIdxInCurByte == 0x80)
+        if (this->bitMask == 0x80)
         {
             this->curByte = FileAbstraction::ReadByte();
             if (this->curByte == PBG_EOF)
             {
                 return 0;
             }
-            this->offsetInFile += 1;
-            this->crc += this->curByte;
+            this->offset += 1;
+            this->checksum += this->curByte;
         }
-        u32 bitIdx = this->bitIdxInCurByte;
+        u32 bitIdx = this->bitMask;
         if ((bitIdx & this->curByte) != 0)
         {
             result |= remainingBits;
         }
         remainingBits >>= 1;
-        this->bitIdxInCurByte >>= 1;
-        if (this->bitIdxInCurByte == 0)
+        this->bitMask >>= 1;
+        if (this->bitMask == 0)
         {
-            this->bitIdxInCurByte = 0x80;
+            this->bitMask = 0x80;
         }
     }
 
@@ -97,15 +97,15 @@ u32 Pbg3Parser::ReadInt(u32 numBitsAsPowersOf2)
 
 i32 Pbg3Parser::ReadByte()
 {
-    if (this->offsetInFile < this->fileSize)
+    if (this->offset < this->fileSize)
     {
-        this->offsetInFile += 1;
+        this->offset += 1;
     }
 
     return FileAbstraction::ReadByte();
 }
 
-BOOL Pbg3Parser::SeekToOffset(u32 fileOffset)
+BOOL Pbg3Parser::SeekToOffset(DWORD fileOffset)
 {
     if (fileOffset >= this->fileSize)
     {
@@ -122,8 +122,8 @@ BOOL Pbg3Parser::SeekToOffset(u32 fileOffset)
         return FALSE;
     }
 
-    this->offsetInFile = fileOffset;
-    this->crc = 0;
+    this->offset = fileOffset;
+    this->checksum = 0;
     return TRUE;
 }
 
@@ -134,14 +134,14 @@ BOOL Pbg3Parser::SeekToNextByte()
         return FALSE;
     }
 
-    while (this->bitIdxInCurByte != 0x80)
+    while (this->bitMask != 0x80)
     {
         this->ReadBit();
     }
     return TRUE;
 }
 
-BOOL Pbg3Parser::Read(u8 *data, u32 bytesToRead)
+BOOL Pbg3Parser::Read(void *data, DWORD bytesToRead)
 {
     DWORD numBytesRead;
 
