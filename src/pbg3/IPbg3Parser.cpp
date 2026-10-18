@@ -80,9 +80,4 @@ BOOL IPbg3Parser::ReadString(char *out, u32 maxSize)
 
     return FALSE;
 }
-
-u8 IPbg3Parser::ReadUnalignedByte()
-{
-    return this->ReadInt(8);
-}
 } // namespace th06
