@@ -22,9 +22,10 @@
 #define ZUN_ALLOC_ARRAY(type, count) (type *)ZUN_ALLOC(sizeof(type) * (count))
 #define ZUN_FREE(ptr) g_ZunMemory.Free(ptr)
 #define ZUN_NEW(type) (type *)g_ZunMemory.AddToRegistry(new type(), sizeof(type), MACRO_STR(type))
-#define ZUN_NEW_ARRAY(type, count) (type *)g_ZunMemory.AddToRegistry(new type[count](), sizeof(type) * (count), MACRO_STR(type))
+#define ZUN_NEW_ARRAY(type, count)                                                                                     \
+    (type *)g_ZunMemory.AddToRegistry(new type[count](), sizeof(type) * (count), MACRO_STR(type))
 #define ZUN_DELETE(p)                                                                                                  \
-    g_ZunMemory.RemoveFromRegistry((void*)p);                                                                          \
+    g_ZunMemory.RemoveFromRegistry((void *)p);                                                                         \
     delete (p);                                                                                                        \
     (p) = NULL
 
