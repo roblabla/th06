@@ -119,7 +119,7 @@ u8 *Pbg3Archive::ReadEntryRaw(u32 *outSize, u32 *outChecksum, i32 entryIdx)
     if (data == NULL)
         return NULL;
 
-    if (this->parser->ReadByteAlignedData(data, size) == FALSE)
+    if (this->parser->Read(data, size) == FALSE)
     {
         free(data);
         return NULL;

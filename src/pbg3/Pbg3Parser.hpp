@@ -10,13 +10,13 @@ class Pbg3Parser : public IPbg3Parser, public FileAbstraction
   public:
     Pbg3Parser();
     BOOL OpenArchive(const char *path);
-    void Close();
+    virtual void Close();
     virtual BOOL ReadBit();
     virtual u32 ReadInt(u32 numBitsAsPowersOf2);
     virtual i32 ReadByte();
     virtual BOOL SeekToOffset(u32 fileOffset);
     virtual BOOL SeekToNextByte();
-    virtual BOOL ReadByteAlignedData(u8 *data, u32 bytesToRead);
+    virtual BOOL Read(u8 *data, u32 bytesToRead);
     virtual BOOL GetLastWriteTime(LPFILETIME lastWriteTime);
 
     ~Pbg3Parser();
