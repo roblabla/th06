@@ -27,6 +27,7 @@ class Pbg3Archive
     BOOL ParseHeader();
     i32 FindEntry(const char *path);
     u32 GetEntrySize(u32 entryIdx);
+    u32 GetEntrySize(const char *path);
     u8 *ReadEntryRaw(u32 *outSize, u32 *outChecksum, i32 entryIdx);
     u8 *ReadDecompressEntry(u32 entryIdx, const char *filename);
 

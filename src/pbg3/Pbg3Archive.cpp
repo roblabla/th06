@@ -15,7 +15,7 @@ Pbg3Archive::Pbg3Archive()
 
 BOOL Pbg3Archive::ParseHeader()
 {
-    if (this->parser->ReadMagic() != 0x33474250)
+    if (this->parser->ReadInt() != 0x33474250)
     {
         SAFE_DELETE(this->parser);
         return FALSE;
@@ -84,6 +84,12 @@ u32 Pbg3Archive::GetEntrySize(u32 entryIdx)
     }
 
     return this->entries[entryIdx].uncompressedSize;
+}
+
+// Dead KOG code
+u32 Pbg3Archive::GetEntrySize(const char *path)
+{
+    return this->GetEntrySize(this->FindEntry(path));
 }
 
 u8 *Pbg3Archive::ReadEntryRaw(u32 *outSize, u32 *outChecksum, i32 entryIdx)
