@@ -973,16 +973,6 @@ DWORD CWaveFile::GetSize()
     return m_dwSize;
 }
 
-// NOTE: This doesn't match the original CWaveFile::Write at all
-// and is just speculation about a change ZUN could've made that
-// also happens to make the IAT match.
-HRESULT CWaveFile::Write(UINT size, BYTE *data, UINT *written)
-{
-    *written = 0;
-    LONG result = mmioWrite(m_hmmio, (HPSTR)data, size);
-    return result == size ? S_OK : E_FAIL;
-}
-
 //-----------------------------------------------------------------------------
 // Name: CWaveFile::ResetFile()
 // Desc: Resets the internal m_ck pointer so reading starts from the

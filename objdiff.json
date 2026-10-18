@@ -95,9 +95,9 @@
             "reverse_fn_order": false
         },
         {
-            "name": "IPbg3Parser",
-            "target_path": "build/objdiff/orig/IPbg3Parser.obj",
-            "base_path": "build/objdiff/reimpl/IPbg3Parser.obj",
+            "name": "IPbg3Reader",
+            "target_path": "build/objdiff/orig/IPbg3Reader.obj",
+            "base_path": "build/objdiff/reimpl/IPbg3Reader.obj",
             "reverse_fn_order": false
         },
         {
@@ -131,9 +131,9 @@
             "reverse_fn_order": false
         },
         {
-            "name": "Pbg3Parser",
-            "target_path": "build/objdiff/orig/Pbg3Parser.obj",
-            "base_path": "build/objdiff/reimpl/Pbg3Parser.obj",
+            "name": "Pbg3Reader",
+            "target_path": "build/objdiff/orig/Pbg3Reader.obj",
+            "base_path": "build/objdiff/reimpl/Pbg3Reader.obj",
             "reverse_fn_order": false
         },
         {

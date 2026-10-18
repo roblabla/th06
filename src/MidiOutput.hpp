@@ -89,7 +89,9 @@ struct MidiDevice
 
     ZunResult Close();
     ZunBool OpenDevice(u32 uDeviceId);
+    ZunBool SendShortMsg(DWORD msg);
     ZunBool SendShortMsg(u8 midiStatus, u8 firstByte, u8 secondByte);
+    void GetDeviceName(u32 uDeviceId, char *name);
     ZunBool SendLongMsg(LPMIDIHDR pmh);
 
     HMIDIOUT handle;
@@ -178,7 +180,7 @@ struct MidiOutput : MidiTimer
 };
 u32 GetDeltaTime(u8 **data);
 
-inline u32 ConvDWord(u32 data)
+static inline u32 ConvDWord(u32 data)
 {
     u32 temp;
 

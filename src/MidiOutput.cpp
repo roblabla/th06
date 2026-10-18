@@ -66,6 +66,18 @@ ZunBool MidiDevice::SendLongMsg(LPMIDIHDR pmh)
     }
 }
 
+ZunBool MidiDevice::SendShortMsg(DWORD msg)
+{
+    if (this->handle == NULL)
+    {
+        return false;
+    }
+    else
+    {
+        return midiOutShortMsg(this->handle, msg) != MMSYSERR_NOERROR;
+    }
+}
+
 ZunBool MidiDevice::SendShortMsg(u8 midiStatus, u8 firstByte, u8 secondByte)
 {
     u8 data[4];
@@ -81,6 +93,14 @@ ZunBool MidiDevice::SendShortMsg(u8 midiStatus, u8 firstByte, u8 secondByte)
         data[2] = secondByte;
         return midiOutShortMsg(this->handle, *(DWORD *)data) != MMSYSERR_NOERROR;
     }
+}
+
+void MidiDevice::GetDeviceName(u32 uDeviceId, char *name)
+{
+    MIDIOUTCAPS caps;
+
+    midiOutGetDevCaps(uDeviceId, &caps, sizeof(caps));
+    strcpy(name, caps.szPname);
 }
 
 MidiTimer::MidiTimer()
@@ -130,7 +150,7 @@ void CALLBACK MidiTimer_DefaultTimerCallback(UINT uTimerID, UINT uMsg, DWORD_PTR
     timer->OnTimerElapsed();
 }
 
-u16 ConvWord(u16 data)
+static u16 ConvWord(u16 data)
 {
     u16 temp;
 

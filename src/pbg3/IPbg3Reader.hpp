@@ -5,14 +5,18 @@
 
 namespace th06
 {
-class IPbg3Parser
+class IPbg3Reader
 {
   public:
-    IPbg3Parser()
+    IPbg3Reader()
     {
         this->Reset();
     }
     void Reset();
+    u32 GetSize() const
+    {
+        return this->fileSize;
+    }
     u32 ReadVarInt();
     u32 ReadInt();
     char ReadChar()
@@ -27,7 +31,7 @@ class IPbg3Parser
     virtual BOOL SeekToNextByte() = 0;
     virtual BOOL Read(void *data, DWORD bytesToRead) = 0;
     virtual BOOL GetLastWriteTime(LPFILETIME lastWriteTime) = 0;
-    virtual ~IPbg3Parser()
+    virtual ~IPbg3Reader()
     {
     }
 

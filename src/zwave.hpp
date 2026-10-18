@@ -184,7 +184,6 @@ class CWaveFile
     HRESULT Read(BYTE *pBuffer, DWORD dwSizeToRead, DWORD *pdwSizeRead);
 
     DWORD GetSize();
-    HRESULT Write(UINT size, BYTE *data, UINT *written);
     HRESULT ResetFile(bool loop);
     WAVEFORMATEX *GetFormat()
     {

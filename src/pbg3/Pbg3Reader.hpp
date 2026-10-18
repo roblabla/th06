@@ -1,14 +1,14 @@
 #pragma once
 #include "decomp.hpp"
 #include "pbg3/FileAbstraction.hpp"
-#include "pbg3/IPbg3Parser.hpp"
+#include "pbg3/IPbg3Reader.hpp"
 
 namespace th06
 {
-class Pbg3Parser : public IPbg3Parser, public FileAbstraction
+class Pbg3Reader : public IPbg3Reader, public FileAbstraction
 {
   public:
-    Pbg3Parser();
+    Pbg3Reader();
     BOOL OpenArchive(const char *path);
     virtual void Close();
     virtual BOOL ReadBit();
@@ -19,7 +19,7 @@ class Pbg3Parser : public IPbg3Parser, public FileAbstraction
     virtual BOOL Read(void *data, DWORD bytesToRead);
     virtual BOOL GetLastWriteTime(LPFILETIME lastWriteTime);
 
-    ~Pbg3Parser();
+    ~Pbg3Reader();
 
     BOOL HasNonNullHandle()
     {
@@ -31,5 +31,5 @@ class Pbg3Parser : public IPbg3Parser, public FileAbstraction
         return this->handle != INVALID_HANDLE_VALUE;
     }
 };
-ZUN_ASSERT_SIZE(Pbg3Parser, 0x24);
+ZUN_ASSERT_SIZE(Pbg3Reader, 0x24);
 } // namespace th06
