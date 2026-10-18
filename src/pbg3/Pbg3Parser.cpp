@@ -141,7 +141,7 @@ BOOL Pbg3Parser::SeekToNextByte()
     return TRUE;
 }
 
-BOOL Pbg3Parser::ReadByteAlignedData(u8 *data, u32 bytesToRead)
+BOOL Pbg3Parser::Read(u8 *data, u32 bytesToRead)
 {
     DWORD numBytesRead;
 

@@ -71,7 +71,7 @@ BOOL IPbg3Parser::ReadString(char *out, u32 maxSize)
 
     for (u32 idx = 0; idx < maxSize; idx++)
     {
-        out[idx] = this->ReadInt(8);
+        out[idx] = this->ReadInt(8); // might be an inline according to KoG
         if (out[idx] == '\0')
         {
             return TRUE;
