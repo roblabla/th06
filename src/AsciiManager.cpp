@@ -888,13 +888,4 @@ void AsciiManager::DrawPopupsWithoutHwVertexProcessing()
     }
 }
 
-// NOTE: This moves 1.0f into the AsciiManager section of rdata, after 8.0f. The
-// call makes the /O2 trial compile this after StageMenu::OnDrawRetryMenu, the
-// first user of 8.0f. Nothing calls this, so the linker drops it.
-f32 dummy_float_1(StageMenu *menu, f32 a)
-{
-    menu->OnDrawRetryMenu();
-    return a + 1.0f;
-}
-
 } // namespace th06

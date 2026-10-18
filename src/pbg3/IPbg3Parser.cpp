@@ -71,7 +71,7 @@ BOOL IPbg3Parser::ReadString(char *out, u32 maxSize)
 
     for (u32 idx = 0; idx < maxSize; idx++)
     {
-        out[idx] = this->ReadInt(8); // might be an inline according to KoG
+        out[idx] = this->ReadUnalignedByte();
         if (out[idx] == '\0')
         {
             return TRUE;
@@ -79,5 +79,10 @@ BOOL IPbg3Parser::ReadString(char *out, u32 maxSize)
     }
 
     return FALSE;
+}
+
+u8 IPbg3Parser::ReadUnalignedByte()
+{
+    return this->ReadInt(8);
 }
 } // namespace th06
