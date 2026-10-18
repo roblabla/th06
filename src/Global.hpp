@@ -21,10 +21,10 @@
 #define ZUN_ALLOC_TYPE(type) (type *)ZUN_ALLOC(sizeof(type))
 #define ZUN_ALLOC_ARRAY(type, count) (type *)ZUN_ALLOC(sizeof(type) * (count))
 #define ZUN_FREE(ptr) g_ZunMemory.Free(ptr)
-#define ZUN_NEW(type) g_ZunMemory.AddToRegistry(new type())
-#define ZUN_NEW_ARRAY(type, count) g_ZunMemory.AddToRegistry(new type[count]())
+#define ZUN_NEW(type) (type *)g_ZunMemory.AddToRegistry(new type(), sizeof(type), MACRO_STR(type))
+#define ZUN_NEW_ARRAY(type, count) (type *)g_ZunMemory.AddToRegistry(new type[count](), sizeof(type) * (count), MACRO_STR(type))
 #define ZUN_DELETE(p)                                                                                                  \
-    g_ZunMemory.RemoveFromRegistry(p);                                                                                 \
+    g_ZunMemory.RemoveFromRegistry((void*)p);                                                                          \
     delete (p);                                                                                                        \
     (p) = NULL
 
@@ -149,11 +149,11 @@ class ZunMemory
     {
         free(ptr);
     }
-    template <typename T> T *AddToRegistry(T *ptr, size_t = sizeof(T), const char * = "")
+    void *AddToRegistry(void *ptr, size_t, const char *)
     {
         return ptr;
     }
-    template <typename T> void RemoveFromRegistry(T *ptr)
+    void RemoveFromRegistry(void *ptr)
     {
     }
 
