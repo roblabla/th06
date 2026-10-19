@@ -57,12 +57,12 @@ ZunBool MidiDevice::SendLongMsg(LPMIDIHDR pmh)
     }
     else
     {
-        if (midiOutPrepareHeader(this->handle, pmh, sizeof(*pmh)) != MMSYSERR_NOERROR)
+        if (midiOutPrepareHeader(this->handle, pmh, sizeof(MIDIHDR)) != MMSYSERR_NOERROR)
         {
             return true;
         }
 
-        return midiOutLongMsg(this->handle, pmh, sizeof(*pmh)) != MMSYSERR_NOERROR;
+        return midiOutLongMsg(this->handle, pmh, sizeof(MIDIHDR)) != MMSYSERR_NOERROR;
     }
 }
 
@@ -150,7 +150,9 @@ void CALLBACK MidiTimer_DefaultTimerCallback(UINT uTimerID, UINT uMsg, DWORD_PTR
     timer->OnTimerElapsed();
 }
 
-static u16 ConvWord(u16 data)
+// TODO: should be static inline according to KOG,
+// but cannot be because of link order?
+u16 ConvWord(u16 data)
 {
     u16 temp;
 
@@ -160,6 +162,8 @@ static u16 ConvWord(u16 data)
     return temp;
 }
 
+// TODO: should be static inline according to KOG,
+// but cannot be because of link order?
 u32 GetDeltaTime(u8 **data)
 {
     u8 temp;
@@ -190,12 +194,12 @@ MidiOutput::MidiOutput()
     this->unk2dc = 0;
     this->fadeOutFlag = false;
 
-    for (int i = 0; i < ARRAY_SIZE_SIGNED(this->midiFileData); i++)
+    for (i32 i = 0; i < ARRAY_SIZE_SIGNED(this->midiFileData); i++)
     {
         this->midiFileData[i] = NULL;
     }
 
-    for (int i = 0; i < ARRAY_SIZE_SIGNED(this->midiHeaders); i++)
+    for (i32 i = 0; i < ARRAY_SIZE_SIGNED(this->midiHeaders); i++)
     {
         this->midiHeaders[i] = NULL;
     }
@@ -242,11 +246,9 @@ void MidiOutput::ReleaseFileData(u32 idx)
 
 void MidiOutput::ClearTracks()
 {
-    i32 trackIndex;
-
-    for (trackIndex = 0; trackIndex < this->numTracks; trackIndex++)
+    for (i32 i = 0; i < this->numTracks; i++)
     {
-        ZUN_FREE(this->tracks[trackIndex].data);
+        ZUN_FREE(this->tracks[i].data);
     }
 
     ZUN_FREE(this->tracks);
@@ -254,35 +256,32 @@ void MidiOutput::ClearTracks()
     this->numTracks = 0;
 }
 
-#pragma var_order(trackIdx, currentCursor, currentCursorTrack, fileData, hdrLength, hdrRaw, trackLength,               \
-                  endOfHeaderPointer)
+#pragma var_order(i, currentCursor, currentTrack, fileData, hdrLength, header, trackLength, info)
 ZunResult MidiOutput::ParseFile(i32 fileIdx)
 {
-    u8 hdrRaw[8];
-    u32 trackLength;
-    u8 *currentCursor, *currentCursorTrack, *endOfHeaderPointer;
-    i32 trackIdx;
-    u8 *fileData;
-    u32 hdrLength;
-
     this->ClearTracks();
-    currentCursor = this->midiFileData[fileIdx];
-    fileData = currentCursor;
+
+    u8 *currentCursor = this->midiFileData[fileIdx];
+    u8 *fileData = currentCursor;
     if (currentCursor == NULL)
     {
         DebugPrint(TH_JP_ERR_MIDI_NOT_LOADED);
         return ZUN_ERROR;
     }
 
+    // This must be a byte buffer to
+    // generate a security cookie...
+    u8 header[sizeof(MidiHeader)];
+
     // Read midi header chunk
     // First, read the header len
-    memcpy(&hdrRaw, currentCursor, 8);
+    memcpy(&header, currentCursor, sizeof(MidiHeader));
 
     // Get a pointer to the end of the header chunk
-    currentCursor += sizeof(hdrRaw);
-    hdrLength = ConvDWord(*(u32 *)(hdrRaw + 4));
+    currentCursor += sizeof(MidiHeader);
+    u32 hdrLength = ConvDWord(((MidiHeader *)&header)->size);
 
-    endOfHeaderPointer = currentCursor;
+    MidiInfo *info = (MidiInfo *)currentCursor;
     currentCursor += hdrLength;
 
     // Read the format. Only three values of format are specified:
@@ -291,29 +290,34 @@ ZunResult MidiOutput::ParseFile(i32 fileIdx)
     //  sequence
     //  2: the file contains one or more sequentially independent single-track
     //  patterns
-    this->format = ConvWord(*(u16 *)endOfHeaderPointer);
+    this->format = ConvWord(info->format);
 
     // Read the timebase (divisions) of this file. Note that this doesn't appear to support
     // "negative SMPTE format", which happens when the MSB is set.
-    this->timebase = ConvWord(*(u16 *)(endOfHeaderPointer + 4));
+    this->timebase = ConvWord(info->timeBase);
     // Read the number of tracks in this midi file.
-    this->numTracks = ConvWord(*(u16 *)(endOfHeaderPointer + 2));
+    this->numTracks = ConvWord(info->numTracks);
 
     this->tracks = ZUN_ALLOC_ARRAY(MidiTrack, this->numTracks);
     memset(this->tracks, 0, sizeof(MidiTrack) * this->numTracks);
-    for (trackIdx = 0; trackIdx < this->numTracks; trackIdx += 1)
+
+    u32 trackLength;
+    MidiTrackHeader *currentTrack;
+
+    i32 i;
+    for (i = 0; i < this->numTracks; i += 1)
     {
-        currentCursorTrack = currentCursor;
-        currentCursor += 8;
+        currentTrack = (MidiTrackHeader *)currentCursor;
+        currentCursor += sizeof(MidiTrackHeader);
 
         // Read a track (MTrk) chunk.
         //
         // First, read the length of the chunk
-        trackLength = ConvDWord(*(u32 *)(currentCursorTrack + 4));
-        this->tracks[trackIdx].size = trackLength;
-        this->tracks[trackIdx].data = ZUN_ALLOC(trackLength);
-        this->tracks[trackIdx].play = true;
-        memcpy(this->tracks[trackIdx].data, currentCursor, trackLength);
+        trackLength = ConvDWord(currentTrack->size);
+        this->tracks[i].size = trackLength;
+        this->tracks[i].data = ZUN_ALLOC(trackLength);
+        this->tracks[i].play = true;
+        memcpy(this->tracks[i].data, currentCursor, trackLength);
         currentCursor += trackLength;
     }
     this->tempo = 1000000;

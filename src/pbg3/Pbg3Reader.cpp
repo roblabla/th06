@@ -59,7 +59,7 @@ i32 Pbg3Reader::ReadBit()
 
 u32 Pbg3Reader::ReadBits(u32 numBits)
 {
-    u32 remainingBits = 1 << (numBits - 1);
+    u32 remainingBits = 1u << (numBits - 1);
     u32 result = 0;
 
     if (!this->HasNonNullHandle())

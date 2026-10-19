@@ -23,7 +23,7 @@ class LzEncodeQueue
         LzEncodeEntry entry;
         Node *next;
     };
-    typedef char NodeSizeCheck[sizeof(Node) == 0x118 ? 1 : -1];
+    typedef ZUN_ASSERT_SIZE(Node, 0x118) NodeSizeCheck;
 
   public:
     LzEncodeQueue() : first(NULL), last(NULL), count(0)
@@ -35,9 +35,12 @@ class LzEncodeQueue
         {
             while (this->first != NULL)
             {
+                // NOTE: This specific read pattern convinces
+                // MSVC that it still needs to NULL check old.
+                // Nice anti-pattern PBG.
                 Node *old = this->first;
-                this->first = old->next;
-                delete old;
+                this->first = this->first->next;
+                SAFE_DELETE(old);
             }
         }
     }
@@ -68,12 +71,12 @@ class LzEncodeQueue
         }
         entry = this->first->entry;
         Node *old = this->first;
-        this->first = old->next;
+        this->first = this->first->next;
         if (this->first == NULL)
         {
             this->last = NULL;
         }
-        delete old;
+        SAFE_DELETE(old);
         --this->count;
     }
 

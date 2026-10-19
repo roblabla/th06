@@ -28,13 +28,13 @@ void Pbg3Writer::Close()
     this->Reset();
 }
 
-BOOL Pbg3Writer::WriteBit(i32 bit)
+BOOL Pbg3Writer::WriteBit(BOOL bit)
 {
     if (this->handle == NULL)
     {
         return FALSE;
     }
-    if (bit != 0)
+    if (bit != FALSE)
     {
         this->curByte |= this->bitMask;
     }
@@ -129,7 +129,7 @@ BOOL Pbg3Writer::SeekToNextByte()
     return TRUE;
 }
 
-BOOL Pbg3Writer::WriteByteAlignedData(void *data, u32 length)
+BOOL Pbg3Writer::Write(void *data, DWORD length)
 {
     DWORD written;
     if (this->SeekToNextByte() == FALSE)

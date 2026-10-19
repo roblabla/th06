@@ -4,7 +4,7 @@ namespace th06
 {
 void IPbg3Reader::Reset()
 {
-    this->bitMask = 128;
+    this->bitMask = 0x80;
     this->offset = 0;
     this->fileSize = 0;
     this->curByte = 0;
