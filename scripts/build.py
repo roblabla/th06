@@ -3,7 +3,6 @@ import hashlib
 from pathlib import Path
 import textwrap
 import sys
-import os
 import time
 
 from configure import BuildType, BuildVersion, configure
