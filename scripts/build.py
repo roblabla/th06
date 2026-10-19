@@ -60,7 +60,7 @@ def build(
         ninja_args += ["objdiff"]
     else:
         ninja_args += [build_exe]
-    
+
     configure(build_type, build_version, ver_suffix)
 
     # Use the original MSVC toolchain through the project's Windows environment.

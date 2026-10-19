@@ -279,7 +279,7 @@ ZunResult MidiOutput::ParseFile(i32 fileIdx)
 
     // Get a pointer to the end of the header chunk
     currentCursor += sizeof(MidiHeader);
-    u32 hdrLength = ConvDWord(((MidiHeader*)&header)->size);
+    u32 hdrLength = ConvDWord(((MidiHeader *)&header)->size);
 
     MidiInfo *info = (MidiInfo *)currentCursor;
     currentCursor += hdrLength;
