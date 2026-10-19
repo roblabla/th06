@@ -543,8 +543,8 @@ static ZunResult Ending_AddedCallback(Ending *ending)
     g_AnmManager->LoadAnm(ANM_FILE_STAFF02, "data/staff02.anm", ANM_OFFSET_STAFF02);
     g_AnmManager->LoadAnm(ANM_FILE_STAFF03, "data/staff03.anm", ANM_OFFSET_STAFF03);
 
-    g_AnmManager->SetCurrentTexture(NULL);
-    g_AnmManager->SetCurrentSprite(NULL);
+    g_AnmManager->ClearTexture();
+    g_AnmManager->ClearSprite();
     g_AnmManager->SetCurrentBlendMode(AnmBlendMode_NotSet);
     g_AnmManager->SetCurrentVertexShader(AnmVertexShader_NotSet);
 

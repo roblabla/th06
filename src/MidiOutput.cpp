@@ -150,35 +150,6 @@ void CALLBACK MidiTimer_DefaultTimerCallback(UINT uTimerID, UINT uMsg, DWORD_PTR
     timer->OnTimerElapsed();
 }
 
-// TODO: should be static inline according to KOG,
-// but cannot be because of link order?
-u16 ConvWord(u16 data)
-{
-    u16 temp;
-
-    ((u8 *)&temp)[0] = ((u8 *)&data)[1];
-    ((u8 *)&temp)[1] = ((u8 *)&data)[0];
-
-    return temp;
-}
-
-// TODO: should be static inline according to KOG,
-// but cannot be because of link order?
-u32 GetDeltaTime(u8 **data)
-{
-    u8 temp;
-    u32 count = 0;
-
-    do
-    {
-        temp = **data;
-        ++*data;
-        count = (count << 7) + (temp & 0x7f);
-    } while (temp & 0x80);
-
-    return count;
-}
-
 MidiOutput::MidiOutput()
 {
     this->tracks = NULL;

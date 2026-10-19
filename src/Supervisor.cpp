@@ -210,8 +210,8 @@ void DrawFpsCounter();
 ChainCallbackResult Supervisor_OnDraw(Supervisor *s)
 {
     g_AnmManager->SetCurrentVertexShader(AnmVertexShader_NotSet);
-    g_AnmManager->SetCurrentSprite(NULL);
-    g_AnmManager->SetCurrentTexture(NULL);
+    g_AnmManager->ClearSprite();
+    g_AnmManager->ClearTexture();
     g_AnmManager->SetCurrentColorOp(AnmColorOp_NotSet);
     g_AnmManager->SetCurrentBlendMode(AnmBlendMode_NotSet);
     g_AnmManager->SetCurrentZWriteDisable(AnmZWriteState_NotSet);
