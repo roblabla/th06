@@ -4,8 +4,9 @@
 
 namespace th06
 {
-
+#ifndef PBG_EOF
 #define PBG_EOF (-1)
+#endif
 
 class FileAbstraction
 {

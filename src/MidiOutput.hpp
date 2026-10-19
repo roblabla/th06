@@ -23,6 +23,25 @@ ZUN_ASSERT_TYPE(MidiTimer, 0x10, 4);
 
 void CALLBACK MidiTimer_DefaultTimerCallback(UINT uTimerID, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1, DWORD_PTR dw2);
 
+struct MidiHeader
+{
+    u32 magic;
+    u32 size;
+};
+
+struct MidiInfo
+{
+    u16 format;
+    u16 numTracks;
+    u16 timeBase;
+};
+
+struct MidiTrackHeader
+{
+    u32 magic;
+    u32 size;
+};
+
 enum MidiOpcode
 {
     MIDI_OPCODE_CHANNEL_1 = 0x01,
@@ -178,7 +197,6 @@ struct MidiOutput : MidiTimer
     ULONGLONG loopPlaycount1;
     ULONGLONG loopPlaycount2;
 };
-u32 GetDeltaTime(u8 **data);
 
 static inline u32 ConvDWord(u32 data)
 {

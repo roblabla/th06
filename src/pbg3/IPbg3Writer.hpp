@@ -1,6 +1,6 @@
 #pragma once
 #include "decomp.hpp"
-#include "pbg3/FileAbstraction.hpp"
+#include <Windows.h>
 
 namespace th06
 {
@@ -26,12 +26,12 @@ class IPbg3Writer
     {
         this->checksum = 0;
     }
-    virtual BOOL WriteBit(i32 bit) = 0;
+    virtual BOOL WriteBit(BOOL bit) = 0;
     virtual BOOL WriteBits(u32 value, u32 numBits) = 0;
     virtual i32 WriteByte(i32 value) = 0;
     virtual BOOL SeekToOffset(DWORD fileOffset) = 0;
     virtual BOOL SeekToNextByte() = 0;
-    virtual BOOL WriteByteAlignedData(void *data, u32 length) = 0;
+    virtual BOOL Write(void *data, DWORD length) = 0;
     virtual ~IPbg3Writer()
     {
     }

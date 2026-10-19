@@ -96,8 +96,8 @@ void LzssTree::Delete(i32 position)
 
 void LzssTree::Contract(i32 oldPosition, i32 newPosition)
 {
+    this->nodes[newPosition].parent = this->nodes[oldPosition].parent;
     i32 parent = this->nodes[oldPosition].parent;
-    this->nodes[newPosition].parent = parent;
     if (this->nodes[parent].right == oldPosition)
     {
         this->nodes[parent].right = newPosition;
@@ -215,7 +215,15 @@ BOOL LzEncode::Close()
 
 BOOL LzEncode::Encode(IPbg3Reader *input, const char *name)
 {
-    if (this->writer == NULL || input == NULL || name == NULL)
+    if (this->writer == NULL)
+    {
+        return FALSE;
+    }
+    if (input == NULL)
+    {
+        return FALSE;
+    }
+    if (name == NULL)
     {
         return FALSE;
     }
@@ -294,6 +302,8 @@ BOOL LzEncode::Encode(IPbg3Reader *input, const char *name)
     entry.checksum = this->writer->GetChecksum();
     entry.size = input->GetSize();
     input->GetLastWriteTime(&entry.lastWriteTime);
+
+    // NOTE: Very different strcpy codegen
     strcpy(entry.filename, name);
     this->entries->Push(entry);
     input->SeekToOffset(0);

@@ -10,13 +10,17 @@ MemoryPbg3Reader::MemoryPbg3Reader() : IPbg3Reader()
 
 MemoryPbg3Reader::~MemoryPbg3Reader()
 {
-    this->Close();
+    this->Detach();
 }
 
-BOOL MemoryPbg3Reader::Open(u8 *buffer, u32 length, const FILETIME *time)
+BOOL MemoryPbg3Reader::Attach(u8 *buffer, u32 length, const FILETIME *time)
 {
-    this->Close();
-    if (buffer == NULL || length == 0)
+    this->Detach();
+    if (buffer == NULL)
+    {
+        return FALSE;
+    }
+    if (length == 0)
     {
         return FALSE;
     }
@@ -35,7 +39,7 @@ BOOL MemoryPbg3Reader::Open(u8 *buffer, u32 length, const FILETIME *time)
     return TRUE;
 }
 
-void MemoryPbg3Reader::Close()
+void MemoryPbg3Reader::Detach()
 {
     this->SeekToNextByte();
     this->data = NULL;
@@ -52,7 +56,7 @@ BOOL MemoryPbg3Reader::ReadBit()
     if (this->bitMask == 0x80)
     {
         this->curByte = this->ReadByte();
-        if (this->curByte == (u32)-1)
+        if (this->curByte == PBG_EOF)
         {
             return FALSE;
         }
@@ -80,7 +84,7 @@ u32 MemoryPbg3Reader::ReadBits(u32 numBits)
         if (this->bitMask == 0x80)
         {
             this->curByte = this->ReadByte();
-            if (this->curByte == (u32)-1)
+            if (this->curByte == PBG_EOF)
             {
                 return 0;
             }
@@ -102,9 +106,13 @@ u32 MemoryPbg3Reader::ReadBits(u32 numBits)
 
 i32 MemoryPbg3Reader::ReadByte()
 {
-    if (this->data == NULL || this->offset >= this->fileSize)
+    if (this->data == NULL)
     {
-        return -1;
+        return PBG_EOF;
+    }
+    if (this->offset >= this->fileSize)
+    {
+        return PBG_EOF;
     }
     return this->data[this->offset++];
 }
@@ -115,7 +123,7 @@ BOOL MemoryPbg3Reader::SeekToOffset(DWORD fileOffset)
     {
         return FALSE;
     }
-    if (this->SeekToNextByte() == FALSE)
+    if (FALSE == this->SeekToNextByte())
     {
         return FALSE;
     }
@@ -143,7 +151,11 @@ BOOL MemoryPbg3Reader::Read(void *out, DWORD length)
     {
         return FALSE;
     }
-    if (this->data == NULL || this->offset >= this->fileSize)
+    if (this->data == NULL)
+    {
+        return FALSE;
+    }
+    if (this->offset >= this->fileSize)
     {
         return FALSE;
     }

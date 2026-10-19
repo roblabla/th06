@@ -218,7 +218,7 @@ BOOL Pbg3Archive::LoadR(HMODULE module, const char *name)
         return FALSE;
     }
 
-    if (memReader->Open((u8 *)this->resData, size, NULL) == FALSE)
+    if (memReader->Attach((u8 *)this->resData, size, NULL) == FALSE)
     {
         SAFE_DELETE(this->reader);
         return FALSE;
@@ -264,7 +264,7 @@ BOOL Pbg3Archive::LoadR(HMODULE module, const char *name)
     DEC_NEXT_BIT();
 
 #define DEC_READ_BITS(bitsCount)                                                                                       \
-    outBitMask = 0x01 << (bitsCount - 1);                                                                              \
+    outBitMask = 0x01u << (bitsCount - 1);                                                                             \
     inBits = 0;                                                                                                        \
     while (outBitMask != 0)                                                                                            \
     {                                                                                                                  \
