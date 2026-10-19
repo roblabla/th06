@@ -6,9 +6,9 @@ g_TextureFormatD3D8Mapping,0x456FE8,global,24
 g_ZeroPointFive,0x457028,global,4
 th06::CSound::`vftable',0x4573F8,vtable,4
 th06::CStreamingSound::`vftable',0x4573FC,vtable,4
-th06::IPbg3Parser::`vftable',0x457400,vtable,32
-th06::Pbg3Parser::`vftable'{for `th06::IPbg3Parser'},0x457420,vtable,32
-th06::Pbg3Parser::`vftable'{for `th06::FileAbstraction'},0x457440,vtable,40
+th06::IPbg3Reader::`vftable',0x457400,vtable,32
+th06::Pbg3Reader::`vftable'{for `th06::IPbg3Reader'},0x457420,vtable,32
+th06::Pbg3Reader::`vftable'{for `th06::FileAbstraction'},0x457440,vtable,40
 th06::FileAbstraction::`vftable',0x45746C,vtable,40
 c_dfDIJoystick2,0x457684,global,24
 c_dfDIKeyboard,0x45788C,global,24

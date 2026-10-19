@@ -8,39 +8,6 @@ FileAbstraction::FileAbstraction()
     this->access = 0;
 }
 
-// DUMMY FUNCTIONS FOR IAT
-struct MappedFileView
-{
-    HANDLE file;
-    HANDLE mapping;
-    void *data;
-    DWORD size;
-    BOOL writable;
-};
-BOOL CloseMappedFileView(MappedFileView *view)
-{
-    FlushViewOfFile(view->data, 0);
-    UnmapViewOfFile(view->data);
-    CloseHandle(view->mapping);
-    CloseHandle(view->file);
-    return TRUE;
-}
-BOOL OpenMappedFileView(const WCHAR *filename, BOOL writable, MappedFileView *view)
-{
-    GetFileAttributesW(filename);
-    CreateFileW(filename, 0, 0, NULL, 0, 0, NULL);
-    GetFileSize(view->file, NULL);
-    CreateFileMappingA(view->file, NULL, 0, 0, 0, NULL);
-    MapViewOfFile(view->mapping, 0, 0, 0, 0);
-    return TRUE;
-}
-BOOL Exists_Dummy(const char *filename)
-{
-    GetFileAttributesA(filename);
-    return TRUE;
-}
-// END DUMMY FUNCTIONS
-
 FileAbstraction::~FileAbstraction()
 {
     Close();

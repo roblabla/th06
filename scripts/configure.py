@@ -185,9 +185,13 @@ def configure(build_type, build_version, ver_suffix):
         )
 
         pbg3_sources = [
-            "IPbg3Parser",
-            "Pbg3Parser",
+            "IPbg3Reader",
+            "Pbg3Reader",
+            "IPbg3Writer",
+            "Pbg3Writer",
+            "MemoryPbg3Reader",
             "Pbg3Archive",
+            "LzEncode",
             "FileAbstraction",
         ]
 

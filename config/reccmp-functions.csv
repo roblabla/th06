@@ -471,25 +471,25 @@ th06::CWaveFile::GetSize,0x43be50,function
 th06::CWaveFile::ResetFile,0x43be70,function
 th06::CWaveFile::Read,0x43c080,function
 th06::CWaveFile::Close,0x43c2c0,function
-th06::IPbg3Parser::Reset,0x43c2f0,function
-th06::IPbg3Parser::ReadVarInt,0x43c310,function
-th06::IPbg3Parser::ReadInt,0x43c380,function
-th06::IPbg3Parser::ReadString,0x43c3c0,function
-th06::IPbg3Parser::~IPbg3Parser,0x43c410,function
-th06::IPbg3Parser::`scalar deleting destructor',0x43c420,function
-th06::Pbg3Parser::Pbg3Parser,0x43c440,function
-th06::Pbg3Parser::OpenArchive,0x43c4a0,function
-th06::Pbg3Parser::Close,0x43c4f0,function
-th06::Pbg3Parser::ReadBit,0x43c510,function
-th06::Pbg3Parser::ReadBits,0x43c570,function
-th06::Pbg3Parser::ReadByteAssumeAligned,0x43c5f0,function
-th06::Pbg3Parser::SeekToOffset,0x43c610,function
-th06::Pbg3Parser::SeekToNextByte,0x43c650,function
-th06::Pbg3Parser::Read,0x43c680,function
-th06::Pbg3Parser::GetLastWriteTime,0x43c6b0,function
-th06::Pbg3Parser::ReadByte,0x43c6d0,function
-th06::Pbg3Parser::~Pbg3Parser,0x43c6e0,function
-th06::Pbg3Parser::`scalar deleting destructor',0x43c750,function
+th06::IPbg3Reader::Reset,0x43c2f0,function
+th06::IPbg3Reader::ReadVarInt,0x43c310,function
+th06::IPbg3Reader::ReadInt,0x43c380,function
+th06::IPbg3Reader::ReadString,0x43c3c0,function
+th06::IPbg3Reader::~IPbg3Reader,0x43c410,function
+th06::IPbg3Reader::`scalar deleting destructor',0x43c420,function
+th06::Pbg3Reader::Pbg3Reader,0x43c440,function
+th06::Pbg3Reader::OpenArchive,0x43c4a0,function
+th06::Pbg3Reader::Close,0x43c4f0,function
+th06::Pbg3Reader::ReadBit,0x43c510,function
+th06::Pbg3Reader::ReadBits,0x43c570,function
+th06::Pbg3Reader::ReadByteAssumeAligned,0x43c5f0,function
+th06::Pbg3Reader::SeekToOffset,0x43c610,function
+th06::Pbg3Reader::SeekToNextByte,0x43c650,function
+th06::Pbg3Reader::Read,0x43c680,function
+th06::Pbg3Reader::GetLastWriteTime,0x43c6b0,function
+th06::Pbg3Reader::ReadByte,0x43c6d0,function
+th06::Pbg3Reader::~Pbg3Reader,0x43c6e0,function
+th06::Pbg3Reader::`scalar deleting destructor',0x43c750,function
 th06::Pbg3Archive::Pbg3Archive,0x43c770,function
 th06::Pbg3Archive::ParseHeader,0x43c790,function
 th06::Pbg3Archive::Release,0x43c8d0,function

@@ -1,18 +1,18 @@
-#include "pbg3/Pbg3Parser.hpp"
+#include "pbg3/Pbg3Reader.hpp"
 
 namespace th06
 {
 
-Pbg3Parser::Pbg3Parser() : IPbg3Parser(), FileAbstraction()
+Pbg3Reader::Pbg3Reader() : IPbg3Reader(), FileAbstraction()
 {
 }
 
-Pbg3Parser::~Pbg3Parser()
+Pbg3Reader::~Pbg3Reader()
 {
     this->Close();
 }
 
-BOOL Pbg3Parser::OpenArchive(const char *path)
+BOOL Pbg3Reader::OpenArchive(const char *path)
 {
     this->Close();
     this->Reset();
@@ -24,13 +24,13 @@ BOOL Pbg3Parser::OpenArchive(const char *path)
     return TRUE;
 }
 
-void Pbg3Parser::Close()
+void Pbg3Reader::Close()
 {
     FileAbstraction::Close();
     this->Reset();
 }
 
-i32 Pbg3Parser::ReadBit()
+i32 Pbg3Reader::ReadBit()
 {
     if (!this->HasNonNullHandle())
     {
@@ -57,7 +57,7 @@ i32 Pbg3Parser::ReadBit()
     return res != 0;
 }
 
-u32 Pbg3Parser::ReadBits(u32 numBits)
+u32 Pbg3Reader::ReadBits(u32 numBits)
 {
     u32 remainingBits = 1 << (numBits - 1);
     u32 result = 0;
@@ -95,7 +95,7 @@ u32 Pbg3Parser::ReadBits(u32 numBits)
     return result;
 }
 
-i32 Pbg3Parser::ReadByte()
+i32 Pbg3Reader::ReadByte()
 {
     if (this->offset < this->fileSize)
     {
@@ -105,7 +105,7 @@ i32 Pbg3Parser::ReadByte()
     return FileAbstraction::ReadByte();
 }
 
-BOOL Pbg3Parser::SeekToOffset(DWORD fileOffset)
+BOOL Pbg3Reader::SeekToOffset(DWORD fileOffset)
 {
     if (fileOffset >= this->fileSize)
     {
@@ -127,7 +127,7 @@ BOOL Pbg3Parser::SeekToOffset(DWORD fileOffset)
     return TRUE;
 }
 
-BOOL Pbg3Parser::SeekToNextByte()
+BOOL Pbg3Reader::SeekToNextByte()
 {
     if (!this->HasNonNullHandle())
     {
@@ -141,7 +141,7 @@ BOOL Pbg3Parser::SeekToNextByte()
     return TRUE;
 }
 
-BOOL Pbg3Parser::Read(void *data, DWORD bytesToRead)
+BOOL Pbg3Reader::Read(void *data, DWORD bytesToRead)
 {
     DWORD numBytesRead;
 
@@ -149,7 +149,7 @@ BOOL Pbg3Parser::Read(void *data, DWORD bytesToRead)
     return FileAbstraction::Read(data, bytesToRead, &numBytesRead);
 }
 
-BOOL Pbg3Parser::GetLastWriteTime(LPFILETIME lastWriteTime)
+BOOL Pbg3Reader::GetLastWriteTime(LPFILETIME lastWriteTime)
 {
     if (!this->HasValidHandle())
     {

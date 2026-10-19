@@ -1,8 +1,8 @@
-#include "pbg3/IPbg3Parser.hpp"
+#include "pbg3/IPbg3Reader.hpp"
 
 namespace th06
 {
-void IPbg3Parser::Reset()
+void IPbg3Reader::Reset()
 {
     this->bitMask = 128;
     this->offset = 0;
@@ -11,7 +11,7 @@ void IPbg3Parser::Reset()
     this->checksum = 0;
 }
 
-u32 IPbg3Parser::ReadVarInt()
+u32 IPbg3Reader::ReadVarInt()
 {
     u32 res = 0;
     i32 varintHdr = 0;
@@ -54,7 +54,7 @@ u32 IPbg3Parser::ReadVarInt()
     return res;
 }
 
-u32 IPbg3Parser::ReadInt()
+u32 IPbg3Reader::ReadInt()
 {
     u32 b0 = this->ReadBits(8);
     u32 b1 = b0 + (this->ReadBits(8) << 8);
@@ -64,7 +64,7 @@ u32 IPbg3Parser::ReadInt()
     return b3;
 }
 
-BOOL IPbg3Parser::ReadString(char *out, u32 maxSize)
+BOOL IPbg3Reader::ReadString(char *out, u32 maxSize)
 {
     if (out == NULL)
         return FALSE;

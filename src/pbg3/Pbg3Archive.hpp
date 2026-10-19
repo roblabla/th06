@@ -1,6 +1,6 @@
 #pragma once
 #include "decomp.hpp"
-#include "pbg3/Pbg3Parser.hpp"
+#include "pbg3/Pbg3Reader.hpp"
 
 namespace th06
 {
@@ -24,6 +24,7 @@ class Pbg3Archive
     BOOL Release();
 
     BOOL Load(const char *path);
+    BOOL LoadR(HMODULE module, const char *name);
     BOOL ParseHeader();
     i32 FindEntry(const char *path);
     u32 GetEntrySize(u32 entryIdx);
@@ -32,8 +33,8 @@ class Pbg3Archive
     u8 *ReadDecompressEntry(u32 entryIdx, const char *filename);
 
   private:
-    Pbg3Parser *parser;
-    void *unk;
+    IPbg3Reader *reader;
+    void *resData;
     u32 numOfEntries;
     u32 fileTableOffset;
     Pbg3Entry *entries;

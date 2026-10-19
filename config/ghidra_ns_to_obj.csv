@@ -11,13 +11,13 @@ FileAbstraction,th06::FileAbstraction
 GameManager,th06::GameManager,th06::GameManager_RegisterChain,th06::GameManager_CutChain,th06::GameManager_OnUpdate,th06::GameManager_OnDraw,th06::GameManager_AddedCallback,th06::GameManager_DeletedCallback,th06::SetupCamera,th06::SetupCameraStageBackground,th06::CharacterShotType
 Global,th06::Chain,th06::ChainElem,th06::CMyFont,th06::Controller,th06::FileSystem,th06::GameErrorContext,th06::Rng,th06::utils
 Gui,th06::Gui,th06::GuiImpl,th06::Gui_RegisterChain,th06::Gui_CutChain,th06::Gui_AddedCallback,th06::Gui_DeletedCallback,th06::Gui_OnUpdate,th06::Gui_OnDraw,th06::GuiMsgVm
-IPbg3Parser,th06::IPbg3Parser
+IPbg3Reader,th06::IPbg3Reader
 ItemManager,th06::ItemManager
 MainMenu,th06::MainMenu,th06::LoadTitleAnm,th06::LoadReplayMenu,th06::MainMenu_OnUpdate,th06::MainMenu_OnDraw,th06::MainMenu_AddedCallback,th06::MainMenu_DeletedCallback,th06::LoadDiffCharSelect,th06::ReleaseTitleAnm,th06::MainMenu_RegisterChain,th06::MoveCursor,th06::SwapMapping,th06::DrawMenuItem
 MidiOutput,th06::MidiDevice,th06::MidiTimer,th06::MidiOutput,th06::MidiTimer_DefaultTimerCallback,th06::ConvWord,th06::GetDeltaTime,th06::ConvDWord
 MusicRoom,th06::MusicRoom,th06::MusicRoom_AddedCallback,th06::MusicRoom_DeletedCallback,th06::MusicRoom_OnDraw,th06::MusicRoom_OnUpdate,th06::MusicRoom_RegisterChain
 Pbg3Archive,th06::Pbg3Archive
-Pbg3Parser,th06::Pbg3Parser
+Pbg3Reader,th06::Pbg3Reader
 Player,th06::Player,th06::Player_RegisterChain,th06::Player_CutChain,th06::Player_OnUpdate,th06::Player_OnDrawHighPrio,th06::Player_OnDrawLowPrio,th06::Player_AddedCallback,th06::Player_DeletedCallback,th06::FireBulletReimuA,th06::FireBulletReimuB,th06::FireBulletMarisaA,th06::FireBulletMarisaB,th06::FireSingleBullet,th06::StartFireBulletTimer,th06::UpdatePlayerBullets,th06::UpdateFireBulletsTimer,th06::SpawnBullets,th06::DrawBullets,th06::DrawBulletExplosions,th06::PlayerBombInfo::PlayerBombInfo
 ReplayManager,th06::ReplayManager,th06::ReplayManager_RegisterChain,th06::ReplayManager_OnUpdate,th06::ReplayManager_OnUpdateDemoHighPrio,th06::ReplayManager_OnUpdateDemoLowPrio,th06::ReplayManager_OnDraw,th06::ReplayManager_AddedCallback,th06::ReplayManager_AddedCallbackDemo,th06::ReplayManager_DeletedCallback,th06::StopRecordingReplay,th06::SaveReplay,th06::ValidateReplayData
 ResultScreen,th06::ResultScreen,th06::ResultScreen_RegisterChain,th06::ResultScreen_OnUpdate,th06::ResultScreen_OnDraw,th06::ResultScreen_AddedCallback,th06::ResultScreen_DeletedCallback,th06::OpenScore,th06::GetHighScore,th06::LinkScore,th06::FreeAllScores,th06::ParseCatk,th06::ParseClrd,th06::ParsePscr,th06::ReleaseScoreDat,th06::WriteScore,th06::MoveResultCursor,th06::MoveResultCursorHorizontally

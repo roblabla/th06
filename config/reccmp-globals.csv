@@ -9,9 +9,9 @@ g_DifficultyWeightsList,0x46bca4,global,20
 g_TextureFormatD3D8Mapping,0x46c220,global,24
 th06::CSound::`vftable',0x46c680,vtable,4
 th06::CStreamingSound::`vftable',0x46c69c,vtable,4
-th06::IPbg3Parser::`vftable',0x46cb7c,vtable,32
-th06::Pbg3Parser::`vftable'{for `th06::IPbg3Parser'},0x46cb9c,vtable,32
-th06::Pbg3Parser::`vftable'{for `th06::FileAbstraction'},0x46cbbc,vtable,40
+th06::IPbg3Reader::`vftable',0x46cb7c,vtable,32
+th06::Pbg3Reader::`vftable'{for `th06::IPbg3Reader'},0x46cb9c,vtable,32
+th06::Pbg3Reader::`vftable'{for `th06::FileAbstraction'},0x46cbbc,vtable,40
 th06::FileAbstraction::`vftable',0x46cbe8,vtable,40
 c_dfDIJoystick2,0x46cdfc,global,24
 c_dfDIKeyboard,0x46d004,global,24
