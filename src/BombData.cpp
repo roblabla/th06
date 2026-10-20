@@ -46,7 +46,7 @@ void BombReimuACalc(Player *player)
     }
     if (player->bombInfo.timer >= 60 && player->bombInfo.timer < 180)
     {
-        if ((i32)player->bombInfo.timer % 16 == 0)
+        if (MULTIPLE_OF(player->bombInfo.timer, 16))
         {
             i = ((i32)player->bombInfo.timer - 60) / 16;
             if (i != 0)
@@ -312,7 +312,7 @@ void BombReimuBCalc(Player *player)
         for (i = 0; i < 4; i++)
         {
             g_AnmManager->ExecuteScript(&player->bombInfo.sprites[0][i]);
-            if (player->bombInfo.timer.HasTicked() && (i32)player->bombInfo.timer % 2 != 0)
+            if (player->bombInfo.timer.HasTicked() && !MULTIPLE_OF(player->bombInfo.timer, 2))
             {
                 player->bombProjectiles[i].pos.x =
                     player->bombInfo.bombRegionPositions[i].x + player->bombInfo.sprites[0][i].posOffset.x;
@@ -374,8 +374,8 @@ void BombMarisaACalc(Player *player)
 
             float starAngle = i * ZUN_2PI / 8.0f;
 
-            player->bombInfo.bombRegionVelocities[i].x = cosf(starAngle) * 2;
-            player->bombInfo.bombRegionVelocities[i].y = sinf(starAngle) * 2;
+            player->bombInfo.bombRegionVelocities[i].x = cosf(starAngle) * 2.0f;
+            player->bombInfo.bombRegionVelocities[i].y = sinf(starAngle) * 2.0f;
             player->bombInfo.bombRegionVelocities[i].z = 0.0f;
         }
         g_SoundPlayer.PlaySoundByIdx(SOUND_BOMB_REIMARI);
@@ -388,7 +388,7 @@ void BombMarisaACalc(Player *player)
             player->bombInfo.bombRegionPositions[i] +=
                 player->bombInfo.bombRegionVelocities[i] * g_Supervisor.effectiveFramerateMultiplier;
 
-            if (player->bombInfo.timer.HasTicked() && (i32)player->bombInfo.timer % 3 != 0)
+            if (player->bombInfo.timer.HasTicked() && !MULTIPLE_OF(player->bombInfo.timer, 3))
             {
                 player->bombProjectiles[i].pos.x = player->bombInfo.bombRegionPositions[i].x;
                 player->bombProjectiles[i].pos.y = player->bombInfo.bombRegionPositions[i].y;
@@ -486,7 +486,7 @@ void BombMarisaBCalc(Player *player)
             ScreenEffect_RegisterChain(SCREEN_EFFECT_SHAKE, 200, 24, 0, 0);
         }
 
-        if (player->bombInfo.timer.HasTicked() && (i32)player->bombInfo.timer % 4 != 0)
+        if (player->bombInfo.timer.HasTicked() && !MULTIPLE_OF(player->bombInfo.timer, 4))
         {
             player->bombProjectiles[0].pos.x = GAME_REGION_WIDTH / 2.0f;
             player->bombProjectiles[0].pos.y = player->positionCenter.y / 2.0f;

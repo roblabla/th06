@@ -340,9 +340,7 @@ ZunResult EffectManager_RegisterChain()
     EffectManager *mgr = &g_EffectManager;
     mgr->Reset();
 
-    g_EffectManagerCalcChain.callback = (ChainCallback)EffectManager_OnUpdate;
-    g_EffectManagerCalcChain.addedCallback = NULL;
-    g_EffectManagerCalcChain.deletedCallback = NULL;
+    g_EffectManagerCalcChain.SetCallback((ChainCallback)EffectManager_OnUpdate);
     g_EffectManagerCalcChain.addedCallback = (ChainAddedCallback)EffectManager_AddedCallback;
     g_EffectManagerCalcChain.deletedCallback = (ChainAddedCallback)EffectManager_DeletedCallback;
     g_EffectManagerCalcChain.arg = mgr;
@@ -352,9 +350,7 @@ ZunResult EffectManager_RegisterChain()
         return ZUN_ERROR;
     }
 
-    g_EffectManagerDrawChain.callback = (ChainCallback)EffectManager_OnDraw;
-    g_EffectManagerDrawChain.addedCallback = NULL;
-    g_EffectManagerDrawChain.deletedCallback = NULL;
+    g_EffectManagerDrawChain.SetCallback((ChainCallback)EffectManager_OnDraw);
     g_EffectManagerDrawChain.arg = mgr;
     g_Chain.AddToDrawChain(&g_EffectManagerDrawChain, TH_CHAIN_PRIO_DRAW_EFFECTMANAGER);
 

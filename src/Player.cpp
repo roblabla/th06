@@ -425,7 +425,7 @@ i32 Player::CalcDamageToEnemy(D3DXVECTOR3 *enemyPos, D3DXVECTOR3 *enemyHitboxSiz
                 bullet->size.x = 48.0f;
                 bullet->size.y = 48.0f;
             }
-            if ((i32)bullet->lifetime % 6 == 0)
+            if (MULTIPLE_OF(bullet->lifetime, 6))
             {
                 g_EffectManager.SpawnParticles(PARTICLE_EFFECT_UNK_5, &bullet->position, 1, COLOR_WHITE);
             }
