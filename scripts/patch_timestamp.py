@@ -28,7 +28,7 @@ def patch_timestamp(exe_path, timestamp_value):
                 exe.seek(pe_offset + 0x8)
                 exe.write(timestamp)
                 return
-        except PermissionError as e:
+        except PermissionError:
             time.sleep(0.1)
             timeout -= 1
             if timeout == 0:
