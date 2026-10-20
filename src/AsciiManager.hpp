@@ -103,6 +103,10 @@ struct AsciiManager
     {
         this->isSelected = isSelected;
     }
+    void ResetStrings()
+    {
+        this->numStrings = 0;
+    }
 
     AnmVm fontVm;
     AnmVm scorePopupVm;

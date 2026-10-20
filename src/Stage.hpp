@@ -99,6 +99,16 @@ struct Stage
     ZunResult UpdateObjects();
     ZunResult RenderObjects(i32 zLevel);
 
+    void StartSpellcard()
+    {
+        this->spellcardState = RUNNING;
+        this->ticksSinceSpellcardStarted = 0;
+    }
+    void EndSpellcard()
+    {
+        this->spellcardState = NOT_RUNNING;
+    }
+
     AnmVm *quadVms;
     RawStageHeader *stdData;
     i32 quadCount;

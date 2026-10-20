@@ -11,7 +11,6 @@
 
 namespace th06
 {
-AUTO_BSS_SORT(Q1);
 
 struct ScoreDat
 {
@@ -187,13 +186,13 @@ ScoreDat *OpenScore(const char *path)
     }
     else
     {
-        if (g_LastFileSize < sizeof(ScoreDat))
+        if (g_ReadFileSize < sizeof(ScoreDat))
         {
             ZUN_FREE(scoreData);
             goto FAILED_TO_READ;
         }
 
-        remainingData = g_LastFileSize - 2;
+        remainingData = g_ReadFileSize - 2;
         checksum = 0;
         xorValue = 0;
         bytesShifted = 0;
@@ -1261,7 +1260,7 @@ i32 ResultScreen::HandleReplaySaveKeyboard()
                     continue;
                 }
 #if BUILD_VERSION >= BUILD_VERSION_013
-                if (ValidateReplayData(replayLoaded, g_LastFileSize) == ZUN_SUCCESS)
+                if (ValidateReplayData(replayLoaded, g_ReadFileSize) == ZUN_SUCCESS)
                 {
                     this->replays[i] = *replayLoaded;
                 }
@@ -2164,7 +2163,7 @@ static ZunResult ResultScreen_DeletedCallback(ResultScreen *resultScreen)
     g_AnmManager->ReleaseAnm(ANM_FILE_RESULT03);
     g_AnmManager->ReleaseSurface(0);
 
-    g_Chain.Cut(resultScreen->drawChain);
+    g_FuncChain.Cut(resultScreen->drawChain);
 
     resultScreen->drawChain = NULL;
 
@@ -2180,7 +2179,7 @@ ZunResult ResultScreen_RegisterChain(i32 unk)
 
     DebugPrint(TH_DBG_RESULTSCREEN_COUNAT, g_GameManager.counat);
 
-    resultScreen->calcChain = g_Chain.CreateElem((ChainCallback)ResultScreen_OnUpdate);
+    resultScreen->calcChain = g_FuncChain.CreateElem((ChainCallback)ResultScreen_OnUpdate);
     resultScreen->calcChain->addedCallback = (ChainAddedCallback)ResultScreen_AddedCallback;
     resultScreen->calcChain->deletedCallback = (ChainDeletedCallback)ResultScreen_DeletedCallback;
     resultScreen->calcChain->arg = resultScreen;
@@ -2197,14 +2196,14 @@ ZunResult ResultScreen_RegisterChain(i32 unk)
         }
     }
 
-    if (g_Chain.AddToCalcChain(resultScreen->calcChain, TH_CHAIN_PRIO_CALC_RESULTSCREEN) != ZUN_SUCCESS)
+    if (g_FuncChain.AddToCalcChain(resultScreen->calcChain, TH_CHAIN_PRIO_CALC_RESULTSCREEN) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
 
-    resultScreen->drawChain = g_Chain.CreateElem((ChainCallback)ResultScreen_OnDraw);
+    resultScreen->drawChain = g_FuncChain.CreateElem((ChainCallback)ResultScreen_OnDraw);
     resultScreen->drawChain->arg = resultScreen;
-    g_Chain.AddToDrawChain(resultScreen->drawChain, TH_CHAIN_PRIO_DRAW_RESULTSCREEN);
+    g_FuncChain.AddToDrawChain(resultScreen->drawChain, TH_CHAIN_PRIO_DRAW_RESULTSCREEN);
 
     return ZUN_SUCCESS;
 }

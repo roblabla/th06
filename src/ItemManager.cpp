@@ -6,9 +6,9 @@
 
 namespace th06
 {
-BSS_SORT(K3) ItemManager g_ItemManager;
-BSS_SORT(K4) ChainElem g_ItemManagerCalcChain;          // unused
-BSS_SORT_FIRST(K2, 8) ChainElem g_ItemManagerDrawChain; // unused
+ItemManager g_ItemManager;
+ChainElem g_ItemManagerCalcChain; // unused
+ChainElem g_ItemMgrOnDrawElem;    // unused
 
 void ItemManager::SpawnItem(D3DXVECTOR3 *position, ItemType itemType, ItemState state)
 {
@@ -76,9 +76,6 @@ i32 g_PowerUpThresholds[] = {8, 16, 32, 48, 64, 80, 96, 128, 999, 1, 0};
          ? (top)                                                                                                       \
          : ((bottom) - (((i32)(item)->currentPosition.y - PIV_LINE) * (multiplier))))
 
-// This is necessary to position the guard variable for g_ItemSize
-AUTO_BSS_SORT(K1);
-
 #pragma var_order(idx, itemScore, playerAngle, itemAcquired, curItem)
 void ItemManager::OnUpdate()
 {
@@ -90,7 +87,7 @@ void ItemManager::OnUpdate()
 
     curItem = &this->items[0];
 
-    static D3DXVECTOR3 g_ItemSize(16.0f, 16.0f, 16.0f);
+    static D3DXVECTOR3 g_ItemHitSize(16.0f, 16.0f, 16.0f);
 
     itemAcquired = false;
     this->itemCount = 0;
@@ -151,7 +148,7 @@ void ItemManager::OnUpdate()
             curItem->startPositionVelocity.y = 3.0f;
         }
     yolo:
-        if (g_Player.CalcItemBoxCollision(&curItem->currentPosition, &g_ItemSize))
+        if (g_Player.CalcItemBoxCollision(&curItem->currentPosition, &g_ItemHitSize))
         {
             switch (curItem->itemType)
             {

@@ -1,11 +1,4 @@
 #pragma once
-// BSS_SORT is used as a workaround; MSVC's linker orders zero-initialized
-// and uninitialized globals based on name in a hard to predict manner that
-// would effectively require figuring out what ZUN called his variables,
-// which is less than desirable for obvious reasons. This allows us to
-// override the order the linker would normally choose.
-// Is it pretty? No. But MSVC has unfortunately forced our hand.
-
 #include "dxutil.hpp"
 
 #define _MACRO_CATW(arg1, arg2, arg3) arg1##arg2##arg3
@@ -14,32 +7,6 @@
 #define MACRO_CAT(arg1, arg2) _MACRO_CAT(arg1, arg2)
 #define _MACRO_STR(arg) #arg
 #define MACRO_STR(arg) _MACRO_STR(arg)
-
-// #define DISABLE_BSS_HACK 1
-
-#if !DISABLE_BSS_HACK
-#define AUTO_BSS_SORT(sort) __pragma(bss_seg(MACRO_STR(MACRO_CAT(.bss$, sort))))
-#define MANUAL_BSS_SORT(sort) __declspec(allocate(MACRO_STR(MACRO_CAT(.bss$, sort))))
-#define BSS_SORT(sort) AUTO_BSS_SORT(sort) MANUAL_BSS_SORT(sort)
-#define BSS_SORT_FIRST(sort, alignment) BSS_SORT(sort) __declspec(align(alignment))
-#else
-#define AUTO_BSS_SORT(sort)
-#define MANUAL_BSS_SORT(sort)
-#define BSS_SORT(sort)
-#define BSS_SORT_FIRST(sort, alignment)
-#endif
-
-// The trial is built with /O2, which drops the zero stores a dynamic initializer
-// makes to an object in the default .bss, since that memory starts out zeroed.
-// Any bss_seg or allocate on the object turns this off, even one naming ".bss",
-// so the sorted globals above keep those stores. ZUN never sorted .bss, so the
-// constructors of sorted globals wrap such stores in BSS_ZERO_INIT to leave them
-// out of the trial.
-#if TRIALBUILD
-#define BSS_ZERO_INIT(stmt)
-#else
-#define BSS_ZERO_INIT(stmt) stmt
-#endif
 
 // Using __COUNTER__ would be better but makes PCH *really* slow
 #define unique_name(prefix) MACRO_CAT(prefix, __LINE__)

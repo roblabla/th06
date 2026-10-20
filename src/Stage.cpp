@@ -6,13 +6,10 @@
 
 namespace th06
 {
-#if !DISABLE_BSS_HACK
-BSS_SORT(B1) i32 g_StagePad;
-#endif
-BSS_SORT(B3) Stage g_Stage;
-BSS_SORT(B5) ChainElem g_StageCalcChain;
-BSS_SORT(B2) ChainElem g_StageOnDrawHighPrioChain;
-BSS_SORT(B4) ChainElem g_StageOnDrawLowPrioChain;
+Stage g_Stage;
+ChainElem g_StageCalcChain;
+ChainElem g_StageDrawHighPrioChain;
+ChainElem g_StageOnDrawLowPrioChain;
 
 #define GET_ARG(type, num) ((type *)curInstr->args)[num]
 #define GET_INT_ARG(num) GET_ARG(i32, num)
@@ -331,25 +328,25 @@ ZunResult Stage_RegisterChain(u32 stage)
     g_StageCalcChain.deletedCallback = (ChainDeletedCallback)Stage_DeletedCallback;
     g_StageCalcChain.arg = stg;
 
-    if (g_Chain.AddToCalcChain(&g_StageCalcChain, TH_CHAIN_PRIO_CALC_STAGE) != ZUN_SUCCESS)
+    if (g_FuncChain.AddToCalcChain(&g_StageCalcChain, TH_CHAIN_PRIO_CALC_STAGE) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
-    g_StageOnDrawHighPrioChain.SetCallback((ChainCallback)Stage_OnDrawHighPrio);
-    g_StageOnDrawHighPrioChain.arg = stg;
-    g_Chain.AddToDrawChain(&g_StageOnDrawHighPrioChain, TH_CHAIN_PRIO_DRAW_HIGH_PRIO_STAGE);
+    g_StageDrawHighPrioChain.SetCallback((ChainCallback)Stage_OnDrawHighPrio);
+    g_StageDrawHighPrioChain.arg = stg;
+    g_FuncChain.AddToDrawChain(&g_StageDrawHighPrioChain, TH_CHAIN_PRIO_DRAW_HIGH_PRIO_STAGE);
     g_StageOnDrawLowPrioChain.SetCallback((ChainCallback)Stage_OnDrawLowPrio);
     g_StageOnDrawLowPrioChain.arg = stg;
-    g_Chain.AddToDrawChain(&g_StageOnDrawLowPrioChain, TH_CHAIN_PRIO_DRAW_LOW_PRIO_STAGE);
+    g_FuncChain.AddToDrawChain(&g_StageOnDrawLowPrioChain, TH_CHAIN_PRIO_DRAW_LOW_PRIO_STAGE);
 
     return ZUN_SUCCESS;
 }
 
 void Stage_CutChain()
 {
-    g_Chain.Cut(&g_StageCalcChain);
-    g_Chain.Cut(&g_StageOnDrawHighPrioChain);
-    g_Chain.Cut(&g_StageOnDrawLowPrioChain);
+    g_FuncChain.Cut(&g_StageCalcChain);
+    g_FuncChain.Cut(&g_StageDrawHighPrioChain);
+    g_FuncChain.Cut(&g_StageOnDrawLowPrioChain);
 }
 
 #pragma var_order(vmIdx, idx, curObj, curQuad)

@@ -64,11 +64,8 @@ ExInsn g_EclExInsn[] = {
     ExInsFlandreFinalContextUpdate,
 };
 
-BSS_SORT(C5) ChainElem g_EclManagerCalcChain; // unused
-BSS_SORT(C4) EclManager g_EclManager;
-BSS_SORT(C1) i32 g_PlayerShot;
-BSS_SORT(C2) f32 g_PlayerDistance;
-BSS_SORT(C3) f32 g_PlayerAngle;
+ChainElem g_EclManagerCalcChain; // unused
+EclManager g_EclManager;
 
 ZunResult EclManager::Load(const char *eclPath)
 {
@@ -581,14 +578,14 @@ restart_sub_changed:
             if (GET_INSTR_INT_ARG(0) >= 0)
             {
                 g_EnemyManager.bosses[GET_INSTR_INT_ARG(0)] = enemy;
-                g_Gui.bossPresent = true;
-                g_Gui.SetBossHealthBar(1.0f);
+                g_Gui.SetBossPresent(true);
+                g_Gui.bossHealthBar1 = 1.0f;
                 enemy->flags.isBoss = true;
                 enemy->bossId = GET_INSTR_INT_ARG(0);
             }
             else
             {
-                g_Gui.bossPresent = false;
+                g_Gui.SetBossPresent(false);
                 g_EnemyManager.bosses[enemy->bossId] = NULL;
                 enemy->flags.isBoss = false;
             }
@@ -759,8 +756,7 @@ restart_sub_changed:
             g_EnemyManager.spellcardInfo.idx = GET_INSTR_SHORT_ARG(1);
             g_EnemyManager.spellcardInfo.captureScore = g_SpellcardScore[g_EnemyManager.spellcardInfo.idx];
             g_BulletManager.TurnAllBulletsIntoPoints();
-            g_Stage.spellcardState = RUNNING;
-            g_Stage.ticksSinceSpellcardStarted = 0;
+            g_Stage.StartSpellcard();
             enemy->ResetRank();
             Catk *catk = &g_GameManager.catk[g_EnemyManager.spellcardInfo.idx];
             i32 csum = 0;
@@ -821,7 +817,7 @@ restart_sub_changed:
                 }
                 g_EnemyManager.spellcardInfo.isActive = 0;
             }
-            g_Stage.spellcardState = NOT_RUNNING;
+            g_Stage.EndSpellcard();
             break;
         case ECL_OPCODE_PHASE_TIMER_SET:
             enemy->phaseTimer = GET_INSTR_INT_ARG(0);
@@ -1136,6 +1132,7 @@ static void EclMoveTime(Enemy *enemy, EclRawInstr *instr)
 
 static i32 *EclGetVar(Enemy *enemy, EclVarId *eclVarId, EclValueType *valueType)
 {
+
     if (valueType != NULL)
         *valueType = ECL_VALUE_TYPE_UNDEFINED;
 
@@ -1241,11 +1238,13 @@ static i32 *EclGetVar(Enemy *enemy, EclVarId *eclVarId, EclValueType *valueType)
             *valueType = ECL_VALUE_TYPE_READONLY;
         return (i32 *)&g_Player.positionCenter.z;
 
-    case ECL_VAR_PLAYER_ANGLE:
+    case ECL_VAR_PLAYER_ANGLE: {
+        static f32 g_PlayerAngle;
         g_PlayerAngle = g_Player.AngleToPlayer(&enemy->position);
         if (valueType != NULL)
             *valueType = ECL_VALUE_TYPE_READONLY;
         return (i32 *)&g_PlayerAngle;
+    }
 
     case ECL_VAR_ENEMY_TIMER:
         if (valueType != NULL)
@@ -1253,6 +1252,7 @@ static i32 *EclGetVar(Enemy *enemy, EclVarId *eclVarId, EclValueType *valueType)
         return &enemy->phaseTimer.current;
 
     case ECL_VAR_PLAYER_DISTANCE: {
+        static f32 g_PlayerDistance;
         D3DXVECTOR3 distance = g_Player.positionCenter - enemy->position;
         g_PlayerDistance = D3DXVec3Length(&distance);
         if (valueType != NULL)
@@ -1265,11 +1265,13 @@ static i32 *EclGetVar(Enemy *enemy, EclVarId *eclVarId, EclValueType *valueType)
             *valueType = ECL_VALUE_TYPE_INT;
         return &enemy->life;
 
-    case ECL_VAR_PLAYER_SHOT:
+    case ECL_VAR_PLAYER_SHOT: {
+        static i32 g_PlayerShot;
         g_PlayerShot = CURRENT_SHOTTYPE();
         if (valueType != NULL)
             *valueType = ECL_VALUE_TYPE_INT;
         return &g_PlayerShot;
+    }
     }
     return (i32 *)eclVarId;
 }

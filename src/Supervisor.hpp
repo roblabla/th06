@@ -136,7 +136,7 @@ struct Supervisor
 {
     Supervisor()
     {
-        BSS_ZERO_INIT(memset(this, 0, sizeof(Supervisor)));
+        memset(this, 0, sizeof(Supervisor));
     }
 
     ZunBool ReadMidiFile(u32 midiFileIdx, const char *path);
@@ -183,19 +183,9 @@ struct Supervisor
         return this->cfg.opts.displayMinimumGraphics;
     }
 
-    ZunBool IsShadingDisabled()
-    {
-        return this->cfg.opts.suppressUseOfGoroudShading;
-    }
-
     ZunBool IsDepthTestDisabled()
     {
         return this->cfg.opts.disableDepthTest;
-    }
-
-    ZunBool IsForced60Fps()
-    {
-        return this->cfg.opts.force60Fps;
     }
 
     ZunBool IsColorCompositingDisabled()
@@ -230,7 +220,7 @@ struct Supervisor
 
     ZunBool ShouldRunAt60Fps()
     {
-        return this->IsForced60Fps() && this->vsyncEnabled;
+        return this->cfg.opts.force60Fps && this->vsyncEnabled;
     }
 
     ZunBool IsWindowed()

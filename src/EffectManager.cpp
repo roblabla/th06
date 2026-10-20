@@ -6,9 +6,9 @@
 
 namespace th06
 {
-BSS_SORT(D1) EffectManager g_EffectManager;
-BSS_SORT(D2) ChainElem g_EffectManagerCalcChain;
-BSS_SORT(D3) ChainElem g_EffectManagerDrawChain;
+EffectManager g_EffectManager;
+ChainElem g_EffectManagerExecChain;
+ChainElem g_EffectManagerDrawChain;
 
 void EffectManager::Reset()
 {
@@ -340,26 +340,26 @@ ZunResult EffectManager_RegisterChain()
     EffectManager *mgr = &g_EffectManager;
     mgr->Reset();
 
-    g_EffectManagerCalcChain.SetCallback((ChainCallback)EffectManager_OnUpdate);
-    g_EffectManagerCalcChain.addedCallback = (ChainAddedCallback)EffectManager_AddedCallback;
-    g_EffectManagerCalcChain.deletedCallback = (ChainAddedCallback)EffectManager_DeletedCallback;
-    g_EffectManagerCalcChain.arg = mgr;
+    g_EffectManagerExecChain.SetCallback((ChainCallback)EffectManager_OnUpdate);
+    g_EffectManagerExecChain.addedCallback = (ChainAddedCallback)EffectManager_AddedCallback;
+    g_EffectManagerExecChain.deletedCallback = (ChainAddedCallback)EffectManager_DeletedCallback;
+    g_EffectManagerExecChain.arg = mgr;
 
-    if (g_Chain.AddToCalcChain(&g_EffectManagerCalcChain, TH_CHAIN_PRIO_CALC_EFFECTMANAGER) != ZUN_SUCCESS)
+    if (g_FuncChain.AddToCalcChain(&g_EffectManagerExecChain, TH_CHAIN_PRIO_CALC_EFFECTMANAGER) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
 
     g_EffectManagerDrawChain.SetCallback((ChainCallback)EffectManager_OnDraw);
     g_EffectManagerDrawChain.arg = mgr;
-    g_Chain.AddToDrawChain(&g_EffectManagerDrawChain, TH_CHAIN_PRIO_DRAW_EFFECTMANAGER);
+    g_FuncChain.AddToDrawChain(&g_EffectManagerDrawChain, TH_CHAIN_PRIO_DRAW_EFFECTMANAGER);
 
     return ZUN_SUCCESS;
 }
 
 void EffectManager_CutChain()
 {
-    g_Chain.Cut(&g_EffectManagerCalcChain);
-    g_Chain.Cut(&g_EffectManagerDrawChain);
+    g_FuncChain.Cut(&g_EffectManagerExecChain);
+    g_FuncChain.Cut(&g_EffectManagerDrawChain);
 }
 } // namespace th06

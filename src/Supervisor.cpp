@@ -14,34 +14,33 @@
 
 namespace th06
 {
-AUTO_BSS_SORT(M1);
 
-MANUAL_BSS_SORT(M1) Supervisor g_Supervisor;
+Supervisor g_Supervisor;
 
 ChainCallbackResult Supervisor_OnUpdate(Supervisor *s)
 {
     g_SoundPlayer.UpdateFades();
-    g_LastFrameInput = g_CurFrameInput;
+    g_PreviousFrameKeys = g_CurFrameInput;
     g_CurFrameInput = Controller::GetInput();
-    g_IsEigthFrameOfHeldInput = false;
-    if (g_LastFrameInput == g_CurFrameInput)
+    g_IsEigthFrameInput = false;
+    if (g_PreviousFrameKeys == g_CurFrameInput)
     {
-        if (g_NumOfFramesInputsWereHeld >= 30)
+        if (g_CountFramesInputsWereHeld >= 30)
         {
-            if (g_NumOfFramesInputsWereHeld % 8 == 0)
+            if (g_CountFramesInputsWereHeld % 8 == 0)
             {
-                g_IsEigthFrameOfHeldInput = true;
+                g_IsEigthFrameInput = true;
             }
-            if (g_NumOfFramesInputsWereHeld >= 38)
+            if (g_CountFramesInputsWereHeld >= 38)
             {
-                g_NumOfFramesInputsWereHeld = 30;
+                g_CountFramesInputsWereHeld = 30;
             }
         }
-        g_NumOfFramesInputsWereHeld++;
+        g_CountFramesInputsWereHeld++;
     }
     else
     {
-        g_NumOfFramesInputsWereHeld = 0;
+        g_CountFramesInputsWereHeld = 0;
     }
 
     if (s->wantedState != s->curState)
@@ -197,7 +196,7 @@ ChainCallbackResult Supervisor_OnUpdate(Supervisor *s)
             }
             break;
         }
-        g_CurFrameInput = g_LastFrameInput = g_IsEigthFrameOfHeldInput = 0;
+        g_CurFrameInput = g_PreviousFrameKeys = g_IsEigthFrameInput = 0;
     }
 
     s->wantedState = s->curState;
@@ -209,12 +208,12 @@ void DrawFpsCounter();
 
 ChainCallbackResult Supervisor_OnDraw(Supervisor *s)
 {
-    g_AnmManager->SetCurrentVertexShader(AnmVertexShader_NotSet);
+    g_AnmManager->ClearVertexShader();
     g_AnmManager->ClearSprite();
     g_AnmManager->ClearTexture();
-    g_AnmManager->SetCurrentColorOp(AnmColorOp_NotSet);
-    g_AnmManager->SetCurrentBlendMode(AnmBlendMode_NotSet);
-    g_AnmManager->SetCurrentZWriteDisable(AnmZWriteState_NotSet);
+    g_AnmManager->ClearColorOp();
+    g_AnmManager->ClearBlendMode();
+    g_AnmManager->ClearZWrite();
 
     DrawFpsCounter();
     return CHAIN_CALLBACK_RESULT_CONTINUE;
@@ -331,7 +330,7 @@ static ZunResult Supervisor_AddedCallback(Supervisor *s)
         s->pbg3Archives[i] = NULL;
     }
 
-    g_Pbg3Archives = s->pbg3Archives;
+    g_Pbg3ArcList = s->pbg3Archives;
     if (s->LoadPbg3(IN_PBG3_INDEX, TH_IN_DAT_FILE))
     {
         return ZUN_ERROR;
@@ -419,18 +418,18 @@ ZunResult Supervisor_RegisterChain()
     supervisor->curState = -1;
     supervisor->calcCount = 0;
 
-    chain = g_Chain.CreateElem((ChainCallback)Supervisor_OnUpdate);
+    chain = g_FuncChain.CreateElem((ChainCallback)Supervisor_OnUpdate);
     chain->arg = supervisor;
     chain->addedCallback = (ChainAddedCallback)Supervisor_AddedCallback;
     chain->deletedCallback = (ChainDeletedCallback)Supervisor_DeletedCallback;
-    if (g_Chain.AddToCalcChain(chain, TH_CHAIN_PRIO_CALC_SUPERVISOR) != ZUN_SUCCESS)
+    if (g_FuncChain.AddToCalcChain(chain, TH_CHAIN_PRIO_CALC_SUPERVISOR) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
 
-    chain = g_Chain.CreateElem((ChainCallback)Supervisor_OnDraw);
+    chain = g_FuncChain.CreateElem((ChainCallback)Supervisor_OnDraw);
     chain->arg = supervisor;
-    g_Chain.AddToDrawChain(chain, TH_CHAIN_PRIO_DRAW_SUPERVISOR);
+    g_FuncChain.AddToDrawChain(chain, TH_CHAIN_PRIO_DRAW_SUPERVISOR);
 
     return ZUN_SUCCESS;
 }
@@ -443,9 +442,9 @@ void DrawFpsCounter()
     float elapsed;
     float fps;
 
-    MANUAL_BSS_SORT(M1) static DWORD g_LastTime = timeGetTime();
-    MANUAL_BSS_SORT(M1) static u32 g_NumFramesSinceLastTime = 0;
-    MANUAL_BSS_SORT(M1) static char g_FpsCounterBuffer[256];
+    static DWORD g_LastTime = timeGetTime();
+    static u32 g_NumFramesSinceLastTime = 0;
+    static char g_FpsCounterBuffer[256];
 
     curTime = timeGetTime();
     g_NumFramesSinceLastTime = g_NumFramesSinceLastTime + 1 + (u32)g_Supervisor.cfg.frameskipConfig;
@@ -650,7 +649,7 @@ ZunResult Supervisor::LoadConfig(const char *path)
             g_Supervisor.cfg.colorMode16bit >= 2 || g_Supervisor.cfg.musicMode >= 3 ||
             g_Supervisor.cfg.defaultDifficulty >= 5 || g_Supervisor.cfg.playSounds >= 2 ||
             g_Supervisor.cfg.windowed >= 2 || g_Supervisor.cfg.frameskipConfig >= 3 ||
-            g_Supervisor.cfg.version != CONFIG_VERSION || g_LastFileSize != sizeof(GameConfiguration))
+            g_Supervisor.cfg.version != CONFIG_VERSION || g_ReadFileSize != sizeof(GameConfiguration))
         {
             g_Supervisor.cfg.lifeCount = 2;
             g_Supervisor.cfg.bombCount = 3;
@@ -701,7 +700,7 @@ ZunResult Supervisor::LoadConfig(const char *path)
     {
         g_GameErrorContext.Log(TH_ERR_DONT_RENDER_ITEMS);
     }
-    if (this->IsShadingDisabled())
+    if (this->cfg.opts.suppressUseOfGoroudShading)
     {
         g_GameErrorContext.Log(TH_ERR_NO_GOURAUD_SHADING);
     }
@@ -709,7 +708,7 @@ ZunResult Supervisor::LoadConfig(const char *path)
     {
         g_GameErrorContext.Log(TH_ERR_NO_DEPTH_TESTING);
     }
-    if (this->IsForced60Fps())
+    if (this->cfg.opts.force60Fps)
     {
         g_GameErrorContext.Log(TH_ERR_FORCE_60FPS_MODE);
         this->vsyncEnabled = false;

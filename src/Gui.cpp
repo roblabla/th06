@@ -100,9 +100,9 @@ struct GuiImpl
 };
 ZUN_ASSERT_TYPE(GuiImpl, 0x2c44, 4);
 
-BSS_SORT(G1) Gui g_Gui;
-BSS_SORT(G3) ChainElem g_GuiCalcChain;
-BSS_SORT(G2) ChainElem g_GuiDrawChain;
+Gui g_Gui;
+ChainElem g_GuiExecChain;
+ChainElem g_GuiDrawChain;
 
 ZunBool Gui::IsStageFinished()
 {
@@ -838,10 +838,10 @@ ZunResult GuiImpl::DrawDialogue()
     }
     g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_DIFFUSE | D3DFVF_XYZRHW);
     g_Supervisor.d3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, vertices, sizeof(VertexDiffuseXyzrwh));
-    g_AnmManager->SetCurrentVertexShader(AnmVertexShader_NotSet);
-    g_AnmManager->SetCurrentColorOp(AnmColorOp_NotSet);
-    g_AnmManager->SetCurrentBlendMode(AnmBlendMode_NotSet);
-    g_AnmManager->SetCurrentZWriteDisable(AnmZWriteState_NotSet);
+    g_AnmManager->ClearVertexShader();
+    g_AnmManager->ClearColorOp();
+    g_AnmManager->ClearBlendMode();
+    g_AnmManager->ClearZWrite();
     if (!g_Supervisor.IsColorCompositingDisabled())
     {
         g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
@@ -1249,10 +1249,10 @@ void Gui::DrawGameScene()
             }
             g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_DIFFUSE | D3DFVF_XYZRHW);
             g_Supervisor.d3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, vertices, sizeof(VertexDiffuseXyzrwh));
-            g_AnmManager->SetCurrentVertexShader(AnmVertexShader_NotSet);
-            g_AnmManager->SetCurrentColorOp(AnmColorOp_NotSet);
-            g_AnmManager->SetCurrentBlendMode(AnmBlendMode_NotSet);
-            g_AnmManager->SetCurrentZWriteDisable(AnmZWriteState_NotSet);
+            g_AnmManager->ClearVertexShader();
+            g_AnmManager->ClearColorOp();
+            g_AnmManager->ClearBlendMode();
+            g_AnmManager->ClearZWrite();
             if (!g_Supervisor.IsColorCompositingDisabled())
             {
                 g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
@@ -1422,23 +1422,23 @@ ZunResult Gui_RegisterChain()
         memset(gui, 0, sizeof(Gui));
         gui->impl = ZUN_NEW(GuiImpl);
     }
-    g_GuiCalcChain.SetCallback((ChainCallback)Gui_OnUpdate);
-    g_GuiCalcChain.addedCallback = (ChainAddedCallback)Gui_AddedCallback;
-    g_GuiCalcChain.deletedCallback = (ChainDeletedCallback)Gui_DeletedCallback;
-    g_GuiCalcChain.arg = gui;
-    if (g_Chain.AddToCalcChain(&g_GuiCalcChain, TH_CHAIN_PRIO_CALC_GUI) != ZUN_SUCCESS)
+    g_GuiExecChain.SetCallback((ChainCallback)Gui_OnUpdate);
+    g_GuiExecChain.addedCallback = (ChainAddedCallback)Gui_AddedCallback;
+    g_GuiExecChain.deletedCallback = (ChainDeletedCallback)Gui_DeletedCallback;
+    g_GuiExecChain.arg = gui;
+    if (g_FuncChain.AddToCalcChain(&g_GuiExecChain, TH_CHAIN_PRIO_CALC_GUI) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
     g_GuiDrawChain.SetCallback((ChainCallback)Gui_OnDraw);
     g_GuiDrawChain.arg = gui;
-    g_Chain.AddToDrawChain(&g_GuiDrawChain, TH_CHAIN_PRIO_DRAW_GUI);
+    g_FuncChain.AddToDrawChain(&g_GuiDrawChain, TH_CHAIN_PRIO_DRAW_GUI);
     return ZUN_SUCCESS;
 }
 
 void Gui_CutChain()
 {
-    g_Chain.Cut(&g_GuiCalcChain);
-    g_Chain.Cut(&g_GuiDrawChain);
+    g_FuncChain.Cut(&g_GuiExecChain);
+    g_FuncChain.Cut(&g_GuiDrawChain);
 }
 } // namespace th06

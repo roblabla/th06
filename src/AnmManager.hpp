@@ -160,33 +160,25 @@ class AnmManager
         return this->textures[vm->sprite->sourceFileIndex] != NULL;
     }
 
-    void SetCurrentVertexShader(u8 vertexShader)
+    void ClearBlendMode()
     {
-        this->currentVertexShader = vertexShader;
+        this->currentBlendMode = AnmBlendMode_NotSet;
     }
-    void SetCurrentColorOp(u8 colorOp)
+    void ClearColorOp()
     {
-        this->currentColorOp = colorOp;
+        this->currentColorOp = AnmColorOp_NotSet;
     }
-    void SetCurrentBlendMode(u8 blendMode)
+    void ClearVertexShader()
     {
-        this->currentBlendMode = blendMode;
-    }
-    void SetCurrentZWriteDisable(u8 zwriteDisable)
-    {
-        this->currentZWriteDisable = zwriteDisable;
-    }
-    void SetCurrentTexture(LPDIRECT3DTEXTURE8 texture)
-    {
-        this->currentTexture = texture;
-    }
-    void SetCurrentSprite(AnmLoadedSprite *sprite)
-    {
-        this->currentSprite = sprite;
+        this->currentVertexShader = AnmVertexShader_NotSet;
     }
     void ClearTexture()
     {
         this->currentTexture = NULL;
+    }
+    void ClearZWrite()
+    {
+        this->currentZWriteDisable = AnmZWriteState_NotSet;
     }
     void ClearSprite()
     {

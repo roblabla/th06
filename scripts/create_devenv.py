@@ -134,7 +134,6 @@ ONLY_CHOICES = [
     "dx8",
     "py",
     "pragma",
-    "bss_patch",
     "ninja",
     "satsuki",
     "ghidra",
@@ -734,33 +733,6 @@ def install_pragma_var_order(tmp_dir, output_path):
     shutil.rmtree(str(tmp_dir), ignore_errors=True)
 
 
-def install_bss_patch(output_path):
-    VC7 = output_path / "PROGRAM FILES/MICROSOFT VISUAL STUDIO .NET/VC7"
-    if not (VC7 / "BIN/LINKOrig.EXE").exists():
-        shutil.copyfile(str(VC7 / "BIN/LINK.EXE"), str(VC7 / "BIN/LINKOrig.EXE"))
-    link_exe = open(str(VC7 / "BIN/LINK.EXE"), "r+b")
-    link_exe.seek(0x1DC50)
-    # Patch a call instruction to reference the patch
-    link_exe.write(b"\x41\x07\x00")
-    link_exe.seek(0x91DB0)
-    # CMP BYTE PTR [ECX], '.'
-    # JNE original_func
-    # CMP BYTE PTR [ECX+1], 'b'
-    # JNE original_func
-    # CMP BYTE PTR [ECX+2], 's'
-    # JNE original_func
-    # CMP BYTE PTR [ECX+3], 's'
-    # JNE original_func
-    # CMP BYTE PTR [ECX+4], '\0'
-    # JNE original_func
-    # MOV ECX, ".bss$zzzzzzzzzz"
-    # JMP original_func
-    link_exe.write(
-        b".bss$zzzzzzzzzz\x00\x80\x39.\x0f\x85\xf7\xbb\xf8\xff\x80\x79\x01b\x0f\x85\xed\xbb\xf8\xff\x80\x79\x02s\x0f\x85\xe3\xbb\xf8\xff\x80\x79\x03s\x0f\x85\xd9\xbb\xf8\xff\x80\x79\x04\x00\x0f\x85\xcf\xbb\xf8\xff\x8b\x0c\x24\x81\xc1\x5d\x41\x07\x00\xe9\xc1\xbb\xf8\xff\xcc"
-    )
-    link_exe.close()
-
-
 def install_ninja(ninja_zip_path, output_path):
     print("Installing ninja")
     install_path = output_path / "ninja"
@@ -861,8 +833,6 @@ def main(args: Namespace) -> int:
             install_python(python_installer_path, wirunsql_path, tmp_dir, output_path)
         if "pragma" in steps:
             install_pragma_var_order(tmp_dir, output_path)
-        if "bss_patch" in steps:
-            install_bss_patch(output_path)
         if "ninja" in steps:
             install_ninja(ninja_zip_path, output_path)
         if "satsuki" in steps:

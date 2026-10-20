@@ -6,8 +6,6 @@ namespace th06
 {
 static DWORD WINAPI SoundPlayer_BackgroundMusicPlayerThread(LPVOID lpThreadParameter);
 
-AUTO_BSS_SORT(S1);
-
 #define BACKGROUND_MUSIC_BUFFER_SIZE 0x8000
 #define BACKGROUND_MUSIC_WAV_NUM_CHANNELS 2
 #define BACKGROUND_MUSIC_WAV_BITS_PER_SAMPLE 16
@@ -324,7 +322,7 @@ ZunResult SoundPlayer::LoadPos(const char *path)
     {
         return ZUN_ERROR;
     }
-    bgmFile = this->backgroundMusic->m_pWaveFile;
+    bgmFile = this->backgroundMusic->GetWaveFile();
     loopEnd = *(i32 *)(fileData + 4) * 4;
     loopStart = *(i32 *)(fileData) * 4;
     bgmFile->m_loopStartPoint = loopStart;

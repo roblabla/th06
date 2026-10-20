@@ -82,11 +82,7 @@ class CSound
   protected:
     LPDIRECTSOUNDBUFFER *m_apDSBuffer;
     DWORD m_dwDSBufferSize;
-
-  public:
     CWaveFile *m_pWaveFile;
-
-  protected:
     DWORD m_dwNumBuffers;
 
   public:
@@ -117,6 +113,11 @@ class CSound
         this->m_dwIsFadingOut = TRUE;
         this->m_dwCurFadeoutProgress = seconds * 60;
         this->m_dwTotalFadeout = this->m_dwCurFadeoutProgress;
+    }
+
+    CWaveFile *GetWaveFile()
+    {
+        return m_pWaveFile;
     }
 };
 
