@@ -2002,7 +2002,7 @@ ChainCallbackResult MainMenu_OnDraw(MainMenu *menu)
     {
         return CHAIN_CALLBACK_RESULT_CONTINUE;
     }
-    g_AnmManager->SetCurrentTexture(NULL);
+    g_AnmManager->ClearTexture();
     g_AnmManager->CopySurfaceToBackBuffer(0, 0, 0, 0, 0);
     if (menu->framesActive != 0)
     {

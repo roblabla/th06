@@ -184,6 +184,14 @@ class AnmManager
     {
         this->currentSprite = sprite;
     }
+    void ClearTexture()
+    {
+        this->currentTexture = NULL;
+    }
+    void ClearSprite()
+    {
+        this->currentSprite = NULL;
+    }
 
     i32 ExecuteScript(AnmVm *vm);
     ZunResult Draw(AnmVm *vm);

@@ -239,13 +239,6 @@ struct Player
     ChainElem *chainCalc;
     ChainElem *chainDraw1;
     ChainElem *chainDraw2;
-
-    void ApplyGameRegionOffset(AnmVm *sprite)
-    {
-        sprite->pos[0] += g_GameManager.gameRegionScreenPos.x;
-        sprite->pos[1] += g_GameManager.gameRegionScreenPos.y;
-        sprite->pos[2] = 0.0f;
-    }
 };
 ZUN_ASSERT_TYPE(Player, 0x98f0, 4);
 

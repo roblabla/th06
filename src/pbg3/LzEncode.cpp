@@ -29,17 +29,21 @@ void LzssTree::Reset()
 
 i32 LzssTree::Insert(i32 position, i32 *matchPosition)
 {
+    i32 length;
+    i32 candidate;
+    i32 difference;
+    i32 best;
+    i32 *next;
+
     if (position == 0)
     {
         return 0;
     }
-    i32 candidate = this->nodes[LZSS_DICTSIZE].right;
-    i32 best = 0;
+    candidate = this->nodes[LZSS_DICTSIZE].right;
+    best = 0;
     for (;;)
     {
-        i32 length = 0;
-        i32 difference;
-        do
+        for (length = 0; length < LZSS_LOOKAHEAD_MAX; length++)
         {
             difference =
                 this->window[LZSS_DICTPOS_MOD(position, length)] - this->window[LZSS_DICTPOS_MOD(candidate, length)];
@@ -47,19 +51,25 @@ i32 LzssTree::Insert(i32 position, i32 *matchPosition)
             {
                 break;
             }
-            ++length;
-        } while (length < LZSS_LOOKAHEAD_MAX);
+        }
         if (length >= best)
         {
             best = length;
             *matchPosition = candidate;
-            if (length >= LZSS_LOOKAHEAD_MAX)
+            if (best >= LZSS_LOOKAHEAD_MAX)
             {
                 this->Replace(candidate, position);
-                return length;
+                return best;
             }
         }
-        i32 *next = difference >= 0 ? &this->nodes[candidate].right : &this->nodes[candidate].left;
+        if (difference >= 0)
+        {
+            next = &this->nodes[candidate].right;
+        }
+        else
+        {
+            next = &this->nodes[candidate].left;
+        }
         if (*next == 0)
         {
             *next = position;
@@ -74,6 +84,8 @@ i32 LzssTree::Insert(i32 position, i32 *matchPosition)
 
 void LzssTree::Delete(i32 position)
 {
+    i32 replacement;
+
     if (this->nodes[position].parent == 0)
     {
         return;
@@ -88,7 +100,7 @@ void LzssTree::Delete(i32 position)
     }
     else
     {
-        i32 replacement = this->FindPredecessor(position);
+        replacement = this->FindPredecessor(position);
         this->Delete(replacement);
         this->Replace(position, replacement);
     }
@@ -97,14 +109,13 @@ void LzssTree::Delete(i32 position)
 void LzssTree::Contract(i32 oldPosition, i32 newPosition)
 {
     this->nodes[newPosition].parent = this->nodes[oldPosition].parent;
-    i32 parent = this->nodes[oldPosition].parent;
-    if (this->nodes[parent].right == oldPosition)
+    if (this->nodes[this->nodes[oldPosition].parent].right == oldPosition)
     {
-        this->nodes[parent].right = newPosition;
+        this->nodes[this->nodes[oldPosition].parent].right = newPosition;
     }
     else
     {
-        this->nodes[parent].left = newPosition;
+        this->nodes[this->nodes[oldPosition].parent].left = newPosition;
     }
     this->nodes[oldPosition].parent = 0;
 }
@@ -128,12 +139,14 @@ void LzssTree::Replace(i32 oldPosition, i32 newPosition)
 
 i32 LzssTree::FindPredecessor(i32 position)
 {
-    position = this->nodes[position].left;
-    while (this->nodes[position].right != 0)
+    i32 next;
+
+    next = this->nodes[position].left;
+    while (this->nodes[next].right != 0)
     {
-        position = this->nodes[position].right;
+        next = this->nodes[next].right;
     }
-    return position;
+    return next;
 }
 
 LzEncode::LzEncode()
@@ -239,27 +252,33 @@ BOOL LzEncode::Encode(IPbg3Reader *input, const char *name)
     }
     this->writer->ResetChecksum();
     this->Reset();
-    i32 head = 1;
+    i32 i;
+    i32 c;
     i32 available;
-    for (available = 0; available < LZSS_LOOKAHEAD_MAX; ++available)
+    i32 head;
+    i32 consumed;
+    i32 matchLength;
+    i32 matchPosition;
+
+    head = 1;
+    for (i = 0; i < LZSS_LOOKAHEAD_MAX; i++)
     {
-        i32 value = input->ReadByte();
-        if (value == PBG_EOF)
+        if ((c = input->ReadByte()) == PBG_EOF)
         {
             break;
         }
-        this->window[head + available] = value;
+        this->window[head + i] = (u8)c;
     }
+    available = i;
     this->SetRoot(head);
-    i32 matchLength = 0;
-    i32 matchPosition = 0;
+    matchLength = 0;
+    matchPosition = 0;
     while (available > 0)
     {
         if (matchLength > available)
         {
             matchLength = available;
         }
-        i32 consumed;
         if (matchLength <= LZSS_BREAKEVEN - 1)
         {
             consumed = 1;
@@ -273,21 +292,19 @@ BOOL LzEncode::Encode(IPbg3Reader *input, const char *name)
             this->writer->WriteBits(matchLength - LZSS_BREAKEVEN, LZSS_LENGTH_BITS);
             consumed = matchLength;
         }
-        for (i32 i = 0; i < consumed; ++i)
+        for (i = 0; i < consumed; i++)
         {
-            i32 incoming = LZSS_DICTPOS_MOD(head, LZSS_LOOKAHEAD_MAX);
-            this->Delete(incoming);
-            i32 value = input->ReadByte();
-            if (value == PBG_EOF)
+            this->Delete(LZSS_DICTPOS_MOD(head, LZSS_LOOKAHEAD_MAX));
+            if ((c = input->ReadByte()) == PBG_EOF)
             {
-                --available;
+                available--;
             }
             else
             {
-                this->window[incoming] = value;
+                this->window[LZSS_DICTPOS_MOD(head, LZSS_LOOKAHEAD_MAX)] = (u8)c;
             }
             head = LZSS_DICTPOS_MOD(head, 1);
-            if (available != 0)
+            if (available)
             {
                 matchLength = this->Insert(head, &matchPosition);
             }

@@ -83,8 +83,8 @@ void ScreenEffect_DrawSquare(ZunRect *rect, D3DCOLOR rectColor)
     g_Supervisor.d3dDevice->SetVertexShader(D3DFVF_DIFFUSE | D3DFVF_XYZRHW);
     g_Supervisor.d3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, vertices, sizeof(VertexDiffuseXyzrwh));
     g_AnmManager->SetCurrentVertexShader(AnmVertexShader_NotSet);
-    g_AnmManager->SetCurrentSprite(NULL);
-    g_AnmManager->SetCurrentTexture(NULL);
+    g_AnmManager->ClearSprite();
+    g_AnmManager->ClearTexture();
     g_AnmManager->SetCurrentColorOp(AnmColorOp_NotSet);
     g_AnmManager->SetCurrentBlendMode(AnmBlendMode_NotSet);
     g_AnmManager->SetCurrentZWriteDisable(AnmZWriteState_NotSet);

@@ -57,12 +57,12 @@ AnmManager::AnmManager()
     g_PrimitivesToDrawNoVertexBuf[3].textureUV.y = 1.0f;
 
     this->vertexBuffer = NULL;
-    this->SetCurrentTexture(NULL);
-    this->SetCurrentBlendMode(AnmBlendMode_Normal);
-    this->SetCurrentColorOp(AnmColorOp_Modulate);
+    this->currentTexture = NULL;
+    this->currentBlendMode = AnmBlendMode_Normal;
+    this->currentColorOp = AnmColorOp_Modulate;
     this->currentTextureFactor = 1;
-    this->SetCurrentVertexShader(AnmVertexShader_0);
-    this->SetCurrentZWriteDisable(false);
+    this->currentVertexShader = AnmVertexShader_0;
+    this->currentZWriteDisable = false;
     this->screenshotTextureId = -1;
 }
 
@@ -378,7 +378,7 @@ void AnmManager::ReleaseAnm(i32 anmIdx)
         this->SetCurrentBlendMode(AnmBlendMode_NotSet);
         this->SetCurrentColorOp(AnmColorOp_NotSet);
         this->SetCurrentVertexShader(AnmVertexShader_NotSet);
-        this->SetCurrentTexture(NULL);
+        this->ClearTexture();
     }
 }
 

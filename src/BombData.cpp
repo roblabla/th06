@@ -222,22 +222,30 @@ void BombReimuADraw(Player *player)
         }
 
         bombSprite->pos = player->bombInfo.bombRegionPositions[i] + bombSprite->posOffset;
-        player->ApplyGameRegionOffset(bombSprite);
+        bombSprite->pos[0] += g_GameManager.gameRegionScreenPos.x;
+        bombSprite->pos[1] += g_GameManager.gameRegionScreenPos.y;
+        bombSprite->pos[2] = 0.0f;
         g_AnmManager->DrawNoRotation(bombSprite);
         bombSprite++;
 
         bombSprite->pos = player->bombInfo.bombRegionPositions[i] + bombSprite->posOffset;
-        player->ApplyGameRegionOffset(bombSprite);
+        bombSprite->pos[0] += g_GameManager.gameRegionScreenPos.x;
+        bombSprite->pos[1] += g_GameManager.gameRegionScreenPos.y;
+        bombSprite->pos[2] = 0.0f;
         g_AnmManager->DrawNoRotation(bombSprite);
         bombSprite++;
 
         bombSprite->pos = player->bombInfo.bombRegionPositions[i] + bombSprite->posOffset;
-        player->ApplyGameRegionOffset(bombSprite);
+        bombSprite->pos[0] += g_GameManager.gameRegionScreenPos.x;
+        bombSprite->pos[1] += g_GameManager.gameRegionScreenPos.y;
+        bombSprite->pos[2] = 0.0f;
         g_AnmManager->DrawNoRotation(bombSprite);
         bombSprite++;
 
         bombSprite->pos = player->bombInfo.bombRegionPositions[i] + bombSprite->posOffset;
-        player->ApplyGameRegionOffset(bombSprite);
+        bombSprite->pos[0] += g_GameManager.gameRegionScreenPos.x;
+        bombSprite->pos[1] += g_GameManager.gameRegionScreenPos.y;
+        bombSprite->pos[2] = 0.0f;
         g_AnmManager->DrawNoRotation(bombSprite);
         bombSprite++;
     }

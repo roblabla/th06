@@ -194,7 +194,7 @@ static ChainCallbackResult MusicRoom_OnDraw(MusicRoom *musicRoom)
     rightArrowStr[0] = TEXT_RIGHT_ARROW;
     rightArrowStr[1] = '\0';
 
-    g_AnmManager->SetCurrentTexture(NULL);
+    g_AnmManager->ClearTexture();
     g_AnmManager->CopySurfaceToBackBuffer(0, 0, 0, 0, 0);
     g_AnmManager->DrawNoRotation(musicRoom->mainVm);
 

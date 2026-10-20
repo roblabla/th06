@@ -155,7 +155,7 @@ static void SpawnBullets(Player *p, u32 timer)
         {
             curBullet->sprite.pos.x = curBullet->position.x;
             curBullet->sprite.pos.y = curBullet->position.y;
-            curBullet->sprite.SetPosZ(0.495f);
+            curBullet->sprite.pos[2] = 0.495f;
             curBullet->bulletState = PLAYER_BULLET_STATE_FIRED;
         }
         if (bulletResult == FBR_STOP_SPAWNING)
@@ -328,7 +328,7 @@ static void DrawBulletExplosions(Player *p)
         {
             bullet->sprite.rotation.z = RADIANS(90.0f) - utils::AddNormalizeAngle(bullet->angle, RADIANS(180.0f));
         }
-        bullet->sprite.SetPosZ(0.4f);
+        bullet->sprite.pos[2] = 0.4f;
         g_AnmManager->Draw2(&bullet->sprite);
     }
 }

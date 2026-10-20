@@ -738,7 +738,7 @@ static void GameWindow_InitD3dDevice(void)
         g_AnmManager->SetCurrentBlendMode(AnmBlendMode_NotSet);
         g_AnmManager->SetCurrentColorOp(AnmColorOp_NotSet);
         g_AnmManager->SetCurrentVertexShader(AnmVertexShader_NotSet);
-        g_AnmManager->SetCurrentTexture(NULL);
+        g_AnmManager->ClearTexture();
     }
     g_Stage.skyFogNeedsSetup = true;
 }
