@@ -326,9 +326,7 @@ ZunResult Stage_RegisterChain(u32 stage)
     stg->timer = 0;
 
     stg->stage = stage;
-    g_StageCalcChain.callback = (ChainCallback)Stage_OnUpdate;
-    g_StageCalcChain.addedCallback = NULL;
-    g_StageCalcChain.deletedCallback = NULL;
+    g_StageCalcChain.SetCallback((ChainCallback)Stage_OnUpdate);
     g_StageCalcChain.addedCallback = (ChainAddedCallback)Stage_AddedCallback;
     g_StageCalcChain.deletedCallback = (ChainDeletedCallback)Stage_DeletedCallback;
     g_StageCalcChain.arg = stg;
@@ -337,14 +335,10 @@ ZunResult Stage_RegisterChain(u32 stage)
     {
         return ZUN_ERROR;
     }
-    g_StageOnDrawHighPrioChain.callback = (ChainCallback)Stage_OnDrawHighPrio;
-    g_StageOnDrawHighPrioChain.addedCallback = NULL;
-    g_StageOnDrawHighPrioChain.deletedCallback = NULL;
+    g_StageOnDrawHighPrioChain.SetCallback((ChainCallback)Stage_OnDrawHighPrio);
     g_StageOnDrawHighPrioChain.arg = stg;
     g_Chain.AddToDrawChain(&g_StageOnDrawHighPrioChain, TH_CHAIN_PRIO_DRAW_HIGH_PRIO_STAGE);
-    g_StageOnDrawLowPrioChain.callback = (ChainCallback)Stage_OnDrawLowPrio;
-    g_StageOnDrawLowPrioChain.addedCallback = NULL;
-    g_StageOnDrawLowPrioChain.deletedCallback = NULL;
+    g_StageOnDrawLowPrioChain.SetCallback((ChainCallback)Stage_OnDrawLowPrio);
     g_StageOnDrawLowPrioChain.arg = stg;
     g_Chain.AddToDrawChain(&g_StageOnDrawLowPrioChain, TH_CHAIN_PRIO_DRAW_LOW_PRIO_STAGE);
 

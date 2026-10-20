@@ -150,6 +150,57 @@ void CALLBACK MidiTimer_DefaultTimerCallback(UINT uTimerID, UINT uMsg, DWORD_PTR
     timer->OnTimerElapsed();
 }
 
+// NOTE: would be static inline according to KOG,
+// but cannot be either because of release build link
+// order. MoF also links the outlined function body at
+// this exact location, so it must be defined here
+u16 ConvWord(u16 data)
+{
+    u16 temp;
+
+    ((u8 *)&temp)[0] = ((u8 *)&data)[1];
+    ((u8 *)&temp)[1] = ((u8 *)&data)[0];
+
+    return temp;
+}
+
+// NOTE: would be static inline according to KOG,
+// but currently no way is known to differentiate
+// it from just normal inline. MoF also links the
+// outlined function body at this exact location,
+// so it must be defined here
+static inline u32 ConvDWord(u32 data)
+{
+    u32 temp;
+
+    ((u8 *)&temp)[0] = ((u8 *)&data)[3];
+    ((u8 *)&temp)[1] = ((u8 *)&data)[2];
+    ((u8 *)&temp)[2] = ((u8 *)&data)[1];
+    ((u8 *)&temp)[3] = ((u8 *)&data)[0];
+
+    return temp;
+}
+
+// NOTE: would be header static inline according to KOG,
+// but cannot be static because of trial build register
+// allocation and cannot be inline because of release
+// build fake padding. MoF also links the outlined function
+// body at this exact location, so it must be defined here
+u32 GetDeltaTime(u8 **data)
+{
+    u8 temp;
+    u32 count = 0;
+
+    do
+    {
+        temp = **data;
+        ++*data;
+        count = (count << 7) + (temp & 0x7f);
+    } while (temp & 0x80);
+
+    return count;
+}
+
 MidiOutput::MidiOutput()
 {
     this->tracks = NULL;
@@ -671,9 +722,5 @@ void MidiOutput::FadeOutSetVolume(i32 volume)
         volumeByte = volumeClamped & 0xff;
         this->midiOutDev.SendShortMsg(midiStatus, arg1, volumeByte);
     }
-}
-
-void MidiTimer::OnTimerElapsed()
-{
 }
 }; // namespace th06

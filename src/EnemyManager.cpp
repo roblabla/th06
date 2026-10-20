@@ -174,7 +174,7 @@ void EnemyManager::RunEclTimeline()
         // number of lives lost?
         i32 subrankIncreaseFrame = 10 * 4 * 60;
         subrankIncreaseFrame -= g_GameManager.livesRemaining * 4 * 60;
-        if (this->timelineTime.HasTicked() && (i32)this->timelineTime % subrankIncreaseFrame == 0)
+        if (this->timelineTime.HasTicked() && MULTIPLE_OF(this->timelineTime, subrankIncreaseFrame))
         {
             g_GameManager.IncreaseSubrank(100);
         }
@@ -799,9 +799,7 @@ ZunResult EnemyManager_RegisterChain(const char *stgEnm1, const char *stgEnm2)
     mgr->Initialize();
     mgr->stgEnmAnmFilename = stgEnm1;
     mgr->stgEnm2AnmFilename = stgEnm2;
-    g_EnemyManagerCalcChain.callback = (ChainCallback)EnemyManager_OnUpdate;
-    g_EnemyManagerCalcChain.addedCallback = NULL;
-    g_EnemyManagerCalcChain.deletedCallback = NULL;
+    g_EnemyManagerCalcChain.SetCallback((ChainCallback)EnemyManager_OnUpdate);
     g_EnemyManagerCalcChain.addedCallback = (ChainAddedCallback)EnemyManager_AddedCallback;
     g_EnemyManagerCalcChain.deletedCallback = (ChainAddedCallback)EnemyManager_DeletedCallback;
     g_EnemyManagerCalcChain.arg = mgr;
@@ -809,9 +807,7 @@ ZunResult EnemyManager_RegisterChain(const char *stgEnm1, const char *stgEnm2)
     {
         return ZUN_ERROR;
     }
-    g_EnemyManagerDrawChain.callback = (ChainCallback)EnemyManager_OnDraw;
-    g_EnemyManagerDrawChain.addedCallback = NULL;
-    g_EnemyManagerDrawChain.deletedCallback = NULL;
+    g_EnemyManagerDrawChain.SetCallback((ChainCallback)EnemyManager_OnDraw);
     g_EnemyManagerDrawChain.arg = mgr;
     if (g_Chain.AddToDrawChain(&g_EnemyManagerDrawChain, TH_CHAIN_PRIO_DRAW_ENEMYMANAGER) != ZUN_SUCCESS)
     {

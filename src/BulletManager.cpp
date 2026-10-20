@@ -1438,9 +1438,7 @@ ZunResult BulletManager_RegisterChain(const char *bulletAnmPath)
 
     mgr->InitializeToZero();
     mgr->bulletAnmPath = bulletAnmPath;
-    g_BulletManagerCalcChain.callback = (ChainCallback)BulletManager_OnUpdate;
-    g_BulletManagerCalcChain.addedCallback = NULL;
-    g_BulletManagerCalcChain.deletedCallback = NULL;
+    g_BulletManagerCalcChain.SetCallback((ChainCallback)BulletManager_OnUpdate);
     g_BulletManagerCalcChain.addedCallback = (ChainAddedCallback)BulletManager_AddedCallback;
     g_BulletManagerCalcChain.deletedCallback = (ChainDeletedCallback)BulletManager_DeletedCallback;
     g_BulletManagerCalcChain.arg = mgr;
@@ -1450,9 +1448,7 @@ ZunResult BulletManager_RegisterChain(const char *bulletAnmPath)
         return ZUN_ERROR;
     }
 
-    g_BulletManagerDrawChain.callback = (ChainCallback)BulletManager_OnDraw;
-    g_BulletManagerDrawChain.addedCallback = NULL;
-    g_BulletManagerDrawChain.deletedCallback = NULL;
+    g_BulletManagerDrawChain.SetCallback((ChainCallback)BulletManager_OnDraw);
     g_BulletManagerDrawChain.arg = mgr;
     g_Chain.AddToDrawChain(&g_BulletManagerDrawChain, TH_CHAIN_PRIO_DRAW_BULLETMANAGER);
     return ZUN_SUCCESS;

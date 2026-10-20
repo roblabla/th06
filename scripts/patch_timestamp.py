@@ -2,24 +2,36 @@
 # override the PE header timestamp. So this script does exactly that.
 
 import sys
+import time
 
-
+# The linker isn't always done writing the exe by the time this script
+# runs, so catch any access denied errors that happen from try to read
+# a file as it gets modified and wait for it to finish.
 def patch_timestamp(exe_path, timestamp_value):
     timestamp = timestamp_value.to_bytes(4, byteorder="little")
-    with open(exe_path, "r+b") as exe:
-        # Offset for pointer to PE header
-        exe.seek(0x3C)
-        pe_pointer = exe.read(4)
-        if len(pe_pointer) != 4:
-            raise ValueError("Missing PE header pointer")
-        pe_offset = int.from_bytes(pe_pointer, byteorder="little")
-        exe.seek(pe_offset)
-        header = exe.read(12)
-        if len(header) != 12 or header[:4] != b"PE\0\0":
-            raise ValueError("Invalid PE header")
-        # TimeDateStamp is +0x8 from base of PE header
-        exe.seek(pe_offset + 0x8)
-        exe.write(timestamp)
+    timeout = 100
+    while True:
+        try:
+            with open(exe_path, "r+b") as exe:
+                # Offset for pointer to PE header
+                exe.seek(0x3C)
+                pe_pointer = exe.read(4)
+                if len(pe_pointer) != 4:
+                    raise ValueError("Missing PE header pointer")
+                pe_offset = int.from_bytes(pe_pointer, byteorder="little")
+                exe.seek(pe_offset)
+                header = exe.read(12)
+                if len(header) != 12 or header[:4] != b"PE\0\0":
+                    raise ValueError("Invalid PE header")
+                # TimeDateStamp is +0x8 from base of PE header
+                exe.seek(pe_offset + 0x8)
+                exe.write(timestamp)
+                return
+        except PermissionError as e:
+            time.sleep(0.1)
+            timeout -= 1
+            if timeout == 0:
+                return
 
 
 if __name__ == "__main__":

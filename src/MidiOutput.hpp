@@ -11,7 +11,9 @@ struct MidiTimer
     MidiTimer();
     ~MidiTimer();
 
-    virtual void OnTimerElapsed();
+    virtual void OnTimerElapsed()
+    {
+    }
 
     i32 StopTimer();
     u32 StartTimer(u32 delay, LPTIMECALLBACK cb, DWORD_PTR data);
@@ -197,43 +199,5 @@ struct MidiOutput : MidiTimer
     ULONGLONG loopPlaycount1;
     ULONGLONG loopPlaycount2;
 };
-
-static inline u16 ConvWord(u16 data)
-{
-    u16 temp;
-
-    ((u8 *)&temp)[0] = ((u8 *)&data)[1];
-    ((u8 *)&temp)[1] = ((u8 *)&data)[0];
-
-    return temp;
-}
-
-static inline u32 ConvDWord(u32 data)
-{
-    u32 temp;
-
-    ((u8 *)&temp)[0] = ((u8 *)&data)[3];
-    ((u8 *)&temp)[1] = ((u8 *)&data)[2];
-    ((u8 *)&temp)[2] = ((u8 *)&data)[1];
-    ((u8 *)&temp)[3] = ((u8 *)&data)[0];
-
-    return temp;
-}
-
-static inline u32 GetDeltaTime(u8 **data)
-{
-    u8 temp;
-    u32 count = 0;
-
-    do
-    {
-        temp = **data;
-        ++*data;
-        count = (count << 7) + (temp & 0x7f);
-    } while (temp & 0x80);
-
-    return count;
-}
-
 ZUN_ASSERT_TYPE(MidiOutput, 0x300, 8);
 } // namespace th06

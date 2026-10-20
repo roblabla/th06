@@ -123,7 +123,6 @@ address,type,size
 0x4569F8,float,4
 0x4569FC,float,4
 0x456B20,float,4
-0x46BCDC,float,4
 0x456B28,float,4
 0x456B2C,float,4
 0x456BC8,float,4

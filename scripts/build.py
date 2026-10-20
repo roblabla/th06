@@ -3,7 +3,6 @@ import hashlib
 from pathlib import Path
 import textwrap
 import sys
-import time
 
 from configure import BuildType, BuildVersion, configure
 from winhelpers import run_windows_program
@@ -69,7 +68,6 @@ def build(
     )
 
     if build_type == BuildType.BINARY_MATCHBUILD:
-        time.sleep(0.25)
         patch_timestamp(build_exe, timestamp)
         diff = find_diff(original_exe, build_exe)
         if diff is None:
