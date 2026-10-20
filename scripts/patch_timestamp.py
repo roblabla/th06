@@ -4,6 +4,7 @@
 import sys
 import time
 
+
 # The linker isn't always done writing the exe by the time this script
 # runs, so catch any access denied errors that happen from try to read
 # a file as it gets modified and wait for it to finish.
