@@ -14,7 +14,7 @@
 namespace th06
 {
 
-u32 g_ExtraLivesScores[] = {10000000, 20000000, 40000000, 60000000, 1900000000};
+static u32 g_ExtraLivesScores[] = {10000000, 20000000, 40000000, 60000000, 1900000000};
 
 struct DifficultyInfo
 {
@@ -85,7 +85,7 @@ ChainCallbackResult GameManager_OnUpdate(GameManager *gameManager)
         g_GameManager.gameRegionScreenPos.y = GAME_REGION_POS_Y;
         g_GameManager.gameRegionSize.x = GAME_REGION_WIDTH;
         g_GameManager.gameRegionSize.y = GAME_REGION_HEIGHT;
-#if !TRIALBUILD
+#if BUILT_SINCE(102g)
         g_Supervisor.forceRedrawFrames = 3;
 #endif
     }
@@ -213,12 +213,14 @@ static ZunResult GameManager_AddedCallback(GameManager *mgr)
         /* EXTRA   */ {16, 14, 18},
     };
 
+#if BUILT_SINCE(102g)
     ZunBool failedToLoadReplay = false;
+#endif
     g_Supervisor.d3dDevice->ResourceManagerDiscardBytes(0);
 
     if (g_Supervisor.curState != SUPERVISOR_STATE_NEXT_STAGE)
     {
-#if BUILD_VERSION >= BUILD_VERSION_102h
+#if BUILT_SINCE(102g)
         g_Supervisor.defaultConfig.bombCount = g_GameManager.bombsRemaining;
         g_Supervisor.defaultConfig.lifeCount = g_GameManager.livesRemaining;
 #endif
@@ -331,10 +333,14 @@ static ZunResult GameManager_AddedCallback(GameManager *mgr)
     g_Supervisor.LoadPbg3(ST_PBG3_INDEX, TH_ST_DAT_FILE);
     if (g_GameManager.isInReplay == TRUE)
     {
+#if BUILT_SINCE(102g)
         if (ReplayManager_RegisterChain(true, g_GameManager.replayFile) != ZUN_SUCCESS)
         {
             failedToLoadReplay = true;
         }
+#else
+        ReplayManager_RegisterChain(true, g_GameManager.replayFile);
+#endif
         while (g_ExtraLivesScores[mgr->livesEarned] <= mgr->guiScore)
         {
             mgr->livesEarned++;
@@ -403,7 +409,7 @@ static ZunResult GameManager_AddedCallback(GameManager *mgr)
     mgr->score = 0;
     mgr->isGameCompleted = false;
     g_AsciiManager.InitializeVms();
-#if !TRIALBUILD
+#if BUILT_SINCE(102g)
     if (failedToLoadReplay)
     {
         g_Supervisor.curState = SUPERVISOR_STATE_MAINMENU;

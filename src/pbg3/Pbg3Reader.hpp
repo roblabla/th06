@@ -20,16 +20,6 @@ class Pbg3Reader : public IPbg3Reader, public FileAbstraction
     virtual BOOL GetLastWriteTime(LPFILETIME lastWriteTime);
 
     ~Pbg3Reader();
-
-    BOOL HasNonNullHandle()
-    {
-        return this->handle != NULL;
-    }
-
-    BOOL HasValidHandle()
-    {
-        return this->handle != INVALID_HANDLE_VALUE;
-    }
 };
 ZUN_ASSERT_SIZE(Pbg3Reader, 0x24);
 } // namespace th06

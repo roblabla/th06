@@ -13,29 +13,10 @@
 namespace th06
 {
 struct MidiOutput;
-#define BUILD_VERSION_008p 0x00081
-#define BUILD_VERSION_013 0x00130
-#define BUILD_VERSION_013a 0x00131
-#define BUILD_VERSION_100 0x01000
-#define BUILD_VERSION_101 0x01010
-#define BUILD_VERSION_102 0x01020
-#define BUILD_VERSION_102b 0x01022
-#define BUILD_VERSION_102c 0x01023
-#define BUILD_VERSION_102d 0x01024
-#define BUILD_VERSION_102f 0x01026
-#define BUILD_VERSION_102g 0x01027
-#define BUILD_VERSION_102h 0x01028
-
-#ifndef BUILD_VERSION
-#define BUILD_VERSION BUILD_VERSION_102h
-#endif
-#ifndef GAME_VERSION
-#define GAME_VERSION 0x0102
-#endif
 
 // The 0.13a trial's archive marker differs from its config and replay format version.
-// TODO: Check 0.08p and 0.13
-#if BUILD_VERSION == BUILD_VERSION_013a
+// TODO: Check 0.08p
+#if BUILD_VERSION == BUILD_VERSION_013 || BUILD_VERSION == BUILD_VERSION_013a
 #define CONFIG_VERSION 0x0102
 #define REPLAY_VERSION 0x0102
 #else
@@ -158,11 +139,6 @@ struct Supervisor
         return this->effectiveFramerateMultiplier;
     }
 
-    i32 GetMusicMode()
-    {
-        return this->cfg.musicMode;
-    }
-
     ZunBool IsHardwareBlendingDisabled()
     {
         return this->cfg.opts.useSwTextureBlending;
@@ -203,25 +179,24 @@ struct Supervisor
         return this->cfg.opts.disableFog;
     }
 
-    ZunBool IsDInputDisabled()
-    {
-        return this->cfg.opts.dontUseDirectInput;
-    }
-
     ZunBool ShouldForceBackbufferClear()
     {
-        return this->cfg.opts.clearBackBufferOnRefresh | this->IsMinimumGraphicsMode();
+        return this->cfg.opts.clearBackBufferOnRefresh | this->cfg.opts.displayMinimumGraphics;
     }
 
     u32 IsSoftwareTexturing()
     {
-        return this->IsColorCompositingDisabled() | this->IsHardwareBlendingDisabled();
+        return this->cfg.opts.disableColorCompositing | this->cfg.opts.useSwTextureBlending;
     }
 
+#if BUILT_SINCE(102f)
+    // Added together with vsyncEnabled. Before 1.02f, main.cpp tests cfg.opts.force60Fps directly: a dead
+    // inline copy of this in 0.13's main.obj would give the wrong OnTimerElapsed/~AnmManager ICF survivor.
     ZunBool ShouldRunAt60Fps()
     {
         return this->cfg.opts.force60Fps && this->vsyncEnabled;
     }
+#endif
 
     ZunBool IsWindowed()
     {
@@ -246,7 +221,7 @@ struct Supervisor
     D3DVIEWPORT8 viewport;
     D3DPRESENT_PARAMETERS presentParameters;
     GameConfiguration cfg;
-#if BUILD_VERSION >= BUILD_VERSION_102h
+#if BUILT_SINCE(102g)
     // NOTE: This is not even close to a default config
     GameConfiguration defaultConfig;
 #endif
@@ -259,7 +234,9 @@ struct Supervisor
     i32 forceRedrawFrames;
     ZunBool isInEnding;
 
+#if BUILT_SINCE(102f)
     ZunBool vsyncEnabled;
+#endif
     i32 lastFrameTime;
     f32 effectiveFramerateMultiplier;
     f32 framerateMultiplier;
@@ -282,10 +259,12 @@ struct Supervisor
 };
 ZunResult Supervisor_RegisterChain();
 
-#if BUILD_VERSION >= BUILD_VERSION_102h
+#if BUILT_SINCE(102g)
 ZUN_ASSERT_SIZE(Supervisor, 0x4d8);
-#else
+#elif BUILT_SINCE(102f)
 ZUN_ASSERT_SIZE(Supervisor, 0x4a0);
+#else
+ZUN_ASSERT_SIZE(Supervisor, 0x49c);
 #endif
 
 extern Supervisor g_Supervisor;

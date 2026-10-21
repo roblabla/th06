@@ -228,7 +228,7 @@ ChainCallbackResult Gui_OnDraw(Gui *gui)
         stringPos.y += 16.0f;
         if (g_GameManager.difficulty < EXTRA && !g_GameManager.isInPracticeMode)
         {
-#if BUILD_VERSION >= BUILD_VERSION_102h
+#if BUILT_SINCE(102g)
             switch (g_Supervisor.defaultConfig.lifeCount)
 #else
             switch (g_Supervisor.cfg.lifeCount)
@@ -302,7 +302,7 @@ void Gui::ShowBombNamePortrait(u32 sprite, const char *bombName)
     g_AnmManager->DrawVmTextFmt(&this->impl->bombSpellcardName, COLOR_RGB(COLOR_BARELY_BLUE), COLOR_RGB(COLOR_BLACK),
                                 bombName);
     this->bombSpellcardBarLength = strlen(bombName) * 15 / 2.0f + 16.0f; // TODO: Is this 15 the font size?
-#if !TRIALBUILD
+#if BUILT_SINCE(102g)
     g_Supervisor.forceRedrawFrames = 3;
 #endif
     g_SoundPlayer.PlaySoundByIdx(SOUND_BOMB);
@@ -559,7 +559,7 @@ void Gui::FreeMsgFile()
 void Gui::MsgRead(i32 msgIdx)
 {
     this->impl->MsgRead(msgIdx);
-#if !TRIALBUILD
+#if BUILT_SINCE(102g)
     g_Supervisor.forceRedrawFrames = 3;
 #endif
 }
@@ -1030,7 +1030,7 @@ void Gui::UpdateStageElements()
             stageScore -= stageScore % 10;
             break;
         }
-#if BUILD_VERSION >= BUILD_VERSION_102h
+#if BUILT_SINCE(102g)
         switch (g_Supervisor.defaultConfig.lifeCount)
 #else
         switch (g_Supervisor.cfg.lifeCount)

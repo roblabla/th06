@@ -52,7 +52,7 @@ namespace th06
 namespace utils
 {
 ZunResult CheckForRunningGameInstance(void);
-ZunResult CheckDirectXVersion(void);
+ZunBool CheckDirectXVersion(void);
 
 f32 AddNormalizeAngle(f32 a, f32 b);
 void Rotate(D3DXVECTOR3 *outVector, D3DXVECTOR3 *point, f32 angle);
@@ -218,7 +218,7 @@ extern Rng g_Rng;
 
 #define MULTIPLE_OF(val, mult) !((i32)(val) % (mult))
 
-// From font.h
+// From t-pot's font.h: https://t-pot.com/program/12_font/index.html
 class CMyFont
 {
   private:
@@ -238,11 +238,11 @@ class CMyFont
 struct GameErrorContext
 {
     char m_Buffer[0x800];
-#if TRIALBUILD
+#if BUILT_BEFORE(102g)
     char m_DetailedBuffer[0x800];
 #endif
     char *m_BufferEnd;
-#if TRIALBUILD
+#if BUILT_BEFORE(102g)
     char *m_DetailedBufferEnd;
 #endif
     i8 m_ShowMessageBox;
@@ -254,7 +254,7 @@ struct GameErrorContext
     {
         m_BufferEnd = m_Buffer;
         m_BufferEnd[0] = '\0';
-#if TRIALBUILD
+#if BUILT_BEFORE(102g)
         m_DetailedBufferEnd = m_DetailedBuffer;
         m_DetailedBufferEnd[0] = '\0';
 #endif
@@ -265,7 +265,7 @@ struct GameErrorContext
         ResetContext();
         m_ShowMessageBox = false;
         Log(TH_ERR_LOGGER_START);
-#if TRIALBUILD
+#if BUILT_BEFORE(102g)
         DetailedLog(TH_ERR_DETAILED_LOGGER_START);
 #endif
     }
@@ -276,7 +276,7 @@ struct GameErrorContext
 
     const char *Fatal(const char *fmt, ...);
     const char *Log(const char *fmt, ...);
-#if TRIALBUILD
+#if BUILT_BEFORE(102g)
     const char *DetailedLog(const char *fmd, ...);
 #endif
 
@@ -300,7 +300,7 @@ struct GameErrorContext
         }
     }
 };
-#if !TRIALBUILD
+#if BUILT_SINCE(102g)
 ZUN_ASSERT_TYPE(GameErrorContext, 0x808, 4);
 #else
 ZUN_ASSERT_TYPE(GameErrorContext, 0x100C, 4);

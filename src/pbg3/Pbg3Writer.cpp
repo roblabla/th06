@@ -2,15 +2,6 @@
 
 namespace th06
 {
-Pbg3Writer::Pbg3Writer() : IPbg3Writer(), FileAbstraction()
-{
-}
-
-Pbg3Writer::~Pbg3Writer()
-{
-    this->Close();
-}
-
 BOOL Pbg3Writer::OpenArchive(const char *path)
 {
     this->Close();
@@ -138,4 +129,14 @@ BOOL Pbg3Writer::Write(void *data, DWORD length)
     }
     return FileAbstraction::Write(data, length, &written);
 }
+
+Pbg3Writer::Pbg3Writer() : IPbg3Writer(), FileAbstraction()
+{
+}
+
+Pbg3Writer::~Pbg3Writer()
+{
+    this->Close();
+}
+
 } // namespace th06

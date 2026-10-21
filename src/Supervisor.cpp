@@ -1,6 +1,4 @@
 #include "stdafx.h"
-// Unused, but its inline code sits ahead of this file's functions and sets the /O2 trial's compile order.
-#include <streambuf>
 
 #include "Supervisor.hpp"
 #include "AsciiManager.hpp"
@@ -128,7 +126,7 @@ ChainCallbackResult Supervisor_OnUpdate(Supervisor *s)
                 {
                     return CHAIN_CALLBACK_RESULT_EXIT_GAME_SUCCESS;
                 }
-#if !TRIALBUILD
+#if BUILT_SINCE(102g)
                 if (s->curState == SUPERVISOR_STATE_MAINMENU)
                 {
                     goto RETURN_TO_MENU_FROM_GAME;
@@ -204,7 +202,7 @@ ChainCallbackResult Supervisor_OnUpdate(Supervisor *s)
     return CHAIN_CALLBACK_RESULT_CONTINUE;
 }
 
-void DrawFpsCounter();
+static void DrawFpsCounter();
 
 ChainCallbackResult Supervisor_OnDraw(Supervisor *s)
 {
@@ -239,7 +237,10 @@ BOOL CALLBACK EnumGameControllerObjectsCallback(LPCDIDEVICEOBJECTINSTANCE lpddoi
     DIPROPRANGE diprange;
     LPVOID pvRefBackup = pvRef;
 
+    // Until 1.02d every object gets the range, axis or not.
+#if BUILT_SINCE(102f)
     if (lpddoi->dwType & DIDFT_AXIS)
+#endif
     {
         diprange.diph.dwSize = sizeof(DIPROPRANGE);
         diprange.diph.dwHeaderSize = sizeof(DIPROPHEADER);
@@ -260,8 +261,8 @@ static ZunResult SetupDInput(Supervisor *supervisor)
 {
     HINSTANCE hInst = (HINSTANCE)GetWindowLong(supervisor->hwndGameWindow, GWL_HINSTANCE);
 
-#if !TRIALBUILD
-    if (supervisor->IsDInputDisabled())
+#if BUILT_SINCE(102g)
+    if (supervisor->cfg.opts.dontUseDirectInput)
     {
         return ZUN_ERROR;
     }
@@ -312,11 +313,19 @@ static ZunResult SetupDInput(Supervisor *supervisor)
     {
         supervisor->controller->SetDataFormat(&c_dfDIJoystick2);
         supervisor->controller->SetCooperativeLevel(supervisor->hwndGameWindow, DISCL_EXCLUSIVE | DISCL_FOREGROUND);
+#if BUILT_BEFORE(102f)
+        supervisor->controller->Acquire();
+#endif
 
         g_Supervisor.controllerCaps.dwSize = sizeof(DIDEVCAPS);
 
         supervisor->controller->GetCapabilities(&g_Supervisor.controllerCaps);
+#if BUILT_SINCE(102f)
         supervisor->controller->EnumObjects(EnumGameControllerObjectsCallback, NULL, DIDFT_ALL);
+#else
+        // Until 1.02d only the axes are enumerated; 1.02f enumerates everything and filters in the callback.
+        supervisor->controller->EnumObjects(EnumGameControllerObjectsCallback, NULL, DIDFT_AXIS);
+#endif
 
         g_GameErrorContext.Log(TH_ERR_PAD_FOUND);
     }
@@ -387,7 +396,9 @@ static ZunResult Supervisor_DeletedCallback(Supervisor *s)
     g_AnmManager->ReleaseAnm(0);
     AsciiManager_CutChain();
     g_SoundPlayer.StopBGM();
+#if BUILT_SINCE(102f)
     if (s->midiOutput != NULL)
+#endif
     {
         s->midiOutput->StopPlayback();
         ZUN_DELETE(s->midiOutput);
@@ -434,8 +445,9 @@ ZunResult Supervisor_RegisterChain()
     return ZUN_SUCCESS;
 }
 
+// Adapted from fps_disp: https://t-pot.com/program/13_fps/index.html
 #pragma var_order(curTime, framerate, fps, elapsed)
-void DrawFpsCounter()
+static void DrawFpsCounter()
 {
     DWORD curTime;
     float framerate;
@@ -444,12 +456,11 @@ void DrawFpsCounter()
 
     static DWORD g_LastTime = timeGetTime();
     static u32 g_NumFramesSinceLastTime = 0;
-    static char g_FpsCounterBuffer[256];
+    static char g_FpsCounterBuffer[256] = "";
 
     curTime = timeGetTime();
     g_NumFramesSinceLastTime = g_NumFramesSinceLastTime + 1 + (u32)g_Supervisor.cfg.frameskipConfig;
-    // NOTE: This compare is backwards to match
-    // known source ZUN based this on.
+    // Preserve the comparison order from the original sample.
     if (500 <= curTime - g_LastTime)
     {
         elapsed = (curTime - g_LastTime) / 1000.0f;
@@ -711,7 +722,9 @@ ZunResult Supervisor::LoadConfig(const char *path)
     if (this->cfg.opts.force60Fps)
     {
         g_GameErrorContext.Log(TH_ERR_FORCE_60FPS_MODE);
+#if BUILT_SINCE(102f)
         this->vsyncEnabled = false;
+#endif
     }
     if (this->IsColorCompositingDisabled())
     {
@@ -725,8 +738,8 @@ ZunResult Supervisor::LoadConfig(const char *path)
     {
         g_GameErrorContext.Log(TH_ERR_FORCE_REFERENCE_RASTERIZER);
     }
-#if !TRIALBUILD
-    if (this->IsDInputDisabled())
+#if BUILT_SINCE(102g)
+    if (this->cfg.opts.dontUseDirectInput)
     {
         g_GameErrorContext.Log(TH_ERR_DO_NOT_USE_DIRECTINPUT);
     }
@@ -744,7 +757,7 @@ ZunResult Supervisor::LoadConfig(const char *path)
 ZunBool Supervisor::ReadMidiFile(u32 midiFileIdx, const char *path)
 {
     // Return conventions seem opposite of normal? But they're never used anyway
-    if (g_Supervisor.GetMusicMode() == MIDI)
+    if (g_Supervisor.cfg.musicMode == MIDI)
     {
         if (g_Supervisor.midiOutput != NULL)
         {
@@ -759,7 +772,7 @@ ZunBool Supervisor::ReadMidiFile(u32 midiFileIdx, const char *path)
 
 ZunBool Supervisor::PlayMidiFile(i32 midiFileIdx)
 {
-    if (g_Supervisor.GetMusicMode() == MIDI)
+    if (g_Supervisor.cfg.musicMode == MIDI)
     {
         if (g_Supervisor.midiOutput != NULL)
         {
@@ -774,10 +787,10 @@ ZunBool Supervisor::PlayMidiFile(i32 midiFileIdx)
 
 ZunResult Supervisor::SetupMidiPlayback(const char *path)
 {
-    if (g_Supervisor.GetMusicMode() == MIDI)
+    if (g_Supervisor.cfg.musicMode == MIDI)
     {
     }
-    else if (g_Supervisor.GetMusicMode() == WAV)
+    else if (g_Supervisor.cfg.musicMode == WAV)
     {
     }
     else
@@ -793,14 +806,14 @@ ZunResult Supervisor::PlayAudio(const char *path)
     char audioPaths[2][256];
     char *pathExtension;
 
-    if (g_Supervisor.GetMusicMode() == MIDI)
+    if (g_Supervisor.cfg.musicMode == MIDI)
     {
         if (g_Supervisor.midiOutput != NULL)
         {
             g_Supervisor.midiOutput->LoadAndPlay(path);
         }
     }
-    else if (g_Supervisor.GetMusicMode() == WAV)
+    else if (g_Supervisor.cfg.musicMode == WAV)
     {
         strcpy(audioPaths[0], path);
         strcpy(audioPaths[1], path);
@@ -831,7 +844,7 @@ ZunResult Supervisor::PlayAudio(const char *path)
 
 ZunResult Supervisor::StopAudio()
 {
-    if (g_Supervisor.GetMusicMode() == MIDI)
+    if (g_Supervisor.cfg.musicMode == MIDI)
     {
         if (g_Supervisor.midiOutput != NULL)
         {
@@ -840,7 +853,7 @@ ZunResult Supervisor::StopAudio()
     }
     else
     {
-        if (g_Supervisor.GetMusicMode() == WAV)
+        if (g_Supervisor.cfg.musicMode == WAV)
         {
             g_SoundPlayer.StopBGM();
         }
@@ -855,7 +868,7 @@ ZunResult Supervisor::StopAudio()
 
 ZunResult Supervisor::FadeOutMusic(f32 fadeOutSeconds)
 {
-    if (g_Supervisor.GetMusicMode() == MIDI)
+    if (g_Supervisor.cfg.musicMode == MIDI)
     {
         if (g_Supervisor.midiOutput != NULL)
         {
@@ -864,7 +877,7 @@ ZunResult Supervisor::FadeOutMusic(f32 fadeOutSeconds)
     }
     else
     {
-        if (g_Supervisor.GetMusicMode() == WAV)
+        if (g_Supervisor.cfg.musicMode == WAV)
         {
             if (this->effectiveFramerateMultiplier == 0.0f)
             {

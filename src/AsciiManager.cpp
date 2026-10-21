@@ -54,7 +54,7 @@ ChainCallbackResult AsciiManager_OnUpdate(AsciiManager *mgr)
 ChainCallbackResult AsciiManager_OnDrawMenus(AsciiManager *mgr)
 {
     mgr->DrawStrings();
-    mgr->ResetStrings();
+    mgr->numStrings = 0;
     mgr->gameMenu.OnDrawGameMenu();
     mgr->retryMenu.OnDrawRetryMenu();
     return CHAIN_CALLBACK_RESULT_CONTINUE;
@@ -724,7 +724,7 @@ i32 StageMenu::OnUpdateRetryMenu()
             g_GameManager.guiScore = g_GameManager.continuesUsed;
             g_GameManager.nextScoreIncrement = 0;
             g_GameManager.score = g_GameManager.guiScore;
-#if BUILD_VERSION >= BUILD_VERSION_102h
+#if BUILT_SINCE(102g)
             g_GameManager.livesRemaining = g_Supervisor.defaultConfig.lifeCount;
             g_GameManager.bombsRemaining = g_Supervisor.defaultConfig.bombCount;
 #else

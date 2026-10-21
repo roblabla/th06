@@ -123,4 +123,17 @@ ZunResult ParseClrd(ScoreDat *scoreDat, Clrd *out);
 ZunResult ParsePscr(ScoreDat *scoreDat, Pscr *out);
 
 ZunResult ResultScreen_RegisterChain(ZunBool unk);
+struct ScoreDat
+{
+    u8 xorseed[2];
+    u16 csum;
+    u16 unk_8;
+    u8 unk_9;
+    alignment_padding(0x1);
+    u32 dataOffset;
+    ScoreListNode *scores;
+    u32 fileLen;
+};
+ZUN_ASSERT_TYPE(ScoreDat, 0x14, 4);
+
 } // namespace th06

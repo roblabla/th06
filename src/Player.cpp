@@ -1116,7 +1116,7 @@ static ChainCallbackResult Player_OnUpdate(Player *p)
                     g_Gui.flags.flag0 = 2;
                     if (g_GameManager.difficulty < EXTRA && !g_GameManager.isInPracticeMode)
                     {
-#if BUILD_VERSION >= BUILD_VERSION_102h
+#if BUILT_SINCE(102g)
                         g_GameManager.bombsRemaining = g_Supervisor.defaultConfig.bombCount;
 #else
                         g_GameManager.bombsRemaining = g_Supervisor.cfg.bombCount;

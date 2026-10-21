@@ -7,35 +7,6 @@
 
 namespace th06
 {
-// Recording reserves this many bytes; saved stages contain only the used input records.
-#define STAGE_REPLAY_BUFFER_SIZE 0x69780
-
-struct ReplayManager
-{
-    ReplayManager()
-    {
-    }
-
-    ZunBool IsDemo()
-    {
-        return this->isDemo;
-    }
-
-    i32 frameId;
-    ReplayData *replayData;
-    ZunBool isDemo;
-    const char *replayFile;
-    unreferenced_fields(0x34);
-    u16 unk44;
-    alignment_padding(0x2);
-    ReplayDataInput *replayInputs;
-    ReplayDataInput *replayInputStageBookmarks[7];
-    ChainElem *calcChain;
-    ChainElem *drawChain;
-    ChainElem *calcChainDemoHighPrio;
-};
-ZUN_ASSERT_TYPE(ReplayManager, 0x74, 4);
-
 ReplayManager *g_ReplayManager;
 
 #define TH_BUTTON_REPLAY_CAPTURE                                                                                       \
@@ -330,7 +301,7 @@ ZunResult ReplayManager_RegisterChain(ZunBool isDemo, const char *replayFile)
             ReplayManager_AddedCallback(g_ReplayManager);
             break;
         case true:
-#if !TRIALBUILD
+#if BUILT_SINCE(102g)
             return ReplayManager_AddedCallbackDemo(g_ReplayManager);
 #else
             ReplayManager_AddedCallbackDemo(g_ReplayManager);

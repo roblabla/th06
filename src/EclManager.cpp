@@ -578,14 +578,14 @@ restart_sub_changed:
             if (GET_INSTR_INT_ARG(0) >= 0)
             {
                 g_EnemyManager.bosses[GET_INSTR_INT_ARG(0)] = enemy;
-                g_Gui.SetBossPresent(true);
+                g_Gui.bossPresent = true;
                 g_Gui.bossHealthBar1 = 1.0f;
                 enemy->flags.isBoss = true;
                 enemy->bossId = GET_INSTR_INT_ARG(0);
             }
             else
             {
-                g_Gui.SetBossPresent(false);
+                g_Gui.bossPresent = false;
                 g_EnemyManager.bosses[enemy->bossId] = NULL;
                 enemy->flags.isBoss = false;
             }

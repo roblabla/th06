@@ -1,4 +1,5 @@
 #pragma once
+#include "BuildVersion.hpp"
 #include "dxutil.hpp"
 
 #define _MACRO_CATW(arg1, arg2, arg3) arg1##arg2##arg3

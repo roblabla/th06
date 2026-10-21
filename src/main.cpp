@@ -55,7 +55,7 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPST
         return 1;
     }
 
-#if TRIALBUILD
+#if BUILT_BEFORE(102g)
     if (utils::CheckDirectXVersion())
     {
         g_GameErrorContext.Flush();
@@ -260,7 +260,12 @@ RenderResult GameWindow::Render()
         this->curFrame++;
     }
 
+// ZUN wrote this helper in 1.02f because starting there it also checks VSync
+#if BUILT_SINCE(102f)
     if (g_Supervisor.IsWindowed() || g_Supervisor.ShouldRunAt60Fps())
+#else
+    if (g_Supervisor.IsWindowed() || g_Supervisor.cfg.opts.force60Fps)
+#endif
     {
 #pragma var_order(curtime, delta)
         if (this->curFrame != 0)
@@ -289,7 +294,11 @@ RenderResult GameWindow::Render()
         }
     }
 
+#if BUILT_SINCE(102f)
     if (!g_Supervisor.IsWindowed() && !g_Supervisor.ShouldRunAt60Fps())
+#else
+    if (!g_Supervisor.IsWindowed() && !g_Supervisor.cfg.opts.force60Fps)
+#endif
     {
         if (g_Supervisor.cfg.frameskipConfig >= this->curFrame)
         {
@@ -488,9 +497,14 @@ static i32 GameWindow_InitD3dRendering(void)
         }
         else
         {
+#if BUILT_SINCE(102f)
             present_params.FullScreen_RefreshRateInHz = 60;
             present_params.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_ONE;
             g_GameErrorContext.Log(TH_ERR_SET_REFRESH_RATE_60HZ);
+#else
+            // Until 1.02d forced 60fps just presents immediately, without asking for a 60Hz mode and vsync.
+            present_params.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+#endif
         }
         if (g_Supervisor.cfg.frameskipConfig == 0)
         {
@@ -537,6 +551,7 @@ static i32 GameWindow_InitD3dRendering(void)
                                                                    D3DCREATE_SOFTWARE_VERTEXPROCESSING, &present_params,
                                                                    &g_Supervisor.d3dDevice)))
                     {
+#if BUILT_SINCE(102f)
                         if (g_Supervisor.cfg.opts.force60Fps && !g_Supervisor.vsyncEnabled)
                         {
                             g_GameErrorContext.Log(TH_ERR_CANT_CHANGE_REFRESH_RATE_FORCE_VSYNC);
@@ -546,6 +561,7 @@ static i32 GameWindow_InitD3dRendering(void)
                             continue;
                         }
                         else
+#endif
                         {
                             if (present_params.Flags == D3DPRESENTFLAG_LOCKABLE_BACKBUFFER)
                             {
@@ -601,7 +617,11 @@ static i32 GameWindow_InitD3dRendering(void)
         g_GameErrorContext.Log(TH_ERR_NO_SUPPORT_FOR_D3DTEXOPCAPS_ADD);
         g_Supervisor.cfg.opts.useSwTextureBlending = true;
     }
+#if BUILT_SINCE(102f)
     if (g_Supervisor.ShouldRunAt60Fps() &&
+#else
+    if (g_Supervisor.cfg.opts.force60Fps &&
+#endif
         !(g_Supervisor.d3dCaps.PresentationIntervals & D3DPRESENT_INTERVAL_IMMEDIATE))
     {
         g_GameErrorContext.Log(TH_ERR_CANT_FORCE_60FPS_NO_ASYNC_FLIP);
@@ -754,15 +774,22 @@ ZunResult CheckForRunningGameInstance(void)
     return ZUN_SUCCESS;
 }
 
-ZunResult CheckDirectXVersion(void)
+// Adapted from the DirectX 8 SDK's getdxver sample (dxver.cpp). Returns true when DirectX 8 is missing;
+// 1.02f is the only build that doesn't inline it, so its code shows this form.
+ZunBool CheckDirectXVersion(void)
 {
-    if (GetDXVersion() != 0x800)
+    DWORD dwDXVersion = GetDXVersion();
+
+    switch (dwDXVersion)
     {
+    case 0x800:
+        break;
+    default:
         g_GameErrorContext.Fatal(TH_ERR_DIRECTX8_REQUIRED);
-        return ZUN_ERROR;
+        return true;
     }
 
-    return ZUN_SUCCESS;
+    return false;
 }
 } // namespace utils
 } // namespace th06
