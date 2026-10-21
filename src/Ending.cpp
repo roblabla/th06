@@ -545,8 +545,8 @@ static ZunResult Ending_AddedCallback(Ending *ending)
 
     g_AnmManager->ClearTexture();
     g_AnmManager->ClearSprite();
-    g_AnmManager->SetCurrentBlendMode(AnmBlendMode_NotSet);
-    g_AnmManager->SetCurrentVertexShader(AnmVertexShader_NotSet);
+    g_AnmManager->ClearBlendMode();
+    g_AnmManager->ClearVertexShader();
 
     i32 shottype = CURRENT_SHOTTYPE();
     ending->hasSeenEnding = false;
@@ -638,7 +638,7 @@ static ZunResult Ending_DeletedCallback(Ending *ending)
     g_AnmManager->ReleaseSurface(0);
     ZUN_FREE(ending->endFileData);
 
-    g_Chain.Cut(ending->drawChain);
+    g_FuncChain.Cut(ending->drawChain);
     ending->drawChain = NULL;
 
     ZUN_DELETE(ending);
@@ -651,18 +651,18 @@ static ZunResult Ending_DeletedCallback(Ending *ending)
 ZunResult Ending_RegisterChain()
 {
     Ending *ending = ZUN_NEW(Ending);
-    ending->calcChain = g_Chain.CreateElem((ChainCallback)Ending_OnUpdate);
+    ending->calcChain = g_FuncChain.CreateElem((ChainCallback)Ending_OnUpdate);
     ending->calcChain->arg = ending;
     ending->calcChain->addedCallback = (ChainAddedCallback)Ending_AddedCallback;
     ending->calcChain->deletedCallback = (ChainDeletedCallback)Ending_DeletedCallback;
-    if (g_Chain.AddToCalcChain(ending->calcChain, TH_CHAIN_PRIO_CALC_ENDING) != ZUN_SUCCESS)
+    if (g_FuncChain.AddToCalcChain(ending->calcChain, TH_CHAIN_PRIO_CALC_ENDING) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
 
-    ending->drawChain = g_Chain.CreateElem((ChainCallback)Ending_OnDraw);
+    ending->drawChain = g_FuncChain.CreateElem((ChainCallback)Ending_OnDraw);
     ending->drawChain->arg = ending;
-    g_Chain.AddToDrawChain(ending->drawChain, TH_CHAIN_PRIO_DRAW_ENDING);
+    g_FuncChain.AddToDrawChain(ending->drawChain, TH_CHAIN_PRIO_DRAW_ENDING);
 
     return ZUN_SUCCESS;
 }

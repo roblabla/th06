@@ -37,7 +37,7 @@ static void GameWindow_CreateGameWindow(HINSTANCE hInstance);
 static i32 GameWindow_InitD3dInterface();
 static void GameWindow_Present();
 
-BSS_SORT(L1) GameWindow g_GameWindow;
+GameWindow g_GameWindow;
 } // namespace th06
 
 DWORD GetDXVersion();
@@ -147,7 +147,7 @@ restart:
         }
     }
 
-    g_Chain.Release();
+    g_FuncChain.Release();
     g_SoundPlayer.Release();
 
     ZUN_DELETE(g_AnmManager);
@@ -207,17 +207,8 @@ static void GameWindow_Present()
 
 RenderResult GameWindow::Render()
 {
-    // These function-local statics are emitted next to their functions, so their order follows
-    // emission order, which differs between the /Od release and the /O2 trial. Unsorted, the
-    // compiler reproduces both orders by itself. Sorted, each one needs its own group: a group
-    // holding the f64 is aligned to 8 as a whole, but the first static has to land 4 past that.
-#if !TRIALBUILD
-    BSS_SORT(L2) static i32 g_TickCountToEffectiveFramerate;
-    BSS_SORT(L3) static f64 g_LastFrameTime;
-#else
-    BSS_SORT(L3) static i32 g_TickCountToEffectiveFramerate;
-    BSS_SORT(L4) static f64 g_LastFrameTime;
-#endif
+    static i32 g_TickCountToEffectiveFramerate;
+    static f64 g_LastFrameTime;
 
     i32 res;
 
@@ -246,7 +237,7 @@ RenderResult GameWindow::Render()
                 g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
             }
             g_Supervisor.d3dDevice->BeginScene();
-            g_Chain.RunDrawChain();
+            g_FuncChain.RunDrawChain();
             g_Supervisor.d3dDevice->EndScene();
             g_Supervisor.d3dDevice->SetTexture(0, NULL);
         }
@@ -256,7 +247,7 @@ RenderResult GameWindow::Render()
         g_Supervisor.viewport.Width = GAME_WINDOW_WIDTH;
         g_Supervisor.viewport.Height = GAME_WINDOW_HEIGHT;
         g_Supervisor.d3dDevice->SetViewport(&g_Supervisor.viewport);
-        res = g_Chain.RunCalcChain();
+        res = g_FuncChain.RunCalcChain();
         g_SoundPlayer.PlaySounds();
         if (res == 0)
         {
@@ -491,7 +482,7 @@ static i32 GameWindow_InitD3dRendering(void)
         {
             present_params.BackBufferFormat = D3DFMT_R5G6B5;
         }
-        if (!g_Supervisor.IsForced60Fps())
+        if (!g_Supervisor.cfg.opts.force60Fps)
         {
             present_params.FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_ONE;
         }
@@ -546,7 +537,7 @@ static i32 GameWindow_InitD3dRendering(void)
                                                                    D3DCREATE_SOFTWARE_VERTEXPROCESSING, &present_params,
                                                                    &g_Supervisor.d3dDevice)))
                     {
-                        if (g_Supervisor.IsForced60Fps() && !g_Supervisor.vsyncEnabled)
+                        if (g_Supervisor.cfg.opts.force60Fps && !g_Supervisor.vsyncEnabled)
                         {
                             g_GameErrorContext.Log(TH_ERR_CANT_CHANGE_REFRESH_RATE_FORCE_VSYNC);
                             present_params.FullScreen_RefreshRateInHz = 0;
@@ -655,7 +646,7 @@ static void GameWindow_InitD3dDevice(void)
     g_Supervisor.d3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
     g_Supervisor.d3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
     g_Supervisor.d3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-    if (!g_Supervisor.IsShadingDisabled())
+    if (!g_Supervisor.cfg.opts.suppressUseOfGoroudShading)
     {
         g_Supervisor.d3dDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD);
     }
@@ -735,9 +726,9 @@ static void GameWindow_InitD3dDevice(void)
     g_Supervisor.d3dDevice->SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_WRAP);
     if (g_AnmManager != NULL)
     {
-        g_AnmManager->SetCurrentBlendMode(AnmBlendMode_NotSet);
-        g_AnmManager->SetCurrentColorOp(AnmColorOp_NotSet);
-        g_AnmManager->SetCurrentVertexShader(AnmVertexShader_NotSet);
+        g_AnmManager->ClearBlendMode();
+        g_AnmManager->ClearColorOp();
+        g_AnmManager->ClearVertexShader();
         g_AnmManager->ClearTexture();
     }
     g_Stage.skyFogNeedsSetup = true;
@@ -747,12 +738,7 @@ namespace utils
 {
 ZunResult CheckForRunningGameInstance(void)
 {
-    // See GameWindow::Render for why these statics are sorted per version.
-#if !TRIALBUILD
-    BSS_SORT(L4) static HANDLE g_ExclusiveMutex;
-#else
-    BSS_SORT(L2) static HANDLE g_ExclusiveMutex;
-#endif
+    static HANDLE g_ExclusiveMutex;
     g_ExclusiveMutex = CreateMutex(NULL, TRUE, TEXT("Touhou Koumakyou App"));
 
     if (g_ExclusiveMutex == NULL)
@@ -768,7 +754,6 @@ ZunResult CheckForRunningGameInstance(void)
     return ZUN_SUCCESS;
 }
 
-#if TRIALBUILD
 ZunResult CheckDirectXVersion(void)
 {
     if (GetDXVersion() != 0x800)
@@ -779,6 +764,5 @@ ZunResult CheckDirectXVersion(void)
 
     return ZUN_SUCCESS;
 }
-#endif
 } // namespace utils
 } // namespace th06

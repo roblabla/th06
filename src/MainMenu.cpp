@@ -11,9 +11,6 @@
 
 namespace th06
 {
-// This is the final section, so force it into the same group as
-// all the library stuff to prevent an extra 16 bytes of padding
-AUTO_BSS_SORT(zzzzzzzzzz);
 
 enum GameState
 {
@@ -1334,7 +1331,7 @@ i32 MainMenu::ReplayHandling()
                     {
                         continue;
                     }
-                    if (!ValidateReplayData(replayData, g_LastFileSize))
+                    if (!ValidateReplayData(replayData, g_ReadFileSize))
                     {
                         this->replayFileData[replayFileIdx] = *replayData;
                         strcpy(this->replayFilePaths[replayFileIdx], replayFilePath);
@@ -1355,7 +1352,7 @@ i32 MainMenu::ReplayHandling()
                         {
                             continue;
                         }
-                        if (!ValidateReplayData(replayData, g_LastFileSize))
+                        if (!ValidateReplayData(replayData, g_ReadFileSize))
                         {
                             this->replayFileData[replayFileIdx] = *replayData;
                             sprintf(this->replayFilePaths[replayFileIdx], "./replay/%s", replayFileInfo.cFileName);
@@ -1415,7 +1412,7 @@ i32 MainMenu::ReplayHandling()
                 g_SoundPlayer.PlaySoundByIdx(SOUND_SELECT);
                 this->currentReplay =
                     (ReplayData *)FileSystem::OpenPath(this->replayFilePaths[this->chosenReplay], EXTERNAL_FILE);
-                ValidateReplayData(this->currentReplay, g_LastFileSize);
+                ValidateReplayData(this->currentReplay, g_ReadFileSize);
                 for (cur = 0; cur < ARRAY_SIZE_SIGNED(this->currentReplay->stageReplayData); cur++)
                 {
                     if (this->currentReplay->stageReplayData[cur] != NULL)
@@ -2307,7 +2304,7 @@ static ZunResult MainMenu_DeletedCallback(MainMenu *menu)
     }
     g_AnmManager->ReleaseSurface(0);
     g_AnmManager->ClearScriptRange(ANM_OFFSET_TITLE01, ANM_OFFSET_TITLE01S - ANM_OFFSET_TITLE01);
-    g_Chain.Cut(menu->chainDraw);
+    g_FuncChain.Cut(menu->chainDraw);
     menu->chainDraw = NULL;
 
     ZUN_FREE(menu->currentReplay);
@@ -2323,18 +2320,18 @@ ZunResult MainMenu_RegisterChain(ZunBool isDemo)
     DebugPrint(TH_DBG_MAINMENU_VRAM, g_Supervisor.d3dDevice->GetAvailableTextureMem());
     menu->gameState = isDemo ? STATE_REPLAY_LOAD : STATE_STARTUP;
     g_Supervisor.framerateMultiplier = 0.0f;
-    menu->chainCalc = g_Chain.CreateElem((ChainCallback)MainMenu_OnUpdate);
+    menu->chainCalc = g_FuncChain.CreateElem((ChainCallback)MainMenu_OnUpdate);
     menu->chainCalc->arg = menu;
     menu->chainCalc->addedCallback = (ChainAddedCallback)MainMenu_AddedCallback;
     menu->chainCalc->deletedCallback = (ChainDeletedCallback)MainMenu_DeletedCallback;
     menu->stateTimer = 0;
-    if (g_Chain.AddToCalcChain(menu->chainCalc, TH_CHAIN_PRIO_CALC_MAINMENU) != ZUN_SUCCESS)
+    if (g_FuncChain.AddToCalcChain(menu->chainCalc, TH_CHAIN_PRIO_CALC_MAINMENU) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
-    menu->chainDraw = g_Chain.CreateElem((ChainCallback)MainMenu_OnDraw);
+    menu->chainDraw = g_FuncChain.CreateElem((ChainCallback)MainMenu_OnDraw);
     menu->chainDraw->arg = menu;
-    g_Chain.AddToDrawChain(menu->chainDraw, TH_CHAIN_PRIO_DRAW_MAINMENU);
+    g_FuncChain.AddToDrawChain(menu->chainDraw, TH_CHAIN_PRIO_DRAW_MAINMENU);
     menu->lastFrameTime = 0;
     menu->stateTimer = 60;
     menu->frameCountForRefreshRateCalc = 0;

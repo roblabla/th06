@@ -24,9 +24,9 @@ struct DifficultyInfo
 };
 ZUN_ASSERT_TYPE(DifficultyInfo, 0xc, 4);
 
-BSS_SORT(H1) GameManager g_GameManager;
-BSS_SORT(H2) ChainElem g_GameManagerCalcChain;
-BSS_SORT(H3) ChainElem g_GameManagerDrawChain;
+GameManager g_GameManager;
+ChainElem g_GameMgrCalcChainElem;
+ChainElem g_GameManagerOnDrawChain;
 
 #define MAX_SCORE 999999999
 
@@ -342,8 +342,8 @@ static ZunResult GameManager_AddedCallback(GameManager *mgr)
         mgr->minRank = g_DifficultyInfoForReplay[g_GameManager.difficulty].minRank;
         mgr->maxRank = g_DifficultyInfoForReplay[g_GameManager.difficulty].maxRank;
     }
-    g_Rng.generationCount = 0;
-    mgr->randomSeed = g_Rng.seed;
+    g_Rng.ResetGenerationCount();
+    mgr->randomSeed = g_Rng.GetSeed();
     if (Stage_RegisterChain(mgr->currentStage) != ZUN_SUCCESS)
     {
         g_GameErrorContext.Log(TH_ERR_GAMEMANAGER_FAILED_TO_INITIALIZE_STAGE);
@@ -437,27 +437,27 @@ ZunResult GameManager_RegisterChain()
 {
     GameManager *mgr = &g_GameManager;
 
-    g_GameManagerCalcChain.SetCallback((ChainCallback)GameManager_OnUpdate);
-    g_GameManagerCalcChain.addedCallback = (ChainAddedCallback)GameManager_AddedCallback;
-    g_GameManagerCalcChain.deletedCallback = (ChainDeletedCallback)GameManager_DeletedCallback;
-    g_GameManagerCalcChain.arg = mgr;
+    g_GameMgrCalcChainElem.SetCallback((ChainCallback)GameManager_OnUpdate);
+    g_GameMgrCalcChainElem.addedCallback = (ChainAddedCallback)GameManager_AddedCallback;
+    g_GameMgrCalcChainElem.deletedCallback = (ChainDeletedCallback)GameManager_DeletedCallback;
+    g_GameMgrCalcChainElem.arg = mgr;
 
     mgr->gameFrames = 0;
 
-    if (g_Chain.AddToCalcChain(&g_GameManagerCalcChain, TH_CHAIN_PRIO_CALC_GAMEMANAGER) != ZUN_SUCCESS)
+    if (g_FuncChain.AddToCalcChain(&g_GameMgrCalcChainElem, TH_CHAIN_PRIO_CALC_GAMEMANAGER) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
-    g_GameManagerDrawChain.SetCallback((ChainCallback)GameManager_OnDraw);
-    g_GameManagerDrawChain.arg = mgr;
-    g_Chain.AddToDrawChain(&g_GameManagerDrawChain, TH_CHAIN_PRIO_DRAW_GAMEMANAGER);
+    g_GameManagerOnDrawChain.SetCallback((ChainCallback)GameManager_OnDraw);
+    g_GameManagerOnDrawChain.arg = mgr;
+    g_FuncChain.AddToDrawChain(&g_GameManagerOnDrawChain, TH_CHAIN_PRIO_DRAW_GAMEMANAGER);
     return ZUN_SUCCESS;
 }
 
 void GameManager_CutChain()
 {
-    g_Chain.Cut(&g_GameManagerCalcChain);
-    g_Chain.Cut(&g_GameManagerDrawChain);
+    g_FuncChain.Cut(&g_GameMgrCalcChainElem);
+    g_FuncChain.Cut(&g_GameManagerOnDrawChain);
 }
 
 #pragma var_order(cameraDistance, viewportMiddleHeight, viewportMiddleWidth, aspectRatio, fov)

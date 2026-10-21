@@ -56,8 +56,8 @@ class Chain
     ChainElem drawChain;
     u32 midiOutputDeviceCount;
     u32 unk;
-    // actual size unknown, this isn't referenced and might have some padding included
-    unreferenced_fields(0x38);
+    // Only the first 0x48 bytes are referenced.
+    unreferenced_fields(0x34);
 
     void ReleaseSingleChain(ChainElem *root);
 
@@ -74,7 +74,7 @@ class Chain
 
     ChainElem *CreateElem(ChainCallback callback);
 };
-ZUN_ASSERT_TYPE(Chain, 0x80, 4);
+ZUN_ASSERT_TYPE(Chain, 0x7c, 4);
 
-extern Chain g_Chain;
+extern Chain g_FuncChain;
 } // namespace th06

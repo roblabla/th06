@@ -59,12 +59,9 @@ SpawnEffectColors g_BulletSpawnEffects8Colors[] = {
     SPAWN_EFFECT_WHITE,  // BULLET_WHITE8
 };
 
-#if !DISABLE_BSS_HACK
-BSS_SORT(F1) i32 g_BulletManagerPad;
-#endif
-BSS_SORT(F4) ChainElem g_BulletManagerCalcChain;
-BSS_SORT(F2) ChainElem g_BulletManagerDrawChain;
-BSS_SORT(F3) BulletManager g_BulletManager;
+ChainElem g_BulletManagerCalcChainElem;
+ChainElem g_BulletManagerDrawChainElem;
+BulletManager g_BulletManager;
 
 struct BulletTypeInfo
 {
@@ -1438,25 +1435,25 @@ ZunResult BulletManager_RegisterChain(const char *bulletAnmPath)
 
     mgr->InitializeToZero();
     mgr->bulletAnmPath = bulletAnmPath;
-    g_BulletManagerCalcChain.SetCallback((ChainCallback)BulletManager_OnUpdate);
-    g_BulletManagerCalcChain.addedCallback = (ChainAddedCallback)BulletManager_AddedCallback;
-    g_BulletManagerCalcChain.deletedCallback = (ChainDeletedCallback)BulletManager_DeletedCallback;
-    g_BulletManagerCalcChain.arg = mgr;
+    g_BulletManagerCalcChainElem.SetCallback((ChainCallback)BulletManager_OnUpdate);
+    g_BulletManagerCalcChainElem.addedCallback = (ChainAddedCallback)BulletManager_AddedCallback;
+    g_BulletManagerCalcChainElem.deletedCallback = (ChainDeletedCallback)BulletManager_DeletedCallback;
+    g_BulletManagerCalcChainElem.arg = mgr;
 
-    if (g_Chain.AddToCalcChain(&g_BulletManagerCalcChain, TH_CHAIN_PRIO_CALC_BULLETMANAGER) != ZUN_SUCCESS)
+    if (g_FuncChain.AddToCalcChain(&g_BulletManagerCalcChainElem, TH_CHAIN_PRIO_CALC_BULLETMANAGER) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
 
-    g_BulletManagerDrawChain.SetCallback((ChainCallback)BulletManager_OnDraw);
-    g_BulletManagerDrawChain.arg = mgr;
-    g_Chain.AddToDrawChain(&g_BulletManagerDrawChain, TH_CHAIN_PRIO_DRAW_BULLETMANAGER);
+    g_BulletManagerDrawChainElem.SetCallback((ChainCallback)BulletManager_OnDraw);
+    g_BulletManagerDrawChainElem.arg = mgr;
+    g_FuncChain.AddToDrawChain(&g_BulletManagerDrawChainElem, TH_CHAIN_PRIO_DRAW_BULLETMANAGER);
     return ZUN_SUCCESS;
 }
 
 void BulletManager_CutChain()
 {
-    g_Chain.Cut(&g_BulletManagerCalcChain);
-    g_Chain.Cut(&g_BulletManagerDrawChain);
+    g_FuncChain.Cut(&g_BulletManagerCalcChainElem);
+    g_FuncChain.Cut(&g_BulletManagerDrawChainElem);
 }
 } // namespace th06

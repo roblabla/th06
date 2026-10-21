@@ -6,7 +6,6 @@
 
 namespace th06
 {
-AUTO_BSS_SORT(N1);
 
 struct TrackDescriptor
 {
@@ -283,7 +282,7 @@ static ZunResult MusicRoom_AddedCallback(MusicRoom *musicRoom)
     musicRoom->trackDescriptors = ZUN_NEW_ARRAY(TrackDescriptor, ARRAY_SIZE_SIGNED(musicRoom->titleSprites));
 
     i = -1;
-    while (currChar - fileBase < (i32)g_LastFileSize)
+    while (currChar - fileBase < g_ReadFileSize)
     {
         if (*currChar == '@')
         {
@@ -296,7 +295,7 @@ static ZunResult MusicRoom_AddedCallback(MusicRoom *musicRoom)
                 musicRoom->trackDescriptors[i].path[charIndex] = *currChar;
                 currChar++;
                 charIndex++;
-                if (currChar - fileBase >= (i32)g_LastFileSize)
+                if (currChar - fileBase >= g_ReadFileSize)
                 {
                     goto finishMusiccmtRead;
                 }
@@ -305,7 +304,7 @@ static ZunResult MusicRoom_AddedCallback(MusicRoom *musicRoom)
             while (*currChar == '\n' || *currChar == '\r')
             {
                 currChar++;
-                if (currChar - fileBase >= (i32)g_LastFileSize)
+                if (currChar - fileBase >= g_ReadFileSize)
                 {
                     goto finishMusiccmtRead;
                 }
@@ -317,7 +316,7 @@ static ZunResult MusicRoom_AddedCallback(MusicRoom *musicRoom)
                 musicRoom->trackDescriptors[i].title[charIndex] = *currChar;
                 currChar++;
                 charIndex++;
-                if (currChar - fileBase >= (i32)g_LastFileSize)
+                if (currChar - fileBase >= g_ReadFileSize)
                 {
                     goto finishMusiccmtRead;
                 }
@@ -328,7 +327,7 @@ static ZunResult MusicRoom_AddedCallback(MusicRoom *musicRoom)
             while (*currChar == '\n' && *currChar == '\r')
             {
                 currChar++;
-                if (currChar - fileBase >= (i32)g_LastFileSize)
+                if (currChar - fileBase >= g_ReadFileSize)
                 {
                     goto finishMusiccmtRead;
                 }
@@ -349,7 +348,7 @@ static ZunResult MusicRoom_AddedCallback(MusicRoom *musicRoom)
                     musicRoom->trackDescriptors[i].description[lineIndex][charIndex] = *currChar;
                     currChar++;
                     charIndex++;
-                    if (currChar - fileBase >= (i32)g_LastFileSize)
+                    if (currChar - fileBase >= g_ReadFileSize)
                     {
                         goto finishMusiccmtRead;
                     }
@@ -358,7 +357,7 @@ static ZunResult MusicRoom_AddedCallback(MusicRoom *musicRoom)
                 while (*currChar == '\n' || *currChar == '\r')
                 {
                     currChar++;
-                    if (currChar - fileBase >= (i32)g_LastFileSize)
+                    if (currChar - fileBase >= g_ReadFileSize)
                     {
                         goto finishMusiccmtRead;
                     }
@@ -428,7 +427,7 @@ static ZunResult MusicRoom_DeletedCallback(MusicRoom *musicRoom)
     g_AnmManager->ReleaseAnm(ANM_FILE_MUSIC00);
     g_AnmManager->ReleaseAnm(ANM_FILE_MUSIC01);
     g_AnmManager->ReleaseAnm(ANM_FILE_MUSIC02);
-    g_Chain.Cut(musicRoom->draw_chain);
+    g_FuncChain.Cut(musicRoom->draw_chain);
     musicRoom->draw_chain = NULL;
 
     return ZUN_SUCCESS;
@@ -440,19 +439,19 @@ ZunResult MusicRoom_RegisterChain()
     MusicRoom *musicRoom = &g_MusicRoom;
     memset(musicRoom, 0, sizeof(MusicRoom));
 
-    musicRoom->calc_chain = g_Chain.CreateElem((ChainCallback)MusicRoom_OnUpdate);
+    musicRoom->calc_chain = g_FuncChain.CreateElem((ChainCallback)MusicRoom_OnUpdate);
     musicRoom->calc_chain->arg = musicRoom;
     musicRoom->calc_chain->addedCallback = (ChainAddedCallback)MusicRoom_AddedCallback;
     musicRoom->calc_chain->deletedCallback = (ChainDeletedCallback)MusicRoom_DeletedCallback;
 
-    if (g_Chain.AddToCalcChain(musicRoom->calc_chain, TH_CHAIN_PRIO_CALC_MAINMENU) != ZUN_SUCCESS)
+    if (g_FuncChain.AddToCalcChain(musicRoom->calc_chain, TH_CHAIN_PRIO_CALC_MAINMENU) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
 
-    musicRoom->draw_chain = g_Chain.CreateElem((ChainCallback)MusicRoom_OnDraw);
+    musicRoom->draw_chain = g_FuncChain.CreateElem((ChainCallback)MusicRoom_OnDraw);
     musicRoom->draw_chain->arg = musicRoom;
-    g_Chain.AddToDrawChain(musicRoom->draw_chain, TH_CHAIN_PRIO_DRAW_MAINMENU);
+    g_FuncChain.AddToDrawChain(musicRoom->draw_chain, TH_CHAIN_PRIO_DRAW_MAINMENU);
 
     return ZUN_SUCCESS;
 }

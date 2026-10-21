@@ -13,10 +13,10 @@
 
 namespace th06
 {
-BSS_SORT(A3) AsciiManager g_AsciiManager;
-BSS_SORT(A4) ChainElem g_AsciiManagerCalcChain;
-BSS_SORT_FIRST(A2, 32) ChainElem g_AsciiManagerOnDrawMenusChain;
-BSS_SORT(A5) ChainElem g_AsciiManagerOnDrawPopupsChain;
+AsciiManager g_AsciiManager;
+ChainElem g_AsciiMgrCalcChain;
+ChainElem g_AsciiManagerOnDrawMenusChain;
+ChainElem g_AsciiManagerOnDrawPopupsChainElem;
 
 ChainCallbackResult AsciiManager_OnUpdate(AsciiManager *mgr)
 {
@@ -54,7 +54,7 @@ ChainCallbackResult AsciiManager_OnUpdate(AsciiManager *mgr)
 ChainCallbackResult AsciiManager_OnDrawMenus(AsciiManager *mgr)
 {
     mgr->DrawStrings();
-    mgr->numStrings = 0;
+    mgr->ResetStrings();
     mgr->gameMenu.OnDrawGameMenu();
     mgr->retryMenu.OnDrawRetryMenu();
     return CHAIN_CALLBACK_RESULT_CONTINUE;
@@ -103,31 +103,31 @@ ZunResult AsciiManager_RegisterChain()
 {
     AsciiManager *mgr = &g_AsciiManager;
 
-    g_AsciiManagerCalcChain.SetCallback((ChainCallback)AsciiManager_OnUpdate);
-    g_AsciiManagerCalcChain.addedCallback = (ChainAddedCallback)AsciiManager_AddedCallback;
-    g_AsciiManagerCalcChain.deletedCallback = (ChainDeletedCallback)AsciiManager_DeletedCallback;
-    g_AsciiManagerCalcChain.arg = mgr;
-    if (g_Chain.AddToCalcChain(&g_AsciiManagerCalcChain, TH_CHAIN_PRIO_CALC_ASCIIMANAGER) != ZUN_SUCCESS)
+    g_AsciiMgrCalcChain.SetCallback((ChainCallback)AsciiManager_OnUpdate);
+    g_AsciiMgrCalcChain.addedCallback = (ChainAddedCallback)AsciiManager_AddedCallback;
+    g_AsciiMgrCalcChain.deletedCallback = (ChainDeletedCallback)AsciiManager_DeletedCallback;
+    g_AsciiMgrCalcChain.arg = mgr;
+    if (g_FuncChain.AddToCalcChain(&g_AsciiMgrCalcChain, TH_CHAIN_PRIO_CALC_ASCIIMANAGER) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
 
     g_AsciiManagerOnDrawMenusChain.SetCallback((ChainCallback)AsciiManager_OnDrawMenus);
     g_AsciiManagerOnDrawMenusChain.arg = mgr;
-    g_Chain.AddToDrawChain(&g_AsciiManagerOnDrawMenusChain, TH_CHAIN_PRIO_DRAW_ASCIIMANAGER_MENUS);
+    g_FuncChain.AddToDrawChain(&g_AsciiManagerOnDrawMenusChain, TH_CHAIN_PRIO_DRAW_ASCIIMANAGER_MENUS);
 
-    g_AsciiManagerOnDrawPopupsChain.SetCallback((ChainCallback)AsciiManager_OnDrawPopups);
-    g_AsciiManagerOnDrawPopupsChain.arg = mgr;
-    g_Chain.AddToDrawChain(&g_AsciiManagerOnDrawPopupsChain, TH_CHAIN_PRIO_DRAW_ASCIIMANAGER_POPUPS);
+    g_AsciiManagerOnDrawPopupsChainElem.SetCallback((ChainCallback)AsciiManager_OnDrawPopups);
+    g_AsciiManagerOnDrawPopupsChainElem.arg = mgr;
+    g_FuncChain.AddToDrawChain(&g_AsciiManagerOnDrawPopupsChainElem, TH_CHAIN_PRIO_DRAW_ASCIIMANAGER_POPUPS);
 
     return ZUN_SUCCESS;
 }
 
 void AsciiManager_CutChain()
 {
-    g_Chain.Cut(&g_AsciiManagerCalcChain);
-    g_Chain.Cut(&g_AsciiManagerOnDrawMenusChain);
-    // What about g_AsciiManagerOnDrawPopupsChain? It looks like zun forgot
+    g_FuncChain.Cut(&g_AsciiMgrCalcChain);
+    g_FuncChain.Cut(&g_AsciiManagerOnDrawMenusChain);
+    // What about g_AsciiManagerOnDrawPopupsChainElem? It looks like zun forgot
     // to free it!
 }
 

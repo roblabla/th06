@@ -18,7 +18,6 @@ BombData g_BombData[] = {
     /* MarisaB */ {BombMarisaBCalc, BombMarisaBDraw},
 };
 
-AUTO_BSS_SORT(O1);
 Player g_Player;
 
 #pragma var_order(bulletData, bulletFrame, pad)
@@ -1348,30 +1347,30 @@ ZunResult Player_RegisterChain(u8 unk)
 
     p->invulnerabilityTimer = 0;
     p->unk_9e1 = unk;
-    p->chainCalc = g_Chain.CreateElem((ChainCallback)Player_OnUpdate);
-    p->chainDraw1 = g_Chain.CreateElem((ChainCallback)Player_OnDrawHighPrio);
-    p->chainDraw2 = g_Chain.CreateElem((ChainCallback)Player_OnDrawLowPrio);
+    p->chainCalc = g_FuncChain.CreateElem((ChainCallback)Player_OnUpdate);
+    p->chainDraw1 = g_FuncChain.CreateElem((ChainCallback)Player_OnDrawHighPrio);
+    p->chainDraw2 = g_FuncChain.CreateElem((ChainCallback)Player_OnDrawLowPrio);
     p->chainCalc->arg = p;
     p->chainDraw1->arg = p;
     p->chainDraw2->arg = p;
     p->chainCalc->addedCallback = (ChainAddedCallback)Player_AddedCallback;
     p->chainCalc->deletedCallback = (ChainDeletedCallback)Player_DeletedCallback;
-    if (g_Chain.AddToCalcChain(p->chainCalc, TH_CHAIN_PRIO_CALC_PLAYER) != ZUN_SUCCESS)
+    if (g_FuncChain.AddToCalcChain(p->chainCalc, TH_CHAIN_PRIO_CALC_PLAYER) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
-    g_Chain.AddToDrawChain(p->chainDraw1, TH_CHAIN_PRIO_DRAW_LOW_PRIO_PLAYER);
-    g_Chain.AddToDrawChain(p->chainDraw2, TH_CHAIN_PRIO_DRAW_HIGH_PRIO_PLAYER);
+    g_FuncChain.AddToDrawChain(p->chainDraw1, TH_CHAIN_PRIO_DRAW_LOW_PRIO_PLAYER);
+    g_FuncChain.AddToDrawChain(p->chainDraw2, TH_CHAIN_PRIO_DRAW_HIGH_PRIO_PLAYER);
     return ZUN_SUCCESS;
 }
 
 void Player_CutChain()
 {
-    g_Chain.Cut(g_Player.chainCalc);
+    g_FuncChain.Cut(g_Player.chainCalc);
     g_Player.chainCalc = NULL;
-    g_Chain.Cut(g_Player.chainDraw1);
+    g_FuncChain.Cut(g_Player.chainDraw1);
     g_Player.chainDraw1 = NULL;
-    g_Chain.Cut(g_Player.chainDraw2);
+    g_FuncChain.Cut(g_Player.chainDraw2);
     g_Player.chainDraw2 = NULL;
 }
 } // namespace th06

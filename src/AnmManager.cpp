@@ -7,10 +7,10 @@
 
 namespace th06
 {
-BSS_SORT(T3) VertexTex1Xyzrwh g_PrimitivesToDrawVertexBuf[4];
-BSS_SORT(T2) VertexTex1DiffuseXyzrwh g_PrimitivesToDrawNoVertexBuf[4];
-BSS_SORT(T4) VertexTex1DiffuseXyz g_PrimitivesToDrawUnknown[4];
-BSS_SORT(T1) AnmManager *g_AnmManager;
+VertexTex1Xyzrwh g_PrimitivesToDrawVertexBuf[4];
+VertexTex1DiffuseXyzrwh g_QuadsToDrawNoVertexBuf[4];
+VertexTex1DiffuseXyz g_PrimitivesToDrawUnknown[4];
+AnmManager *g_AnmManager;
 
 const D3DFORMAT g_TextureFormatD3D8Mapping[] = {
     D3DFMT_UNKNOWN, D3DFMT_A8R8G8B8, D3DFMT_A1R5G5B5, D3DFMT_R5G6B5, D3DFMT_R8G8B8, D3DFMT_A4R4G4B4,
@@ -45,16 +45,16 @@ AnmManager::AnmManager()
     g_PrimitivesToDrawVertexBuf[3].textureUV.x = 1.0f;
     g_PrimitivesToDrawVertexBuf[3].textureUV.y = 1.0f;
 
-    g_PrimitivesToDrawNoVertexBuf[0].position.w = g_PrimitivesToDrawNoVertexBuf[1].position.w =
-        g_PrimitivesToDrawNoVertexBuf[2].position.w = g_PrimitivesToDrawNoVertexBuf[3].position.w = 1.0f;
-    g_PrimitivesToDrawNoVertexBuf[0].textureUV.x = 0.0f;
-    g_PrimitivesToDrawNoVertexBuf[0].textureUV.y = 0.0f;
-    g_PrimitivesToDrawNoVertexBuf[1].textureUV.x = 1.0f;
-    g_PrimitivesToDrawNoVertexBuf[1].textureUV.y = 0.0f;
-    g_PrimitivesToDrawNoVertexBuf[2].textureUV.x = 0.0f;
-    g_PrimitivesToDrawNoVertexBuf[2].textureUV.y = 1.0f;
-    g_PrimitivesToDrawNoVertexBuf[3].textureUV.x = 1.0f;
-    g_PrimitivesToDrawNoVertexBuf[3].textureUV.y = 1.0f;
+    g_QuadsToDrawNoVertexBuf[0].position.w = g_QuadsToDrawNoVertexBuf[1].position.w =
+        g_QuadsToDrawNoVertexBuf[2].position.w = g_QuadsToDrawNoVertexBuf[3].position.w = 1.0f;
+    g_QuadsToDrawNoVertexBuf[0].textureUV.x = 0.0f;
+    g_QuadsToDrawNoVertexBuf[0].textureUV.y = 0.0f;
+    g_QuadsToDrawNoVertexBuf[1].textureUV.x = 1.0f;
+    g_QuadsToDrawNoVertexBuf[1].textureUV.y = 0.0f;
+    g_QuadsToDrawNoVertexBuf[2].textureUV.x = 0.0f;
+    g_QuadsToDrawNoVertexBuf[2].textureUV.y = 1.0f;
+    g_QuadsToDrawNoVertexBuf[3].textureUV.x = 1.0f;
+    g_QuadsToDrawNoVertexBuf[3].textureUV.y = 1.0f;
 
     this->vertexBuffer = NULL;
     this->currentTexture = NULL;
@@ -138,7 +138,7 @@ ZunResult AnmManager::LoadTexture(i32 textureIdx, const char *textureName, i32 t
         }
     }
 
-    if (D3DXCreateTextureFromFileInMemoryEx(g_Supervisor.d3dDevice, this->imageDataArray[textureIdx], g_LastFileSize, 0,
+    if (D3DXCreateTextureFromFileInMemoryEx(g_Supervisor.d3dDevice, this->imageDataArray[textureIdx], g_ReadFileSize, 0,
                                             0, 0, 0, g_TextureFormatD3D8Mapping[textureFormat], D3DPOOL_MANAGED,
                                             D3DX_FILTER_NONE | D3DX_FILTER_POINT, D3DX_DEFAULT, colorKey, NULL, NULL,
                                             &this->textures[textureIdx]) != D3D_OK)
@@ -190,7 +190,7 @@ ZunResult AnmManager::LoadTextureAlphaChannel(i32 textureIdx, const char *textur
         goto err;
     }
 
-    if (D3DXCreateTextureFromFileInMemoryEx(g_Supervisor.d3dDevice, data, g_LastFileSize, 0, 0, 0, 0,
+    if (D3DXCreateTextureFromFileInMemoryEx(g_Supervisor.d3dDevice, data, g_ReadFileSize, 0, 0, 0, 0,
                                             surfaceDesc.Format, D3DPOOL_SYSTEMMEM, D3DX_FILTER_NONE | D3DX_FILTER_POINT,
                                             D3DX_DEFAULT, colorKey, NULL, NULL, &textureSrc) != D3D_OK)
     {
@@ -375,9 +375,9 @@ void AnmManager::ReleaseAnm(i32 anmIdx)
         this->ReleaseTexture(entry->textureIdx);
         ZUN_FREE(this->anmFiles[anmIdx]);
         this->anmFiles[anmIdx] = NULL;
-        this->SetCurrentBlendMode(AnmBlendMode_NotSet);
-        this->SetCurrentColorOp(AnmColorOp_NotSet);
-        this->SetCurrentVertexShader(AnmVertexShader_NotSet);
+        this->ClearBlendMode();
+        this->ClearColorOp();
+        this->ClearVertexShader();
         this->ClearTexture();
     }
 }
@@ -478,10 +478,10 @@ void AnmManager::SetRenderStateForVm(AnmVm *vm)
     }
     else
     {
-        g_PrimitivesToDrawNoVertexBuf[0].diffuse = vm->color;
-        g_PrimitivesToDrawNoVertexBuf[1].diffuse = vm->color;
-        g_PrimitivesToDrawNoVertexBuf[2].diffuse = vm->color;
-        g_PrimitivesToDrawNoVertexBuf[3].diffuse = vm->color;
+        g_QuadsToDrawNoVertexBuf[0].diffuse = vm->color;
+        g_QuadsToDrawNoVertexBuf[1].diffuse = vm->color;
+        g_QuadsToDrawNoVertexBuf[2].diffuse = vm->color;
+        g_QuadsToDrawNoVertexBuf[3].diffuse = vm->color;
         g_PrimitivesToDrawUnknown[0].diffuse = vm->color;
         g_PrimitivesToDrawUnknown[1].diffuse = vm->color;
         g_PrimitivesToDrawUnknown[2].diffuse = vm->color;
@@ -568,27 +568,27 @@ ZunResult AnmManager::DrawInner(AnmVm *vm, ZunBool roundVertices)
     }
     else
     {
-        g_PrimitivesToDrawNoVertexBuf[0].position.x = g_PrimitivesToDrawVertexBuf[0].position.x;
-        g_PrimitivesToDrawNoVertexBuf[0].position.y = g_PrimitivesToDrawVertexBuf[0].position.y;
-        g_PrimitivesToDrawNoVertexBuf[0].position.z = g_PrimitivesToDrawVertexBuf[0].position.z;
-        g_PrimitivesToDrawNoVertexBuf[1].position.x = g_PrimitivesToDrawVertexBuf[1].position.x;
-        g_PrimitivesToDrawNoVertexBuf[1].position.y = g_PrimitivesToDrawVertexBuf[1].position.y;
-        g_PrimitivesToDrawNoVertexBuf[1].position.z = g_PrimitivesToDrawVertexBuf[1].position.z;
-        g_PrimitivesToDrawNoVertexBuf[2].position.x = g_PrimitivesToDrawVertexBuf[2].position.x;
-        g_PrimitivesToDrawNoVertexBuf[2].position.y = g_PrimitivesToDrawVertexBuf[2].position.y;
-        g_PrimitivesToDrawNoVertexBuf[2].position.z = g_PrimitivesToDrawVertexBuf[2].position.z;
-        g_PrimitivesToDrawNoVertexBuf[3].position.x = g_PrimitivesToDrawVertexBuf[3].position.x;
-        g_PrimitivesToDrawNoVertexBuf[3].position.y = g_PrimitivesToDrawVertexBuf[3].position.y;
-        g_PrimitivesToDrawNoVertexBuf[3].position.z = g_PrimitivesToDrawVertexBuf[3].position.z;
-        g_PrimitivesToDrawNoVertexBuf[0].textureUV.x = g_PrimitivesToDrawNoVertexBuf[2].textureUV.x =
+        g_QuadsToDrawNoVertexBuf[0].position.x = g_PrimitivesToDrawVertexBuf[0].position.x;
+        g_QuadsToDrawNoVertexBuf[0].position.y = g_PrimitivesToDrawVertexBuf[0].position.y;
+        g_QuadsToDrawNoVertexBuf[0].position.z = g_PrimitivesToDrawVertexBuf[0].position.z;
+        g_QuadsToDrawNoVertexBuf[1].position.x = g_PrimitivesToDrawVertexBuf[1].position.x;
+        g_QuadsToDrawNoVertexBuf[1].position.y = g_PrimitivesToDrawVertexBuf[1].position.y;
+        g_QuadsToDrawNoVertexBuf[1].position.z = g_PrimitivesToDrawVertexBuf[1].position.z;
+        g_QuadsToDrawNoVertexBuf[2].position.x = g_PrimitivesToDrawVertexBuf[2].position.x;
+        g_QuadsToDrawNoVertexBuf[2].position.y = g_PrimitivesToDrawVertexBuf[2].position.y;
+        g_QuadsToDrawNoVertexBuf[2].position.z = g_PrimitivesToDrawVertexBuf[2].position.z;
+        g_QuadsToDrawNoVertexBuf[3].position.x = g_PrimitivesToDrawVertexBuf[3].position.x;
+        g_QuadsToDrawNoVertexBuf[3].position.y = g_PrimitivesToDrawVertexBuf[3].position.y;
+        g_QuadsToDrawNoVertexBuf[3].position.z = g_PrimitivesToDrawVertexBuf[3].position.z;
+        g_QuadsToDrawNoVertexBuf[0].textureUV.x = g_QuadsToDrawNoVertexBuf[2].textureUV.x =
             vm->sprite->uvStart.x + vm->uvScrollPos.x;
-        g_PrimitivesToDrawNoVertexBuf[1].textureUV.x = g_PrimitivesToDrawNoVertexBuf[3].textureUV.x =
+        g_QuadsToDrawNoVertexBuf[1].textureUV.x = g_QuadsToDrawNoVertexBuf[3].textureUV.x =
             vm->sprite->uvEnd.x + vm->uvScrollPos.x;
-        g_PrimitivesToDrawNoVertexBuf[0].textureUV.y = g_PrimitivesToDrawNoVertexBuf[1].textureUV.y =
+        g_QuadsToDrawNoVertexBuf[0].textureUV.y = g_QuadsToDrawNoVertexBuf[1].textureUV.y =
             vm->sprite->uvStart.y + vm->uvScrollPos.y;
-        g_PrimitivesToDrawNoVertexBuf[2].textureUV.y = g_PrimitivesToDrawNoVertexBuf[3].textureUV.y =
+        g_QuadsToDrawNoVertexBuf[2].textureUV.y = g_QuadsToDrawNoVertexBuf[3].textureUV.y =
             vm->sprite->uvEnd.y + vm->uvScrollPos.y;
-        g_Supervisor.d3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, g_PrimitivesToDrawNoVertexBuf,
+        g_Supervisor.d3dDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, g_QuadsToDrawNoVertexBuf,
                                                 sizeof(VertexTex1DiffuseXyzrwh));
     }
     return ZUN_SUCCESS;
@@ -1379,7 +1379,7 @@ ZunResult AnmManager::LoadSurface(i32 surfaceIdx, const char *path)
         return ZUN_ERROR;
     }
 
-    if (D3DXLoadSurfaceFromFileInMemory(surface, NULL, NULL, data, g_LastFileSize, NULL, D3DX_FILTER_NONE, 0,
+    if (D3DXLoadSurfaceFromFileInMemory(surface, NULL, NULL, data, g_ReadFileSize, NULL, D3DX_FILTER_NONE, 0,
                                         &this->surfaceSourceInfo[surfaceIdx]) != D3D_OK)
     {
         goto fail;

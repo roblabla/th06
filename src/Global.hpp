@@ -14,18 +14,18 @@
 #include "pbg3/Pbg3Archive.hpp"
 
 #define IS_PRESSED(key) (g_CurFrameInput & (key))
-#define WAS_PRESSED(key) (IS_PRESSED(key) && (g_CurFrameInput & (key)) != (g_LastFrameInput & (key)))
-#define WAS_PRESSED_REPEATING(key) (WAS_PRESSED(key) || (IS_PRESSED(key) && g_IsEigthFrameOfHeldInput))
+#define WAS_PRESSED(key) (IS_PRESSED(key) && (g_CurFrameInput & (key)) != (g_PreviousFrameKeys & (key)))
+#define WAS_PRESSED_REPEATING(key) (WAS_PRESSED(key) || (IS_PRESSED(key) && g_IsEigthFrameInput))
 
-#define ZUN_ALLOC(size) (u8 *)g_ZunMemory.Alloc(size)
+#define ZUN_ALLOC(size) (u8 *)g_ZunMemoryMgr.Alloc(size)
 #define ZUN_ALLOC_TYPE(type) (type *)ZUN_ALLOC(sizeof(type))
 #define ZUN_ALLOC_ARRAY(type, count) (type *)ZUN_ALLOC(sizeof(type) * (count))
-#define ZUN_FREE(ptr) g_ZunMemory.Free(ptr)
-#define ZUN_NEW(type) (type *)g_ZunMemory.AddToRegistry(new type(), sizeof(type), MACRO_STR(type))
+#define ZUN_FREE(ptr) g_ZunMemoryMgr.Free(ptr)
+#define ZUN_NEW(type) (type *)g_ZunMemoryMgr.AddToRegistry(new type(), sizeof(type), MACRO_STR(type))
 #define ZUN_NEW_ARRAY(type, count)                                                                                     \
-    (type *)g_ZunMemory.AddToRegistry(new type[count](), sizeof(type) * (count), MACRO_STR(type))
+    (type *)g_ZunMemoryMgr.AddToRegistry(new type[count](), sizeof(type) * (count), MACRO_STR(type))
 #define ZUN_DELETE(p)                                                                                                  \
-    g_ZunMemory.RemoveFromRegistry((void *)p);                                                                         \
+    g_ZunMemoryMgr.RemoveFromRegistry((void *)p);                                                                      \
     delete (p);                                                                                                        \
     (p) = NULL
 
@@ -52,9 +52,7 @@ namespace th06
 namespace utils
 {
 ZunResult CheckForRunningGameInstance(void);
-#if TRIALBUILD
 ZunResult CheckDirectXVersion(void);
-#endif
 
 f32 AddNormalizeAngle(f32 a, f32 b);
 void Rotate(D3DXVECTOR3 *outVector, D3DXVECTOR3 *point, f32 angle);
@@ -127,17 +125,17 @@ struct ControllerMapping
 ZUN_ASSERT_TYPE(ControllerMapping, 0x12, 2);
 
 extern ControllerMapping g_ControllerMapping;
-extern u16 g_LastFrameInput;
+extern u16 g_PreviousFrameKeys;
 extern u16 g_CurFrameInput;
-extern u16 g_IsEigthFrameOfHeldInput;
-extern u16 g_NumOfFramesInputsWereHeld;
+extern u16 g_IsEigthFrameInput;
+extern u16 g_CountFramesInputsWereHeld;
 
 class ZunMemory
 {
   public:
     ZunMemory()
     {
-        BSS_ZERO_INIT(this->bRegistryInUse = false);
+        this->bRegistryInUse = false;
     }
     ~ZunMemory()
     {
@@ -161,7 +159,7 @@ class ZunMemory
   private:
     ZunBool bRegistryInUse;
 };
-extern ZunMemory g_ZunMemory;
+extern ZunMemory g_ZunMemoryMgr;
 
 // From FileSystem.hpp
 namespace FileSystem
@@ -171,7 +169,7 @@ namespace FileSystem
 u8 *OpenPath(const char *filepath, ZunBool isExternalResource = false);
 int WriteDataToFile(const char *path, const void *data, size_t size);
 } // namespace FileSystem
-extern u32 g_LastFileSize;
+extern long g_ReadFileSize;
 
 // From Rng.hpp
 struct Rng
@@ -188,6 +186,16 @@ struct Rng
     {
         this->seed = seed;
         this->generationCount = 0;
+    }
+
+    void ResetGenerationCount()
+    {
+        this->generationCount = 0;
+    }
+
+    u16 GetSeed()
+    {
+        return this->seed;
     }
 
     u16 GetRandomU16InRange(u16 range)
@@ -299,6 +307,5 @@ ZUN_ASSERT_TYPE(GameErrorContext, 0x100C, 4);
 #endif
 
 extern GameErrorContext g_GameErrorContext;
-extern Pbg3Archive **g_Pbg3Archives;
-extern LPDIRECT3DSURFACE8 g_TextBufferSurface;
+extern Pbg3Archive **g_Pbg3ArcList;
 } // namespace th06

@@ -15,6 +15,7 @@
 #include "Supervisor.hpp"
 #include "ZunTimer.hpp"
 #include "SoundPlayer.hpp"
+#include "MidiOutput.hpp"
 #include "AnmManager.hpp"
 #include "GameManager.hpp"
 #include "Enemy.hpp"

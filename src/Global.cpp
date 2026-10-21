@@ -23,28 +23,20 @@ ControllerMapping g_ControllerMapping = {
 #endif
 };
 
-BSS_SORT(J1) Chain g_Chain;
+Chain g_FuncChain;
 
 // Controller
-BSS_SORT(J5) u8 g_ControllerData[128];
 #if !TRIALBUILD
-BSS_SORT(I1) JOYCAPS g_JoystickCaps;
+JOYCAPS g_JoystickDevCaps;
 #endif
-BSS_SORT(I2) u16 g_FocusButtonConflictState;
-BSS_SORT(I6) u16 g_LastFrameInput;
-BSS_SORT(I7) u16 g_IsEigthFrameOfHeldInput;
-BSS_SORT(I8) u16 g_NumOfFramesInputsWereHeld;
-BSS_SORT(I5) u16 g_CurFrameInput;
+u16 g_FocusButtonConflictState;
+u16 g_PreviousFrameKeys;
+u16 g_IsEigthFrameInput;
+u16 g_CountFramesInputsWereHeld;
+u16 g_CurFrameInput;
 
 // CMyFont
-#if TRIALBUILD
-// In the /O2 trial the constructor is folded into initialized .data, which
-// doesn't happen inside a bss_seg, so this one is not sorted.
-#pragma bss_seg()
-#else
-BSS_SORT(J3)
-#endif
-CMyFont g_CMyFont;
+CMyFont g_CMyFonts;
 
 Chain::~Chain()
 {
@@ -415,17 +407,10 @@ destroy_elem:
 }
 
 // ZunMemory
-#if TRIALBUILD
-// Nothing in the trial reads g_ZunMemory, so its slot can't be checked; this is
-// the one gap in this unit's .bss that leaves every other address unchanged.
-BSS_SORT(J0)
-#else
-BSS_SORT(J4)
-#endif
-ZunMemory g_ZunMemory;
+ZunMemory g_ZunMemoryMgr;
 
 // FileSystem
-BSS_SORT(I9) u32 g_LastFileSize;
+long g_ReadFileSize;
 
 u16 Controller::GetJoystickCaps(void)
 {
@@ -444,7 +429,7 @@ u16 Controller::GetJoystickCaps(void)
         return 1;
     }
 
-    joyGetDevCaps(JOYSTICKID1, &g_JoystickCaps, sizeof(g_JoystickCaps));
+    joyGetDevCaps(JOYSTICKID1, &g_JoystickDevCaps, sizeof(g_JoystickDevCaps));
 #endif
     return 0;
 }
@@ -525,18 +510,18 @@ u16 Controller::GetControllerInput(u16 buttons)
         SetButtonFromControllerInputs(&buttons, CONTROLLER_MAPPING.rightButton, TH_BUTTON_RIGHT, aa.dwButtons);
         SetButtonFromControllerInputs(&buttons, CONTROLLER_MAPPING.skipButton, TH_BUTTON_SKIP, aa.dwButtons);
 
-        ab = ((g_JoystickCaps.wXmax - g_JoystickCaps.wXmin) / 2 / 2);
+        ab = ((g_JoystickDevCaps.wXmax - g_JoystickDevCaps.wXmin) / 2 / 2);
 
         buttons |= JOYSTICK_BUTTON_PRESSED(TH_BUTTON_RIGHT, aa.dwXpos,
-                                           JOYSTICK_MIDPOINT(g_JoystickCaps.wXmin, g_JoystickCaps.wXmax) + ab);
+                                           JOYSTICK_MIDPOINT(g_JoystickDevCaps.wXmin, g_JoystickDevCaps.wXmax) + ab);
         buttons |= JOYSTICK_BUTTON_PRESSED(
-            TH_BUTTON_LEFT, JOYSTICK_MIDPOINT(g_JoystickCaps.wXmin, g_JoystickCaps.wXmax) - ab, aa.dwXpos);
+            TH_BUTTON_LEFT, JOYSTICK_MIDPOINT(g_JoystickDevCaps.wXmin, g_JoystickDevCaps.wXmax) - ab, aa.dwXpos);
 
-        ab = ((g_JoystickCaps.wYmax - g_JoystickCaps.wYmin) / 2 / 2);
+        ab = ((g_JoystickDevCaps.wYmax - g_JoystickDevCaps.wYmin) / 2 / 2);
         buttons |= JOYSTICK_BUTTON_PRESSED(TH_BUTTON_DOWN, aa.dwYpos,
-                                           JOYSTICK_MIDPOINT(g_JoystickCaps.wYmin, g_JoystickCaps.wYmax) + ab);
+                                           JOYSTICK_MIDPOINT(g_JoystickDevCaps.wYmin, g_JoystickDevCaps.wYmax) + ab);
         buttons |= JOYSTICK_BUTTON_PRESSED(
-            TH_BUTTON_UP, JOYSTICK_MIDPOINT(g_JoystickCaps.wYmin, g_JoystickCaps.wYmax) - ab, aa.dwYpos);
+            TH_BUTTON_UP, JOYSTICK_MIDPOINT(g_JoystickDevCaps.wYmin, g_JoystickDevCaps.wYmax) - ab, aa.dwYpos);
 
 #endif
         return buttons;
@@ -668,6 +653,8 @@ u32 Controller::SetButtonFromControllerInputs(u16 *outButtons, i16 controllerBut
 // This is for rebinding keys
 u8 *th06::Controller::GetControllerState()
 {
+    static u8 g_ControllerData[128];
+
     memset(&g_ControllerData, 0, sizeof(g_ControllerData));
 
     if (g_Supervisor.controller == NULL)
@@ -862,8 +849,6 @@ void CMyFont::Init(LPDIRECT3DDEVICE8 lpD3DDEV, int w, int h)
     DeleteObject(hFont);
 }
 
-BSS_SORT(J6) LPDIRECT3DSURFACE8 g_TextBufferSurface;
-
 // ----------------------------------------------------------------------------
 void CMyFont::Print(char *str, int x, int y, D3DCOLOR color)
 {
@@ -881,14 +866,14 @@ void CMyFont::Clean()
     RELEASE(m_lpFont);
 }
 
-BSS_SORT(I4) Pbg3Archive **g_Pbg3Archives;
+Pbg3Archive **g_Pbg3ArcList;
 
 #pragma var_order(pbg3Idx, entryname, entryIdx, fsize, data, file)
 u8 *FileSystem::OpenPath(const char *filepath, ZunBool isExternalResource)
 {
     u8 *data;
     FILE *file;
-    size_t fsize;
+    long fsize;
     const char *entryname;
     i32 pbg3Idx;
 
@@ -913,13 +898,13 @@ u8 *FileSystem::OpenPath(const char *filepath, ZunBool isExternalResource)
         {
             entryname++;
         }
-        if (g_Pbg3Archives != NULL)
+        if (g_Pbg3ArcList != NULL)
         {
             for (pbg3Idx = 0; pbg3Idx < 16; pbg3Idx++)
             {
-                if (g_Pbg3Archives[pbg3Idx] != NULL)
+                if (g_Pbg3ArcList[pbg3Idx] != NULL)
                 {
-                    entryIdx = g_Pbg3Archives[pbg3Idx]->FindEntry(entryname);
+                    entryIdx = g_Pbg3ArcList[pbg3Idx]->FindEntry(entryname);
                     if (entryIdx >= 0)
                     {
                         break;
@@ -935,8 +920,8 @@ u8 *FileSystem::OpenPath(const char *filepath, ZunBool isExternalResource)
     if (entryIdx >= 0)
     {
         DebugPrint("%s Decode ... \n", entryname);
-        data = g_Pbg3Archives[pbg3Idx]->ReadDecompressEntry(entryIdx, entryname);
-        g_LastFileSize = g_Pbg3Archives[pbg3Idx]->GetEntrySize(entryIdx);
+        data = g_Pbg3ArcList[pbg3Idx]->ReadDecompressEntry(entryIdx, entryname);
+        g_ReadFileSize = g_Pbg3ArcList[pbg3Idx]->GetEntrySize(entryIdx);
     }
     else
     {
@@ -951,7 +936,7 @@ u8 *FileSystem::OpenPath(const char *filepath, ZunBool isExternalResource)
         {
             fseek(file, 0, SEEK_END);
             fsize = ftell(file);
-            g_LastFileSize = fsize;
+            g_ReadFileSize = fsize;
             fseek(file, 0, SEEK_SET);
             data = ZUN_ALLOC(fsize);
             fread(data, 1, fsize, file);
@@ -984,17 +969,10 @@ int FileSystem::WriteDataToFile(const char *path, const void *data, size_t size)
 }
 
 // GameErrorContext
-#if TRIALBUILD
-// In the /O2 trial the constructor is folded into initialized .data, which
-// doesn't happen inside a bss_seg, so this one is not sorted.
-#pragma bss_seg()
-#else
-BSS_SORT(J2);
-#endif
 GameErrorContext g_GameErrorContext;
 
 // Rng
-BSS_SORT(I3) Rng g_Rng;
+Rng g_Rng;
 
 const char *GameErrorContext::Log(const char *fmt, ...)
 {

@@ -22,12 +22,9 @@ u8 g_RandomItems[] = {
 };
 // clang-format on
 
-#if !DISABLE_BSS_HACK
-BSS_SORT(E1) i32 g_EnemyManagerPad;
-#endif
-BSS_SORT(E4) ChainElem g_EnemyManagerCalcChain;
-BSS_SORT(E2) ChainElem g_EnemyManagerDrawChain;
-BSS_SORT(E3) EnemyManager g_EnemyManager;
+ChainElem g_EnemyManagerCalcChain;
+ChainElem g_EnemyDrawChain;
+EnemyManager g_EnemyManager;
 
 #pragma var_order(i, enemy)
 void EnemyManager::Initialize()
@@ -803,13 +800,13 @@ ZunResult EnemyManager_RegisterChain(const char *stgEnm1, const char *stgEnm2)
     g_EnemyManagerCalcChain.addedCallback = (ChainAddedCallback)EnemyManager_AddedCallback;
     g_EnemyManagerCalcChain.deletedCallback = (ChainAddedCallback)EnemyManager_DeletedCallback;
     g_EnemyManagerCalcChain.arg = mgr;
-    if (g_Chain.AddToCalcChain(&g_EnemyManagerCalcChain, TH_CHAIN_PRIO_CALC_ENEMYMANAGER) != ZUN_SUCCESS)
+    if (g_FuncChain.AddToCalcChain(&g_EnemyManagerCalcChain, TH_CHAIN_PRIO_CALC_ENEMYMANAGER) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
-    g_EnemyManagerDrawChain.SetCallback((ChainCallback)EnemyManager_OnDraw);
-    g_EnemyManagerDrawChain.arg = mgr;
-    if (g_Chain.AddToDrawChain(&g_EnemyManagerDrawChain, TH_CHAIN_PRIO_DRAW_ENEMYMANAGER) != ZUN_SUCCESS)
+    g_EnemyDrawChain.SetCallback((ChainCallback)EnemyManager_OnDraw);
+    g_EnemyDrawChain.arg = mgr;
+    if (g_FuncChain.AddToDrawChain(&g_EnemyDrawChain, TH_CHAIN_PRIO_DRAW_ENEMYMANAGER) != ZUN_SUCCESS)
     {
         return ZUN_ERROR;
     }
@@ -818,7 +815,7 @@ ZunResult EnemyManager_RegisterChain(const char *stgEnm1, const char *stgEnm2)
 
 void EnemyManager_CutChain()
 {
-    g_Chain.Cut(&g_EnemyManagerCalcChain);
-    g_Chain.Cut(&g_EnemyManagerDrawChain);
+    g_FuncChain.Cut(&g_EnemyManagerCalcChain);
+    g_FuncChain.Cut(&g_EnemyDrawChain);
 }
 } // namespace th06
