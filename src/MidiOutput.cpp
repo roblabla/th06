@@ -723,4 +723,8 @@ void MidiOutput::FadeOutSetVolume(i32 volume)
         this->midiOutDev.SendShortMsg(midiStatus, arg1, volumeByte);
     }
 }
+
+void MidiTimer::OnTimerElapsed()
+{
+}
 }; // namespace th06

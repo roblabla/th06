@@ -293,7 +293,7 @@ g_MusicRoom,0x6B2810,global,13364
 $S1,0x6B5C44,global,4
 th06::g_Player,0x6B5C48,global,39152
 th06::g_ReplayManager,0x6BF538,global,4
-th06::g_ScreenEffect,0x6D3F1C,global,48
+th06::g_ScreenEffect,0x6BF53C,global,48
 th06::g_SoundPlayer,0x6BF570,global,1592
 th06::g_AnmManager,0x6BFBA8,global,4
 th06::g_QuadsToDrawNoVertexBuf,0x6BFBB0,global,112

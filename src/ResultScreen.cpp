@@ -12,19 +12,6 @@
 namespace th06
 {
 
-struct ScoreDat
-{
-    u8 xorseed[2];
-    u16 csum;
-    u16 unk_8;
-    u8 unk_9;
-    alignment_padding(0x1);
-    u32 dataOffset;
-    ScoreListNode *scores;
-    u32 fileLen;
-};
-ZUN_ASSERT_TYPE(ScoreDat, 0x14, 4);
-
 enum ResultScreenState
 {
     RESULT_SCREEN_STATE_INIT = 0,
@@ -1241,7 +1228,7 @@ i32 ResultScreen::HandleReplaySaveKeyboard()
         if (this->frameTimer == 0)
         {
             _mkdir("replay");
-#if BUILD_VERSION >= BUILD_VERSION_013
+#if BUILT_SINCE(100)
             ReplayData *replayLoaded;
 #else
             FILE *replayLoaded;
@@ -1250,7 +1237,7 @@ i32 ResultScreen::HandleReplaySaveKeyboard()
             {
                 char replayToReadPath[64];
                 sprintf(replayToReadPath, "./replay/th6_%.2d.rpy", i + 1);
-#if BUILD_VERSION >= BUILD_VERSION_013
+#if BUILT_SINCE(100)
                 replayLoaded = (ReplayData *)FileSystem::OpenPath(replayToReadPath, EXTERNAL_FILE);
 #else
                 replayLoaded = fopen(replayToReadPath, "rb");
@@ -1259,7 +1246,7 @@ i32 ResultScreen::HandleReplaySaveKeyboard()
                 {
                     continue;
                 }
-#if BUILD_VERSION >= BUILD_VERSION_013
+#if BUILT_SINCE(100)
                 if (ValidateReplayData(replayLoaded, g_ReadFileSize) == ZUN_SUCCESS)
                 {
                     this->replays[i] = *replayLoaded;

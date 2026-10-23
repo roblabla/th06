@@ -12,98 +12,6 @@
 namespace th06
 {
 
-enum GameState
-{
-    STATE_STARTUP,
-    STATE_PRE_INPUT,
-    STATE_MAIN_MENU,
-    STATE_OPTIONS,
-    STATE_QUIT,
-    STATE_KEYCONFIG,
-    STATE_DIFFICULTY_LOAD,
-    STATE_DIFFICULTY_SELECT,
-    STATE_CHARACTER_LOAD,
-    STATE_CHARACTER_SELECT,
-    STATE_SCORE,
-    STATE_SHOT_SELECT,
-    STATE_REPLAY_LOAD,
-    STATE_REPLAY_ANIM,
-    STATE_REPLAY_UNLOAD,
-    STATE_REPLAY_SELECT,
-    STATE_MUSIC_ROOM,
-    STATE_PRACTICE_LVL_SELECT,
-};
-
-enum CursorMovement
-{
-    CURSOR_MOVE_UP = -1,
-    CURSOR_DONT_MOVE = 0,
-    CURSOR_MOVE_DOWN = 1,
-};
-
-enum OptionsCursorPosition
-{
-    CURSOR_OPTIONS_POS_LIFECOUNT,
-    CURSOR_OPTIONS_POS_BOMBCOUNT,
-    CURSOR_OPTIONS_POS_COLORMODE,
-    CURSOR_OPTIONS_POS_MUSICMODE,
-    CURSOR_OPTIONS_POS_PLAYSOUNDS,
-    CURSOR_OPTIONS_POS_SCREENMODE,
-    CURSOR_OPTIONS_POS_SETDEFAULT,
-    CURSOR_OPTIONS_POS_KEYCONFIG,
-    CURSOR_OPTIONS_POS_EXIT,
-};
-
-struct MainMenu
-{
-    ZunResult BeginStartup();
-    ZunResult DrawStartMenu();
-    u32 OnUpdateOptionsMenu();
-    ZunResult DrawReplayMenu();
-    ZunResult ChoosePracticeLevel();
-    ZunBool WeirdSecondInputCheck();
-    void ColorMenuItem(AnmVm *, i32, i32, i32);
-
-    i32 ReplayHandling();
-
-    AnmVm vm[122];
-    i32 cursor;
-    unreferenced_fields(0x40);
-    u32 unk_81e4;
-    i32 chosenReplay;
-    i32 replayFilesNum;
-    GameState gameState;
-    i32 stateTimer;
-    i32 idleFrames;
-    D3DCOLOR minimumOpacity;
-    D3DCOLOR menuTextColor;
-    D3DCOLOR color2;
-    D3DCOLOR color1;
-    i32 numFramesSinceActive;
-    u32 framesActive;
-    u32 framesInactive;
-    unreferenced_fields(0x4);
-    ControllerMapping controlMapping;
-    unreferenced_fields(0x2);
-    u8 colorMode16bit;
-    u8 windowed;
-    u8 frameskipConfig;
-    alignment_padding(0x1);
-    ChainElem *chainCalc;
-    ChainElem *chainDraw;
-    char replayFilePaths[TOTAL_REPLAY_COUNT][512];
-    char replayFileName[TOTAL_REPLAY_COUNT][8];
-    ReplayData replayFileData[TOTAL_REPLAY_COUNT];
-    ReplayData *currentReplay;
-    i32 timeRelatedArrSize;
-    f32 timeRelatedArr[16];
-    unreferenced_fields(0x4);
-    u32 unk_10f28;
-    i32 frameCountForRefreshRateCalc;
-    u32 lastFrameTime;
-};
-ZUN_ASSERT_TYPE(MainMenu, 0x10f34, 4);
-
 ZunResult LoadTitleAnm(MainMenu *menu);
 ZunResult LoadReplayMenu(MainMenu *menu);
 ZunResult LoadDiffCharSelect(MainMenu *s);
@@ -181,7 +89,19 @@ ChainCallbackResult MainMenu_OnUpdate(MainMenu *menu)
         }
         if (menu->idleFrames >= 720)
         {
+#if BUILT_SINCE(102g)
             goto load_menu_rpy;
+#else
+            g_GameManager.isInReplay = true;
+            g_GameManager.demoMode = true;
+            g_GameManager.demoFrames = 0;
+            g_Supervisor.framerateMultiplier = 1.0f;
+            strcpy(g_GameManager.replayFile, "data/demo/demo00.rpy");
+            g_GameManager.currentStage = STAGE_INDEX(Stage4);
+            g_GameManager.difficulty = LUNATIC;
+            g_Supervisor.curState = SUPERVISOR_STATE_GAMEMANAGER;
+            return CHAIN_CALLBACK_RESULT_CONTINUE_AND_REMOVE_JOB;
+#endif
         }
 #endif
         if (menu->WeirdSecondInputCheck())
@@ -197,7 +117,9 @@ ChainCallbackResult MainMenu_OnUpdate(MainMenu *menu)
         menu->idleFrames++;
         if (menu->idleFrames >= 720)
         {
+#if BUILT_SINCE(102g)
         load_menu_rpy:
+#endif
             g_GameManager.isInReplay = true;
             g_GameManager.demoMode = true;
             g_GameManager.demoFrames = 0;
@@ -1487,7 +1409,7 @@ i32 MainMenu::ReplayHandling()
             g_GameManager.difficulty = (Difficulty)this->currentReplay->difficulty;
             g_GameManager.character = this->currentReplay->shottypeChara / SHOTTYPES_PER_CHARACTER;
             g_GameManager.shotType = this->currentReplay->shottypeChara % SHOTTYPES_PER_CHARACTER;
-#if !TRIALBUILD
+#if BUILT_SINCE(102g)
             cur = 0;
             while (this->currentReplay->stageReplayData[cur] == NULL)
             {
@@ -1589,7 +1511,7 @@ ZunResult MainMenu::DrawReplayMenu()
         vmRef = &this->vm[114];
         g_AsciiManager.AddFormatText(&vmRef->pos, "Stage  LastScore");
 
-#if !TRIALBUILD
+#if BUILT_SINCE(102g)
         for (i = 0; i < 7; i++)
 #else
         // The trial predates the fix for stage details on later replay pages.
@@ -2211,7 +2133,7 @@ ZunResult LoadReplayMenu(MainMenu *menu)
 
 static ZunResult MainMenu_AddedCallback(MainMenu *menu)
 {
-#if !TRIALBUILD
+#if BUILT_SINCE(102g)
     if (!g_GameManager.demoMode)
 #endif
     {

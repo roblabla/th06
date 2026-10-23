@@ -14,7 +14,7 @@ static u32 SetButtonFromDirectInputJoystate(u16 *outButtons, i16 controllerButto
 } // namespace Controller
 
 ControllerMapping g_ControllerMapping = {
-#if !TRIALBUILD
+#if BUILT_SINCE(102g)
     0,  1,  2,  4, -1,
     -1, -1, -1, 3
 #else
@@ -26,7 +26,7 @@ ControllerMapping g_ControllerMapping = {
 Chain g_FuncChain;
 
 // Controller
-#if !TRIALBUILD
+#if BUILT_SINCE(102g)
 JOYCAPS g_JoystickDevCaps;
 #endif
 u16 g_FocusButtonConflictState;
@@ -78,7 +78,7 @@ Chain::Chain()
 ZunResult Chain::AddToCalcChain(ChainElem *elem, int priority)
 {
     ChainElem *cur = &this->calcChain;
-#if !TRIALBUILD
+#if BUILT_SINCE(102g)
     DebugPrint("add calc chain (pri = %d)\n", priority);
 #endif
     elem->priority = priority;
@@ -128,7 +128,7 @@ ZunResult Chain::AddToCalcChain(ChainElem *elem, int priority)
 ZunResult Chain::AddToDrawChain(ChainElem *elem, int priority)
 {
     ChainElem *cur = &this->drawChain;
-#if !TRIALBUILD
+#if BUILT_SINCE(102g)
     DebugPrint("add draw chain (pri = %d)\n", priority);
 #endif
     elem->priority = priority;
@@ -330,7 +330,9 @@ ChainElem *Chain::CreateElem(ChainCallback callback)
 
 void Chain::Cut(ChainElem *to_remove)
 {
+#if BUILT_SINCE(013a) || BUILD_VERSION == BUILD_VERSION_013
     ZunBool isDrawChain = false;
+#endif
 
     if (to_remove == NULL)
     {
@@ -350,7 +352,9 @@ void Chain::Cut(ChainElem *to_remove)
     }
 
     {
+#if BUILT_SINCE(013a) || BUILD_VERSION == BUILD_VERSION_013
         isDrawChain = true;
+#endif
 
         tmp = &this->drawChain;
         while (tmp != NULL)
@@ -367,6 +371,7 @@ void Chain::Cut(ChainElem *to_remove)
     return;
 
 destroy_elem:
+#if BUILT_SINCE(013a) || BUILD_VERSION == BUILD_VERSION_013
     if (!isDrawChain)
     {
         DebugPrint("calc cut Chain (Pri = %d)\n", to_remove->priority);
@@ -375,6 +380,7 @@ destroy_elem:
     {
         DebugPrint("draw cut Chain (Pri = %d)\n", to_remove->priority);
     }
+#endif
 
     if (to_remove->prev != NULL)
     {
@@ -417,7 +423,7 @@ u16 Controller::GetJoystickCaps(void)
     // NOTE: This isn't stubbed in trial 0.08.
     // Current trial build is based on version 0.13.
     // Why was winmm joystick API removed for that????
-#if !TRIALBUILD
+#if BUILT_SINCE(102g)
     JOYINFOEX pji;
 
     pji.dwSize = sizeof(JOYINFOEX);
@@ -440,7 +446,7 @@ u16 Controller::GetJoystickCaps(void)
 #define KEYBOARD_KEY_PRESSED(button, x) keyboardState[x] & 0x80 ? button : 0
 
 // The trial reads the shared mapping; release reads the loaded configuration.
-#if !TRIALBUILD
+#if BUILT_SINCE(102g)
 #define CONTROLLER_MAPPING g_Supervisor.cfg.controllerMapping
 #else
 #define CONTROLLER_MAPPING g_ControllerMapping
@@ -450,16 +456,18 @@ u16 Controller::GetControllerInput(u16 buttons)
 {
     // NOTE: Those names are like this to get perfect stack frame matching
     // TODO: Give meaningfull names that still match.
+#if BUILT_SINCE(102g)
     JOYINFOEX aa;
     u32 ab;
     u32 ac;
+#endif
     DIJOYSTATE2 a0;
     u32 a2;
     HRESULT aaa;
 
     if (g_Supervisor.controller == NULL)
     {
-#if !TRIALBUILD
+#if BUILT_SINCE(102g)
         memset(&aa, 0, sizeof(aa));
         aa.dwSize = sizeof(JOYINFOEX);
         aa.dwFlags = JOY_RETURNALL;
@@ -549,11 +557,19 @@ u16 Controller::GetControllerInput(u16 buttons)
                 }
             }
 
+#if BUILT_SINCE(102f)
             return buttons;
+#endif
         }
+        // Until 1.02d a successful re-acquire falls through and reads the device state in the same frame, and the
+        // state isn't cleared first.
+#if BUILT_SINCE(102f)
         else
+#endif
         {
+#if BUILT_SINCE(102f)
             memset(&a0, 0, sizeof(a0));
+#endif
 
             aaa = g_Supervisor.controller->GetDeviceState(sizeof(a0), &a0);
 
@@ -564,7 +580,7 @@ u16 Controller::GetControllerInput(u16 buttons)
 
             a2 = SetButtonFromDirectInputJoystate(&buttons, CONTROLLER_MAPPING.shootButton, TH_BUTTON_SHOOT,
                                                   a0.rgbButtons);
-#if TRIALBUILD
+#if BUILT_BEFORE(102g)
             SetButtonFromDirectInputJoystate(&buttons, CONTROLLER_MAPPING.bombButton, TH_BUTTON_BOMB, a0.rgbButtons);
 #endif
 
@@ -600,7 +616,7 @@ u16 Controller::GetControllerInput(u16 buttons)
                 }
             }
 
-#if !TRIALBUILD
+#if BUILT_SINCE(102g)
             SetButtonFromDirectInputJoystate(&buttons, CONTROLLER_MAPPING.bombButton, TH_BUTTON_BOMB, a0.rgbButtons);
 #endif
             SetButtonFromDirectInputJoystate(&buttons, CONTROLLER_MAPPING.menuButton, TH_BUTTON_MENU, a0.rgbButtons);
@@ -660,7 +676,7 @@ u8 *th06::Controller::GetControllerState()
     if (g_Supervisor.controller == NULL)
 #pragma var_order(joyinfoex, joyButtonBit, joyButtonIndex)
     {
-#if !TRIALBUILD
+#if BUILT_SINCE(102g)
         JOYINFOEX joyinfoex;
         u32 joyButtonBit;
         u32 joyButtonIndex;
@@ -704,9 +720,11 @@ u8 *th06::Controller::GetControllerState()
                     return g_ControllerData;
                 }
             }
+#if BUILT_SINCE(102f)
             return g_ControllerData;
+#endif
         }
-#if !TRIALBUILD
+#if BUILT_SINCE(102g)
         // Release checks the earlier Poll result instead of the GetDeviceState result.
         g_Supervisor.controller->GetDeviceState(sizeof(DIJOYSTATE2), &dijoystate2);
 #else
@@ -742,7 +760,7 @@ u16 Controller::GetInput(void)
         buttons |= KEYBOARD_KEY_PRESSED(TH_BUTTON_UP_RIGHT, VK_NUMPAD9);
         buttons |= KEYBOARD_KEY_PRESSED(TH_BUTTON_DOWN_LEFT, VK_NUMPAD1);
         buttons |= KEYBOARD_KEY_PRESSED(TH_BUTTON_DOWN_RIGHT, VK_NUMPAD3);
-#if !TRIALBUILD
+#if BUILT_SINCE(102g)
         buttons |= KEYBOARD_KEY_PRESSED(TH_BUTTON_HOME, VK_HOME);
 #else
         buttons |= KEYBOARD_KEY_PRESSED(TH_BUTTON_HOME, VK_F12);
@@ -781,7 +799,7 @@ u16 Controller::GetInput(void)
         buttons |= KEYBOARD_KEY_PRESSED(TH_BUTTON_UP_RIGHT, DIK_NUMPAD9);
         buttons |= KEYBOARD_KEY_PRESSED(TH_BUTTON_DOWN_LEFT, DIK_NUMPAD1);
         buttons |= KEYBOARD_KEY_PRESSED(TH_BUTTON_DOWN_RIGHT, DIK_NUMPAD3);
-#if !TRIALBUILD
+#if BUILT_SINCE(102g)
         buttons |= KEYBOARD_KEY_PRESSED(TH_BUTTON_HOME, DIK_HOME);
 #else
         buttons |= KEYBOARD_KEY_PRESSED(TH_BUTTON_HOME, DIK_F12);
@@ -819,6 +837,7 @@ void Controller::ResetKeyboard(void)
 //
 // Copyright (c) 2001 if (if@edokko.com)
 // All Rights Reserved.
+// https://t-pot.com/program/12_font/index.html
 //
 // ----------------------------------------------------------------------------
 #define RELEASE(o)                                                                                                     \
@@ -914,6 +933,9 @@ u8 *FileSystem::OpenPath(const char *filepath, ZunBool isExternalResource)
         }
         if (entryIdx < 0)
         {
+#if BUILT_BEFORE(102g)
+            DebugPrint("%s not find ... \n", entryname);
+#endif
             return NULL;
         }
     }
@@ -1024,7 +1046,7 @@ const char *GameErrorContext::Fatal(const char *fmt, ...)
     return fmt;
 }
 
-#if TRIALBUILD
+#if BUILT_BEFORE(102g)
 const char *GameErrorContext::DetailedLog(const char *fmt, ...)
 {
     char tmpBuffer[512];

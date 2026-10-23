@@ -60,12 +60,6 @@ struct Gui
         this->eclSetLives = lives;
     }
 
-    bool SetBossPresent(bool bossPresent)
-    {
-        this->bossPresent = bossPresent;
-        return bossPresent;
-    }
-
     bool BossPresent()
     {
         return this->bossPresent;

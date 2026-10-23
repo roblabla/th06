@@ -32,7 +32,7 @@ void Pbg3Reader::Close()
 
 i32 Pbg3Reader::ReadBit()
 {
-    if (!this->HasNonNullHandle())
+    if (this->handle == NULL)
     {
         return FALSE;
     }
@@ -62,7 +62,7 @@ u32 Pbg3Reader::ReadBits(u32 numBits)
     u32 remainingBits = 1u << (numBits - 1);
     u32 result = 0;
 
-    if (!this->HasNonNullHandle())
+    if (this->handle == NULL)
     {
         return 0;
     }
@@ -129,7 +129,7 @@ BOOL Pbg3Reader::SeekToOffset(DWORD fileOffset)
 
 BOOL Pbg3Reader::SeekToNextByte()
 {
-    if (!this->HasNonNullHandle())
+    if (this->handle == NULL)
     {
         return FALSE;
     }
@@ -151,7 +151,7 @@ BOOL Pbg3Reader::Read(void *data, DWORD bytesToRead)
 
 BOOL Pbg3Reader::GetLastWriteTime(LPFILETIME lastWriteTime)
 {
-    if (!this->HasValidHandle())
+    if (this->handle == INVALID_HANDLE_VALUE)
     {
         return FALSE;
     }

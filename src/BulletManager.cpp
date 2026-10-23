@@ -644,7 +644,7 @@ static ChainCallbackResult BulletManager_OnUpdate(BulletManager *mgr)
 
     g_ItemManager.OnUpdate();
 
-#if BUILD_VERSION >= BUILD_VERSION_013
+#if BUILT_SINCE(100)
     mgr->bulletCount = 0;
 #endif
 
@@ -653,7 +653,7 @@ static ChainCallbackResult BulletManager_OnUpdate(BulletManager *mgr)
         if (curBullet->state == BULLET_STATE_INACTIVE)
             continue;
 
-#if BUILD_VERSION >= BUILD_VERSION_013
+#if BUILT_SINCE(100)
         mgr->bulletCount++;
 #endif
         switch (curBullet->state)

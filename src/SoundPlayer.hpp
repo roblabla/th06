@@ -58,6 +58,15 @@ ZUN_ASSERT_TYPE(SoundEffectData, 0x8, 4);
 
 #define SFX_QUEUE_LENGTH 3
 
+// BGM streaming buffer length and notification count. 1.02h halved both.
+#if BUILT_SINCE(102h)
+#define BACKGROUND_MUSIC_STREAM_SECONDS 2
+#define BACKGROUND_MUSIC_STREAM_NOTIFICATIONS 4
+#else
+#define BACKGROUND_MUSIC_STREAM_SECONDS 4
+#define BACKGROUND_MUSIC_STREAM_NOTIFICATIONS 8
+#endif
+
 struct SoundPlayer
 {
     SoundPlayer()

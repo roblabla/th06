@@ -188,9 +188,9 @@ def configure(build_type, build_version, ver_suffix):
             "IPbg3Reader",
             "Pbg3Reader",
             "IPbg3Writer",
-            "Pbg3Writer",
             "MemoryPbg3Reader",
             "Pbg3Archive",
+            "Pbg3Writer",
             "LzEncode",
             "FileAbstraction",
         ]
